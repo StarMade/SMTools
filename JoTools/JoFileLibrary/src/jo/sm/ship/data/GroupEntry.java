@@ -1,11 +1,20 @@
 package jo.sm.ship.data;
 
-import jo.sm.data.Vector3s;
+import java.util.ArrayList;
+import java.util.List;
+
+import jo.vecmath.Point3s;
+
 
 public class GroupEntry
 {
     private short      mBlockID;
-    private Vector3s[] mBlocks;
+    private List<Point3s> mBlocks;
+    
+    public GroupEntry()
+    {
+        mBlocks = new ArrayList<Point3s>();
+    }
 
     public short getBlockID()
     {
@@ -17,12 +26,12 @@ public class GroupEntry
         mBlockID = blockID;
     }
 
-    public Vector3s[] getBlocks()
+    public List<Point3s> getBlocks()
     {
         return mBlocks;
     }
 
-    public void setBlocks(Vector3s[] blocks)
+    public void setBlocks(List<Point3s> blocks)
     {
         mBlocks = blocks;
     }

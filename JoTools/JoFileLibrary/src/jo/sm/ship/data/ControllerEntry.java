@@ -1,24 +1,34 @@
 package jo.sm.ship.data;
 
-import jo.sm.data.Vector3s;
+import java.util.ArrayList;
+import java.util.List;
+
+import jo.vecmath.Point3s;
+
 
 public class ControllerEntry
 {
-    private Vector3s     mPosition;
-    private GroupEntry[] mGroups;
-    public Vector3s getPosition()
+    private Point3s     mPosition;
+    private List<GroupEntry> mGroups;
+    
+    public ControllerEntry()
+    {
+        mGroups = new ArrayList<GroupEntry>();
+    }
+    
+    public Point3s getPosition()
     {
         return mPosition;
     }
-    public void setPosition(Vector3s position)
+    public void setPosition(Point3s position)
     {
         mPosition = position;
     }
-    public GroupEntry[] getGroups()
+    public List<GroupEntry> getGroups()
     {
         return mGroups;
     }
-    public void setGroups(GroupEntry[] groups)
+    public void setGroups(List<GroupEntry> groups)
     {
         mGroups = groups;
     }
