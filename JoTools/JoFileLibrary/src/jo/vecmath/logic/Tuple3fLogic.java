@@ -25,4 +25,8 @@ public class Tuple3fLogic extends MathUtils
     {
         return sqrt((v.x - x)*(v.x - x) + (v.y - y)*(v.y - y) + (v.z - z)*(v.z - z));
     }
+
+	public static float dot(Tuple3f a, Tuple3f b) {
+		return a.x*b.x + a.y*b.y + a.z*b.z;
+	}
 }

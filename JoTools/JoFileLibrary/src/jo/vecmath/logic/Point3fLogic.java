@@ -24,4 +24,18 @@ public class Point3fLogic extends Tuple3fLogic
         v.interpolate(t1, t2, alpha);
         return v;
     }
+
+	public static Point3f sub(Point3f a, Point3f b) 
+	{
+		Point3f ret = new Point3f();
+		ret.sub(a, b);
+		return ret;
+	}
+
+	public static Point3f scale(Point3f v, float m) 
+	{
+		Point3f ret = new Point3f(v);
+		ret.scale(m);
+		return ret;
+	}
 }
