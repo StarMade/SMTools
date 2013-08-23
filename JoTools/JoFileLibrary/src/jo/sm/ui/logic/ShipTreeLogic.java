@@ -13,7 +13,7 @@ import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Blueprint;
-import jo.sm.ship.logic.LogicLogic;
+import jo.sm.ship.logic.HeaderLogic;
 import jo.sm.ship.logic.ShipLogic;
 
 public class ShipTreeLogic
@@ -123,9 +123,11 @@ public class ShipTreeLogic
                 Blueprint blueprint = BlueprintLogic.readBlueprint(spec.getName());
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(blueprint.getData());
                 System.out.println("Original:");
-                LogicLogic.dump(blueprint.getLogic(), grid);
+                HeaderLogic.dump(blueprint.getHeader());
+                //LogicLogic.dump(blueprint.getLogic(), grid);
                 System.out.println("Loopback:");
-                LogicLogic.dump(LogicLogic.make(grid), grid);
+                HeaderLogic.dump(HeaderLogic.make(grid));
+                //LogicLogic.dump(LogicLogic.make(grid), grid);
                 return grid;
             }
             else if (spec.getType() == ShipSpec.DEFAULT_BLUEPRINT)
@@ -133,9 +135,11 @@ public class ShipTreeLogic
                 Blueprint blueprint = BlueprintLogic.readDefaultBlueprint(spec.getName());
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(blueprint.getData());
                 System.out.println("Original:");
-                LogicLogic.dump(blueprint.getLogic(), grid);
+                HeaderLogic.dump(blueprint.getHeader());
+                //LogicLogic.dump(blueprint.getLogic(), grid);
                 System.out.println("Loopback:");
-                LogicLogic.dump(LogicLogic.make(grid), grid);
+                HeaderLogic.dump(HeaderLogic.make(grid));
+                //LogicLogic.dump(LogicLogic.make(grid), grid);
                 return grid;
             }
             else if (spec.getType() == ShipSpec.ENTITY)

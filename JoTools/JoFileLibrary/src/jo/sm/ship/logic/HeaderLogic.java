@@ -29,10 +29,10 @@ public class HeaderLogic
         Header header = new Header();
         header.setUnknown1(dis.readInt());
         header.setUnknown2(dis.readInt());
-        header.setUpperBound(new Vector3f(dis.readFloat(),
+        header.setLowerBound(new Vector3f(dis.readFloat(),
                         dis.readFloat(),
                         dis.readFloat()));
-        header.setLowerBound(new Vector3f(dis.readFloat(),
+        header.setUpperBound(new Vector3f(dis.readFloat(),
                 dis.readFloat(),
                 dis.readFloat()));
         int manifestLen = dis.readInt();
@@ -58,12 +58,12 @@ public class HeaderLogic
 			dos = new DataOutputStream(os);
 		dos.writeInt(header.getUnknown1());
 		dos.writeInt(header.getUnknown2());
-		dos.writeFloat(header.getUpperBound().x);
-		dos.writeFloat(header.getUpperBound().y);
-		dos.writeFloat(header.getUpperBound().z);
         dos.writeFloat(header.getLowerBound().x);
         dos.writeFloat(header.getLowerBound().y);
         dos.writeFloat(header.getLowerBound().z);
+		dos.writeFloat(header.getUpperBound().x);
+		dos.writeFloat(header.getUpperBound().y);
+		dos.writeFloat(header.getUpperBound().z);
         dos.writeInt(header.getManifest().length);
         for (BlockEntry block : header.getManifest())
         {
@@ -76,7 +76,7 @@ public class HeaderLogic
 	
 	public static void dump(Header header)
 	{
-	    System.out.println("Header "+header.getUpperBound()+" -- "+header.getLowerBound()+" (u1="+header.getUnknown1()+", u2="+header.getUnknown2()+")");
+	    System.out.println("Header "+header.getLowerBound()+" -- "+header.getUpperBound()+" (u1="+header.getUnknown1()+", u2="+header.getUnknown2()+")");
 	    for (BlockEntry entry : header.getManifest())
 	        System.out.println("  "+entry.getBlockQuantity()+"x "+BlockTypes.BLOCK_NAMES.get(entry.getBlockID()));
 	}
@@ -104,8 +104,8 @@ public class HeaderLogic
 	    Header header = new Header();
 	    header.setUnknown1(0);
 	    header.setUnknown2(0);
-        header.setLowerBound(new Vector3f(lower.x - 8, lower.y - 8, lower.z - 8));
-        header.setUpperBound(new Vector3f(upper.x - 8, upper.y - 8, upper.z - 8));
+        header.setLowerBound(new Vector3f(lower.x - 8 - 1, lower.y - 8 - 1, lower.z - 8 - 1));
+        header.setUpperBound(new Vector3f(upper.x - 8 + 1, upper.y - 8 + 1, upper.z - 8 + 1));
 	    header.setManifest(manifest.values().toArray(new BlockEntry[0]));
 	    return header;
 	}

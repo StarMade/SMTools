@@ -6,9 +6,7 @@ import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
-import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
-import jo.vecmath.logic.Transform;
 
 public class ScalePlugin implements IBlocksPlugin
 {
@@ -68,19 +66,12 @@ public class ScalePlugin implements IBlocksPlugin
             params.setZScale(1);
         Point3i core = findCore(original);
         System.out.println("  Core at "+core);
-        Transform t = new Transform();
-        t.setIdentity();
-        t.translate(-core.x, -core.y, -core.z);
-        t.scale(params.getXScale(), params.getYScale(), params.getZScale());
-        t.translate(core.x, core.y, core.z);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
-            Point3f fPoint = new Point3f(xyz.x, xyz.y, xyz.z);
-            t.transform(fPoint);
-            Point3i iPoint = new Point3i(toInt(fPoint.x), toInt(fPoint.y), toInt(fPoint.z));
+            Point3i iPoint = transform(xyz, core, params);
             //System.out.println("  "+xyz+" -> "+fPoint);
             modified.set(iPoint, b);
             if (b.getBlockID() != BlockTypes.CORE_ID)
@@ -100,9 +91,21 @@ public class ScalePlugin implements IBlocksPlugin
         return modified;
     }
     
-    private int toInt(float f)
+    private Point3i transform(Point3i ori, Point3i core, ScaleParameters params)
     {
-        return (int)(f + .5f);
+    	Point3i trans = new Point3i();
+    	trans.x = transform(ori.x, core.x, params.getXScale());
+    	trans.y = transform(ori.y, core.y, params.getYScale());
+    	trans.z = transform(ori.z, core.z, params.getZScale());
+    	return trans;
+    }
+    
+    private int transform(int ori, int core, int scale)
+    {
+    	ori -= core;
+    	ori *= scale;
+    	ori += core;
+    	return ori;
     }
 
     private Point3i findCore(SparseMatrix<Block> grid)

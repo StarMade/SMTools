@@ -191,9 +191,9 @@ public class DataLogic
             int cx = chunk.getPosition().x/16 + 8;
             int cy = chunk.getPosition().y/16 + 8;
             int cz = chunk.getPosition().z/16 + 8;
-            offsetSizeTable[cx][cy][cz][1] = 25 + compressedData.length;
-            offsetSizeTable[cx][cy][cz][0] = i;
-            timestampTable[cx][cy][cz] = chunk.getTimestamp();
+            offsetSizeTable[cz][cy][cx][1] = 25 + compressedData.length;
+            offsetSizeTable[cz][cy][cx][0] = i;
+            timestampTable[cz][cy][cx] = chunk.getTimestamp();
             //System.out.println("  idx="+cx+","+cy+","+cz);
         }
         dos2.flush();
