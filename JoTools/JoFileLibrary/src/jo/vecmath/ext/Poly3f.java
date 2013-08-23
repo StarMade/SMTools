@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jo.vecmath.Point3f;
+
 public class Poly3f {
 	private List<Plane3f> mPlanes;
 	private List<Line3f> mLines;

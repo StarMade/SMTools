@@ -11,6 +11,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -144,14 +145,25 @@ public class RenderFrame extends JFrame implements WindowListener
         if (mSpec == null)
             return;
         int type = mSpec.getClassification();
-        List<IBlocksPlugin> plugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_MODIFY);
-        if (plugins.size() == 0)
-            return;
-        for (IBlocksPlugin plugin : plugins)
+        List<IBlocksPlugin> modifyPlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_MODIFY);
+        if (modifyPlugins.size() > 0)
+            for (IBlocksPlugin plugin : modifyPlugins)
+            {
+                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
+                JMenuItem menu = new JMenuItem(action);
+                modify.add(menu);
+            }
+        List<IBlocksPlugin> generatePlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_GENERATE);
+        if (generatePlugins.size() > 0)
         {
-            BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
-            JMenuItem menu = new JMenuItem(action);
-            modify.add(menu);
+            if (modifyPlugins.size() > 0)
+                modify.add(new JSeparator());
+            for (IBlocksPlugin plugin : generatePlugins)
+            {
+                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
+                JMenuItem menu = new JMenuItem(action);
+                modify.add(menu);
+            }
         }
     }
     

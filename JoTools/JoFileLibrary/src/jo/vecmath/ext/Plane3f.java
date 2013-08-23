@@ -1,5 +1,8 @@
 package jo.vecmath.ext;
 
+import jo.vecmath.Point3f;
+import jo.vecmath.logic.Point3fLogic;
+
 public class Plane3f 
 {
 	private Point3f	mR; // position
@@ -16,14 +19,24 @@ public class Plane3f
 		this();
 		mR.set(r);
 		mN.set(n);
-		mN.normalize();
+		Point3fLogic.normalize(mN);
 	}
 	
-	public Plane3f(Point3f n, double radius)
+    public Plane3f(Point3f p1, Point3f p2, Point3f p3)
+    {
+        this();
+        mR.set(p1);
+        Point3f u = Point3fLogic.sub(p2,  p1);
+        Point3f v = Point3fLogic.sub(p3,  p1);
+        mN.set(Point3fLogic.cross(u, v));
+        Point3fLogic.normalize(mN);
+    }
+    
+	public Plane3f(Point3f n, float radius)
 	{
 		this();
 		mN.set(n);
-		mN.normalize();
+		Point3fLogic.normalize(mN);
 		mR.set(mN);
 		mR.scale(radius);
 	}
@@ -38,9 +51,10 @@ public class Plane3f
 		return mR+"||"+mN;
 	}
 	
-	public double dist(Point3f p)
+	public float dist(Point3f p)
 	{
-		return Math.abs(p.sub(mR).dot(mN));
+		//return Math.abs(p.sub(mR).dot(mN));
+		return (float)Math.abs(Point3fLogic.dot(Point3fLogic.sub(p, mR), mN));
 	}
 	
 	public Point3f getR() {

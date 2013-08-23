@@ -17,7 +17,7 @@ public class GenericPropertyEditor implements PropertyEditor
     {
         mBean = bean;
         mDescriptor = propertyDescriptor;
-        if (!mDescriptor.getPropertyType().isPrimitive())
+        if (!mDescriptor.getPropertyType().isPrimitive() && (mDescriptor.getPropertyType() != String.class))
             throw new IllegalArgumentException("Cannot handle editing type '"+mDescriptor.getPropertyType().getName()+"'");
     }
 

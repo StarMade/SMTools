@@ -3,43 +3,44 @@ package jo.vecmath.logic.ext;
 import jo.vecmath.Point3f;
 import jo.vecmath.ext.Line3f;
 import jo.vecmath.ext.LineSegment3f;
+import jo.vecmath.logic.Point3fLogic;
 
 public class Line3fLogic {
 	// make a line from two points
 	public static Line3f fromPoints(Point3f p1, Point3f p2)
 	{
-		return new Line3f(p1, p2.sub(p1));
+		return new Line3f(p1, Point3fLogic.sub(p2, p1));
 	}
 
 	public static Point3f[] closestPoints(Line3f l1, Line3f l2)
 	{
-		Point3f p21 = l2.getP().sub(l1.getP());
-		Point3f m = l2.getN().cross(l1.getN());
-		double m2 = m.dot(m);
+		Point3f p21 = Point3fLogic.sub(l2.getP(), l1.getP());
+		Point3f m = Point3fLogic.cross(l2.getN(), l1.getN());
+		float m2 = Point3fLogic.dot(m, m);
 		if (m2 == 0)
 			return null;
-		Point3f r = p21.cross(m.mult(1/m2));
-		double t1 = r.dot(l2.getN());
-		Point3f q1 = l1.getP().add(l1.getN().mult(t1));
-		double t2 = r.dot(l1.getN());
-		Point3f q2 = l2.getP().add(l2.getN().mult(t2));
+		Point3f r = Point3fLogic.cross(p21, Point3fLogic.scale(m, 1/m2));
+		float t1 = Point3fLogic.dot(r, l2.getN());
+		Point3f q1 = Point3fLogic.add(l1.getP(), Point3fLogic.scale(l1.getN(), t1));
+		float t2 = Point3fLogic.dot(r, l1.getN());
+		Point3f q2 = Point3fLogic.add(l2.getP(), Point3fLogic.scale(l2.getN(), t2));
 		return new Point3f[] { q1, q2 };
 	}
 	
-	public static double dist(Line3f l, Point3f p)
+	public static float dist(Line3f l, Point3f p)
 	{
-    	Point3f direct = p.sub(l.getP());
-    	Point3f projected = l.getN().mult(direct.dot(l.getN()));
-    	double d = direct.sub(projected).mag();
+    	Point3f direct = Point3fLogic.sub(p, l.getP());
+    	Point3f projected = Point3fLogic.scale(l.getN(), Point3fLogic.dot(direct, l.getN()));
+    	float d = Point3fLogic.mag(Point3fLogic.sub(direct, projected));
     	return d;
 	}
 	
-	public static double dist(Line3f l1, Line3f l2)
+	public static float dist(Line3f l1, Line3f l2)
 	{
 		Point3f[] closest = closestPoints(l1, l2);
 		if (closest == null)
 			return dist(l1, l2.getP()); // parallel
-		double dist = closest[0].dist(closest[1]);
+		float dist = closest[0].distance(closest[1]);
 		return dist;
 	}
 	
@@ -48,7 +49,7 @@ public class Line3fLogic {
 		Point3f[] closest = closestPoints(l1, l2);
 		if (closest == null)
 			return null;
-		double dist = closest[0].dist(closest[1]);
+		double dist = closest[0].distance(closest[1]);
 		if (dist > Point3fLogic.EPSILON)
 			return null;
 		return closest[0];
