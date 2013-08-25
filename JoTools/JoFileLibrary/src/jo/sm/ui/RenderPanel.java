@@ -34,6 +34,7 @@ public class RenderPanel extends JPanel
     private static final float  ROLL_SCALE = 1.1f;
     
     private Point               mMouseDownAt;
+    private boolean				mFancyGraphics;
     
     private ShipSpec            mSpec;
     private SparseMatrix<Block> mGrid;
@@ -59,6 +60,7 @@ public class RenderPanel extends JPanel
         mRotX = 0;
         mRotY = 0;
         mPostTranslate = new Vector3f();
+        mFancyGraphics = true;
         MouseAdapter ma =  new MouseAdapter(){
             public void mousePressed(MouseEvent ev)
             {
@@ -164,7 +166,7 @@ public class RenderPanel extends JPanel
         g.setColor(Color.black);
         g.fillRect(0, 0, s.width, s.height);
         Graphics2D g2 = (Graphics2D)g;
-        RenderLogic.draw(g2, mTiles, mUnitX, mUnitY, mUnitZ);
+        RenderLogic.draw(g2, mTiles, mUnitX, mUnitY, mUnitZ, mFancyGraphics);
     }
 
     
@@ -263,4 +265,16 @@ public class RenderPanel extends JPanel
     {
         mSpec = spec;
     }
+
+	public boolean isFancyGraphics()
+	{
+		return mFancyGraphics;
+	}
+
+	public void setFancyGraphics(boolean fancyGraphics)
+	{
+		mFancyGraphics = fancyGraphics;
+		repaint();
+	}
+
 }

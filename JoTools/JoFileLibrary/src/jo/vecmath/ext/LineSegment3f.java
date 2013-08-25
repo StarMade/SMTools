@@ -32,7 +32,7 @@ public class LineSegment3f
 
     public double length()
     {
-        return mP1.dist(mP2);
+        return mP1.distance(mP2);
     }
     
     public Point3f getP1()

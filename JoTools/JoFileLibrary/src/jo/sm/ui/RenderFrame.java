@@ -6,11 +6,13 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JSeparator;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -27,6 +29,7 @@ import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
 import jo.sm.ui.act.plugin.BlocksPluginAction;
+import jo.sm.ui.act.view.FancyAction;
 import jo.sm.ui.act.view.FilterMissileDumbAction;
 import jo.sm.ui.act.view.FilterMissileFafoAction;
 import jo.sm.ui.act.view.FilterMissileHeatAction;
@@ -73,6 +76,7 @@ public class RenderFrame extends JFrame implements WindowListener
         menuEdit.add(new HardenAction(this));
         menuEdit.add(new SoftenAction(this));
         menuBar.add(menuView);
+        menuView.add(new JCheckBoxMenuItem(new FancyAction(this)));
         menuView.add(new FilterNoneAction(this));
         menuView.add(new FilterPowerAction(this));
         menuView.add(new FilterThrusterAction(this));
@@ -144,14 +148,25 @@ public class RenderFrame extends JFrame implements WindowListener
         if (mSpec == null)
             return;
         int type = mSpec.getClassification();
-        List<IBlocksPlugin> plugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_MODIFY);
-        if (plugins.size() == 0)
-            return;
-        for (IBlocksPlugin plugin : plugins)
+        List<IBlocksPlugin> modifyPlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_MODIFY);
+        if (modifyPlugins.size() > 0)
+            for (IBlocksPlugin plugin : modifyPlugins)
+            {
+                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
+                JMenuItem menu = new JMenuItem(action);
+                modify.add(menu);
+            }
+        List<IBlocksPlugin> generatePlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_GENERATE);
+        if (generatePlugins.size() > 0)
         {
-            BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
-            JMenuItem menu = new JMenuItem(action);
-            modify.add(menu);
+            if (modifyPlugins.size() > 0)
+                modify.add(new JSeparator());
+            for (IBlocksPlugin plugin : generatePlugins)
+            {
+                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
+                JMenuItem menu = new JMenuItem(action);
+                modify.add(menu);
+            }
         }
     }
     

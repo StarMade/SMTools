@@ -25,6 +25,13 @@ public class Point3fLogic extends Tuple3fLogic
         return v;
     }
 
+	public static Point3f add(Point3f a, Point3f b) 
+	{
+		Point3f ret = new Point3f();
+		ret.add(a, b);
+		return ret;
+	}
+
 	public static Point3f sub(Point3f a, Point3f b) 
 	{
 		Point3f ret = new Point3f();
@@ -37,5 +44,20 @@ public class Point3fLogic extends Tuple3fLogic
 		Point3f ret = new Point3f(v);
 		ret.scale(m);
 		return ret;
+	}
+
+	public static Point3f cross(Point3f a, Point3f b) 
+	{
+		Point3f ret = new Point3f();
+        float x = a.y*b.z - a.z*b.y;
+        float y = b.x*a.z - b.z*a.x;
+        ret.z = a.x*b.y - a.y*b.x;
+        ret.x = x;
+        ret.y = y;
+		return ret;
+	}
+
+	public static boolean equals(Point3f a, Point3f b) {
+		return isZero(a.distance(b));
 	}
 }
