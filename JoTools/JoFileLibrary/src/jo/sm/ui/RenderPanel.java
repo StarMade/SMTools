@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -33,6 +36,13 @@ public class RenderPanel extends JPanel
     private static final float  PIXEL_TO_RADIANS = (1f/3.14159f/16f);
     private static final float  ROLL_SCALE = 1.1f;
     
+    private static final int PAN_XM = 'A';
+    private static final int PAN_XP = 'D';
+    private static final int PAN_YM = 'W';
+    private static final int PAN_YP = 'S';
+    private static final int PAN_ZM = 'Q';
+    private static final int PAN_ZP = 'E';
+    
     private Point               mMouseDownAt;
     private boolean				mFancyGraphics;
     
@@ -46,6 +56,7 @@ public class RenderPanel extends JPanel
     private float               mScale;
     private float               mRotX;
     private float               mRotY;
+    private Vector3f            mPOVTranslate;
     private Vector3f            mPostTranslate;
     
     private Point3f             mUnitX;
@@ -56,6 +67,7 @@ public class RenderPanel extends JPanel
     {
         mTransform = new Matrix4f();
         mPreTranslate = new Vector3f();
+        mPOVTranslate = new Vector3f();
         mScale = 1f;
         mRotX = 0;
         mRotY = 0;
@@ -82,6 +94,17 @@ public class RenderPanel extends JPanel
                 doMouseWheel(e.getWheelRotation());
             }
         };
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {			
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent ev)
+			{
+				if (ev.getID() == KeyEvent.KEY_PRESSED)
+					doKeyDown(ev.getKeyCode(), ev.getModifiersEx());
+				else if (ev.getID() == KeyEvent.KEY_RELEASED)
+						doKeyUp(ev.getKeyCode(), ev.getModifiersEx());
+				return false;
+			}
+		});
         addMouseListener(ma);
         addMouseMotionListener(ma);
         addMouseWheelListener(ma);
@@ -94,17 +117,12 @@ public class RenderPanel extends JPanel
         mPostTranslate.y = s.height/2;
         
         mTransform.setIdentity();
-        //System.out.println("After identity=\n"+mTransform);
         Matrix4fLogic.translate(mTransform, mPreTranslate);
-        //System.out.println("After preTrans=\n"+mTransform);
-        Matrix4fLogic.scale(mTransform, mScale);
-        //System.out.println("After scale=\n"+mTransform);
         Matrix4fLogic.rotX(mTransform, mRotX);
-        //System.out.println("After rotX=\n"+mTransform);
         Matrix4fLogic.rotY(mTransform, mRotY);
-        //System.out.println("After rotY=\n"+mTransform);
+        Matrix4fLogic.translate(mTransform, mPOVTranslate);
+        Matrix4fLogic.scale(mTransform, mScale);
         Matrix4fLogic.translate(mTransform, mPostTranslate);
-        //System.out.println("After postTrans=\n"+mTransform);
         
         Matrix3f rot = new Matrix3f();
         mTransform.get(rot);
@@ -120,6 +138,46 @@ public class RenderPanel extends JPanel
         if (mTiles != null)
             RenderLogic.transformAndSort(mTiles, mTransform);
         repaint();
+    }
+    
+    public void doKeyDown(int keyCode, int keyMod)
+    {
+    	System.out.println("code="+Integer.toHexString(keyCode)+", mod="+Integer.toHexString(keyMod));
+    	if ((keyCode == PAN_XP) && (keyMod == 0))
+    	{
+    		mPOVTranslate.x++;
+    		updateTransform();
+    	}
+    	else if ((keyCode == PAN_XM) && (keyMod == 0))
+    	{
+    		mPOVTranslate.x--;
+    		updateTransform();
+    	}
+    	else if ((keyCode == PAN_YP) && (keyMod == 0))
+    	{
+    		mPOVTranslate.y++;
+    		updateTransform();
+    	}
+    	else if ((keyCode == PAN_YM) && (keyMod == 0))
+    	{
+    		mPOVTranslate.y--;
+    		updateTransform();
+    	}
+    	else if ((keyCode == PAN_ZP) && (keyMod == 0))
+    	{
+    		mPOVTranslate.z++;
+    		updateTransform();
+    	}
+    	else if ((keyCode == PAN_ZM) && (keyMod == 0))
+    	{
+    		mPOVTranslate.z--;
+    		updateTransform();
+    	}
+    }
+    
+    public void doKeyUp(int keyCode, int keyMod)
+    {
+    	
     }
     
     private void doMouseDown(Point p)

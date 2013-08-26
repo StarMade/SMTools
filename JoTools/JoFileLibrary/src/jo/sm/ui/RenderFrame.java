@@ -107,6 +107,7 @@ public class RenderFrame extends JFrame implements WindowListener
             {
             }
         });
+
         this.addWindowListener(this);
         setSize(1024, 768);
     }
