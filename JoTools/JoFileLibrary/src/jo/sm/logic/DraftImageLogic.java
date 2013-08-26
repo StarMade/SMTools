@@ -119,7 +119,7 @@ public class DraftImageLogic
         Graphics2D g2 = (Graphics2D)g;
         
         RenderLogic.transformAndSort(tiles, transform);
-        RenderLogic.draw(g2, tiles, unitX, unitY, unitZ);
+        RenderLogic.draw(g2, tiles, unitX, unitY, unitZ, true);
         g2.dispose();
         return img;
     }

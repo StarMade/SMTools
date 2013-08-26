@@ -6,6 +6,7 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -28,6 +29,7 @@ import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
 import jo.sm.ui.act.plugin.BlocksPluginAction;
+import jo.sm.ui.act.view.FancyAction;
 import jo.sm.ui.act.view.FilterMissileDumbAction;
 import jo.sm.ui.act.view.FilterMissileFafoAction;
 import jo.sm.ui.act.view.FilterMissileHeatAction;
@@ -74,6 +76,7 @@ public class RenderFrame extends JFrame implements WindowListener
         menuEdit.add(new HardenAction(this));
         menuEdit.add(new SoftenAction(this));
         menuBar.add(menuView);
+        menuView.add(new JCheckBoxMenuItem(new FancyAction(this)));
         menuView.add(new FilterNoneAction(this));
         menuView.add(new FilterPowerAction(this));
         menuView.add(new FilterThrusterAction(this));
@@ -104,6 +107,7 @@ public class RenderFrame extends JFrame implements WindowListener
             {
             }
         });
+
         this.addWindowListener(this);
         setSize(1024, 768);
     }

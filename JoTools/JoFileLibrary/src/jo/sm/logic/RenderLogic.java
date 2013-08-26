@@ -358,7 +358,8 @@ public class RenderLogic
         showing[naxis] = !showing[axis];
     }
     
-    public static void draw(Graphics2D g2, List<RenderTile> tiles, Point3f unitX, Point3f unitY, Point3f unitZ)
+    public static void draw(Graphics2D g2, List<RenderTile> tiles, Point3f unitX, Point3f unitY, Point3f unitZ,
+    		boolean fancyGraphics)
     {
         float[][] corners = new float[4][2];
         for (RenderTile tile : tiles)
@@ -368,12 +369,15 @@ public class RenderLogic
                 break;
             if (!getCorners(tile, corner, corners, unitX, unitY, unitZ))
                 continue;
+            ImageIcon icon = null;
+            if (fancyGraphics)
+            	icon = BlockTypeColors.getBlockImage(tile.getBlock().getBlockID());
             if (tile.getType() == RenderTile.SQUARE)
-                renderSquare(g2, corners, tile, BlockTypeColors.getBlockImage(tile.getBlock().getBlockID()));
+                renderSquare(g2, corners, tile, icon);
             else if ((tile.getType() >= RenderTile.TRI1) && (tile.getType() <= RenderTile.TRI4))
-                renderTriangle(g2, corners, tile, BlockTypeColors.getWedgeImage(tile.getBlock().getBlockID()));
+                renderTriangle(g2, corners, tile, icon);
             else if ((tile.getType() == RenderTile.RECTANGLE))
-                renderSquare(g2, corners, tile, BlockTypeColors.getBlockImage(tile.getBlock().getBlockID()));
+                renderSquare(g2, corners, tile, icon);
         }
         
     }

@@ -10,6 +10,7 @@ public class Block
     
     public Block()
     {
+    	mHitPoints = 100;
     }
     
     public Block(Block b)

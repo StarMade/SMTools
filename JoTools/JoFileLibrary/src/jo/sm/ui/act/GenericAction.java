@@ -21,4 +21,12 @@ public abstract class GenericAction extends AbstractAction
     {
         return (String)getValue(SHORT_DESCRIPTION);
     }
+    public void setChecked(boolean checked)
+    {
+        putValue(SELECTED_KEY, checked ? "check" : null);
+    }
+    public boolean getChecked()
+    {
+        return (getValue(SELECTED_KEY) != null);
+    }
 }
