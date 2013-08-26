@@ -6,6 +6,7 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -18,9 +19,6 @@ import javax.swing.event.MenuListener;
 
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
-import jo.sm.ui.act.edit.HardenAction;
-import jo.sm.ui.act.edit.SmoothAction;
-import jo.sm.ui.act.edit.SoftenAction;
 import jo.sm.ui.act.file.ExportImagesAction;
 import jo.sm.ui.act.file.OpenExistingAction;
 import jo.sm.ui.act.file.OpenFileAction;
@@ -72,9 +70,6 @@ public class RenderFrame extends JFrame implements WindowListener
         menuFile.add(new ExportImagesAction(this));
         menuFile.add(new QuitAction(this));
         menuBar.add(menuEdit);
-        menuEdit.add(new SmoothAction(this));
-        menuEdit.add(new HardenAction(this));
-        menuEdit.add(new SoftenAction(this));
         menuBar.add(menuView);
         menuView.add(new JCheckBoxMenuItem(new FancyAction(this)));
         menuView.add(new FilterNoneAction(this));
@@ -97,6 +92,21 @@ public class RenderFrame extends JFrame implements WindowListener
             public void menuSelected(MenuEvent ev)
             {
                 updateModify((JMenu)ev.getSource());
+            }            
+            @Override
+            public void menuDeselected(MenuEvent e)
+            {
+            }            
+            @Override
+            public void menuCanceled(MenuEvent e)
+            {
+            }
+        });
+        menuEdit.addMenuListener(new MenuListener() {            
+            @Override
+            public void menuSelected(MenuEvent ev)
+            {
+                updateEdit((JMenu)ev.getSource());
             }            
             @Override
             public void menuDeselected(MenuEvent e)
@@ -169,6 +179,28 @@ public class RenderFrame extends JFrame implements WindowListener
                 modify.add(menu);
             }
         }
+    }
+
+    private void updateEdit(JMenu edit)
+    {
+        for (int idx = edit.getItemCount() - 1; idx >= 0; idx--)
+        {
+            JMenuItem it = edit.getItem(idx);
+            Action a = it.getAction();
+            if ((a != null) && (a instanceof BlocksPluginAction))
+                edit.remove(idx);
+        }
+        if (mSpec == null)
+            return;
+        int type = mSpec.getClassification();
+        List<IBlocksPlugin> modifyPlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_EDIT);
+        if (modifyPlugins.size() > 0)
+            for (IBlocksPlugin plugin : modifyPlugins)
+            {
+                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
+                JMenuItem menu = new JMenuItem(action);
+                edit.add(menu);
+            }
     }
     
     private static void preLoad()

@@ -16,6 +16,27 @@ public class SparseMatrix<T>
         mMatrix = new HashMap<Integer, Map<Integer,Map<Integer,T>>>();
     }
     
+    public SparseMatrix(SparseMatrix<T> original)
+    {
+        this();
+        set(original);
+    }
+    
+    public void addAll(SparseMatrix<T> original)
+    {
+        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
+        {
+            Point3i p = i.next();
+            set(p, original.get(p));
+        }
+    }
+    
+    public void set(SparseMatrix<T> original)
+    {
+        mMatrix.clear();
+        addAll(original);
+    }
+    
     public void set(int x, int y, int z, T val)
     {
         Map<Integer,Map<Integer,T>> xrow = mMatrix.get(x);

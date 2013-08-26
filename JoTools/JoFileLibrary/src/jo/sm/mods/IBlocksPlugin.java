@@ -14,6 +14,7 @@ public interface IBlocksPlugin extends IStarMadePlugin
     public static final int SUBTYPE_PAINT = 1;
     public static final int SUBTYPE_MODIFY = 2;
     public static final int SUBTYPE_GENERATE = 3;
+    public static final int SUBTYPE_EDIT = 4;
 
     public SparseMatrix<Block> modify(SparseMatrix<Block> original, Object params);
 }

@@ -1,5 +1,8 @@
 Manifest-Version: 1.0
 BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
+ jo.sm.plugins.ship.edit.HardenPlugin,
+ jo.sm.plugins.ship.edit.SmoothPlugin,
+ jo.sm.plugins.ship.edit.SoftenPlugin,
  jo.sm.plugins.ship.fill.FillPlugin,
  jo.sm.plugins.ship.hull.HullPlugin,
  jo.sm.plugins.ship.imp.ImportPlugin,
