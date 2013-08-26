@@ -12,6 +12,7 @@ import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.MathUtils;
 import jo.vecmath.logic.Point3iLogic;
@@ -91,6 +92,8 @@ public class HullPlugin implements IBlocksPlugin
         		generateIrregular(modified, params);
         		break;
         }
+        if (ShipLogic.findCore(modified) == null)
+            modified.set(params.getCenterX(),  params.getCenterY(), params.getCenterZ(), new Block(BlockTypes.CORE_ID));
         return modified;
     }
     

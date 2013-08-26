@@ -13,6 +13,12 @@ public class Block
     	mHitPoints = 100;
     }
     
+    public Block(short id)
+    {
+        this();
+        mBlockID = id;
+    }
+    
     public Block(Block b)
     {
         mBlockID = b.mBlockID;

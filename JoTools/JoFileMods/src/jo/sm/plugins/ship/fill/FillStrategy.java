@@ -17,70 +17,64 @@ public class FillStrategy implements Comparator<Point3i>
 
     private int mStrategy;
     private int mAxis;
+    private Point3i mLower;
+    private Point3i mUpper;
     
-    public FillStrategy(int strategy, int axis)
+    public FillStrategy(int strategy, int axis, Point3i lower, Point3i upper)
     {
         mStrategy = strategy;
         mAxis = axis;
+        mLower = lower;
+        mUpper = upper;
     }
+    
+//    private Set<Point3i> done = new HashSet<Point3i>();
     
     @Override
     public int compare(Point3i o1, Point3i o2)
     {
-        int v1 = 0;
-        int v2 = 0;
-        if (mAxis == X)
+        int weight1 = 0;
+        int weight2 = 0;
+        if ((mAxis&X) != 0)
         {
-            v1 = o1.x;
-            v2 = o2.x;
+            weight1 += getWeight(o1.x, mLower.x, mUpper.x);
+            weight2 += getWeight(o2.x, mLower.x, mUpper.x);
         }
-        else if (mAxis == Y)
+        if ((mAxis&Y) != 0)
         {
-            v1 = o1.y;
-            v2 = o2.y;
+            weight1 += getWeight(o1.y, mLower.y, mUpper.y);
+            weight2 += getWeight(o2.y, mLower.y, mUpper.y);
         }
-        else if (mAxis == Z)
+        if ((mAxis&Z) != 0)
         {
-            v1 = o1.z;
-            v2 = o2.z;
+            weight1 += getWeight(o1.z, mLower.z, mUpper.z);
+            weight2 += getWeight(o2.z, mLower.z, mUpper.z);
         }
-        if (mStrategy == MINUS)
-        {
-            if (v1 < v2)
-                return -1;
-            else if (v1 > v2)
-                return 1;
-            return 0;
-        }
-        if (mStrategy == PLUS)
-        {
-            if (v1 < v2)
-                return 1;
-            else if (v1 > v2)
-                return -1;
-            return 0;
-        }
-        if (mStrategy == CENTER)
-        {
-            v1 = Math.abs(v1);
-            v2 = Math.abs(v2);
-            if (v1 < v2)
-                return -1;
-            else if (v1 > v2)
-                return 1;
-            return 0;
-        }
-        if (mStrategy == OUTSIDE)
-        {
-            v1 = Math.abs(v1);
-            v2 = Math.abs(v2);
-            if (v1 < v2)
-                return 1;
-            else if (v1 > v2)
-                return -1;
-            return 0;
-        }
-        return 0;
+//        if (!done.contains(o1))
+//        {
+//            System.out.println(o1+" weight of "+weight1+" axis="+Integer.toHexString(mAxis)+", low="+mLower+", high="+mUpper);
+//            done.add(o1);
+//        }
+//        if (!done.contains(o2))
+//        {
+//            System.out.println(o2+" weight of "+weight2+" axis="+Integer.toHexString(mAxis)+", low="+mLower+", high="+mUpper);
+//            done.add(o2);
+//        }
+        return weight1 - weight2;
     }
 
+    // the higher the value the less desirable this position is
+    private int getWeight(int v, int low, int high)
+    {
+        if (mStrategy == MINUS)
+            return v - low;
+        if (mStrategy == PLUS)
+            return high - v;
+        if (mStrategy == CENTER)
+            return Math.abs(v);
+        if (mStrategy == OUTSIDE)
+            return Math.min(v - low, high - v);
+        return 0;
+    }
+    
 }

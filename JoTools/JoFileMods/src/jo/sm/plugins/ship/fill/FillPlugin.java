@@ -2,12 +2,14 @@ package jo.sm.plugins.ship.fill;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 
 public class FillPlugin implements IBlocksPlugin
@@ -66,7 +68,21 @@ public class FillPlugin implements IBlocksPlugin
                 + params.getMissileHeat() + params.getPower() + params.getSalvage()
                 + params.getShield() + params.getThrusters() + params.getWeapon();
         fill(modified, interior, params.getThrusters()*interiorSize/oneHundredPercent, (short)-1, BlockTypes.THRUSTER_ID,
-                new FillStrategy(FillStrategy.MINUS, FillStrategy.Z));
+                new FillStrategy(FillStrategy.MINUS, FillStrategy.Z, lower, upper));
+        fill(modified, interior, params.getMissileDumb()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_DUMB_CONTROLLER_ID, BlockTypes.MISSILE_DUMB_ID,
+                new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        fill(modified, interior, params.getMissileHeat()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_HEAT_CONTROLLER_ID, BlockTypes.MISSILE_HEAT_ID,
+                new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        fill(modified, interior, params.getMissileFafo()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_FAFO_CONTROLLER_ID, BlockTypes.MISSILE_FAFO_ID,
+                new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        fill(modified, interior, params.getWeapon()*interiorSize/oneHundredPercent, BlockTypes.WEAPON_CONTROLLER_ID, BlockTypes.WEAPON_ID,
+                new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.X, lower, upper));
+        fill(modified, interior, params.getSalvage()*interiorSize/oneHundredPercent, BlockTypes.SALVAGE_CONTROLLER_ID, BlockTypes.SALVAGE_ID,
+                new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.Y, lower, upper));
+        fill(modified, interior, params.getPower()*interiorSize/oneHundredPercent, BlockTypes.POWER_COIL_ID, BlockTypes.POWER_ID,
+                new FillStrategy(FillStrategy.CENTER, FillStrategy.X|FillStrategy.Y|FillStrategy.Z, lower, upper));
+        fill(modified, interior, params.getShield()*interiorSize/oneHundredPercent, (short)-1, BlockTypes.SHIELD_ID,
+                new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.X|FillStrategy.Y|FillStrategy.Z, lower, upper));
         
         return modified;
     }
@@ -74,7 +90,10 @@ public class FillPlugin implements IBlocksPlugin
     private void fill(SparseMatrix<Block> modified, List<Point3i> interior,
             int numBlocks, short controllerID, short blockID, FillStrategy fillStrategy)
     {
+        if (numBlocks <= 0)
+            return;
         Collections.sort(interior, fillStrategy);
+        System.out.println("Sorting for "+BlockTypes.BLOCK_NAMES.get(blockID)+": "+interior.get(0)+", "+interior.get(1)+", "+interior.get(2)+", ...");
         if ((controllerID > 0) && (interior.size() > 0))
             place(modified, interior, controllerID);
         while ((numBlocks-- > 0) && (interior.size() > 0))
@@ -111,6 +130,19 @@ public class FillPlugin implements IBlocksPlugin
                         interior.add(xyz);
                 }
             }
+        Point3i core = ShipLogic.findCore(modified);
+        if (core == null)
+        {
+            core = new Point3i(8, 8, 8);
+            modified.set(core, new Block(BlockTypes.CORE_ID));
+        }
+        int accessRadius = (int)(Math.pow(interior.size(), .333)/200);
+        for (Iterator<Point3i> i = interior.iterator(); i.hasNext(); )
+        {
+            Point3i p = i.next();
+            if ((Math.abs(p.x - core.x) <= accessRadius) || (Math.abs(p.y - core.y) <= accessRadius) || (Math.abs(p.z - core.z) <= accessRadius))
+                i.remove();
+        }
     }
 
     private int findBottom(SparseMatrix<Block> grid, int x, int y, int lowZ, int highZ)
