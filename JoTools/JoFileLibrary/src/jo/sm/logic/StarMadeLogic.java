@@ -43,24 +43,35 @@ public class StarMadeLogic
     private static void loadPlugins(List<String> blocksPlugins)
     {
         for (String blocksPluginClassName : blocksPlugins)
-        {
-            try
-            {
-                Class<?> blocksPluginClass = getInstance().getModLoader().loadClass(blocksPluginClassName);
-                if (blocksPluginClass == null)
-                    continue;
-                IBlocksPlugin plugin = (IBlocksPlugin)blocksPluginClass.newInstance();
-                if (plugin == null)
-                    continue;
-                getInstance().getBlocksPlugins().add(plugin);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
+            addBlocksPlugin(blocksPluginClassName);
     }
 
+    public static boolean addBlocksPlugin(String blocksPluginClassName)
+    {
+        try
+        {
+            Class<?> blocksPluginClass = getInstance().getModLoader().loadClass(blocksPluginClassName);
+            if (blocksPluginClass == null)
+                return false;
+            IBlocksPlugin plugin = (IBlocksPlugin)blocksPluginClass.newInstance();
+            if (plugin == null)
+                return false;
+            addBlocksPlugin(plugin);
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        
+    }
+
+    public static void addBlocksPlugin(IBlocksPlugin plugin)
+    {
+        getInstance().getBlocksPlugins().add(plugin);
+    }
+   
     private static void discoverPlugins(String baseDir,
             List<String> blocksPlugins)
     {

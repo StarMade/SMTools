@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,16 +32,25 @@ public class DataLogic
         Map<Point3i, Data> data = new HashMap<Point3i, Data>();
         for (File dataFile : dataDir.listFiles())
             if (dataFile.getName().endsWith(".smd2") && 
-                    (dataFile.getName().startsWith(prefix) || dataFile.getName().startsWith("ENTITY_SHIP_")))
-            {
-                String[] parts = dataFile.getName().split("\\.");
-                Point3i position = new Point3i(Integer.parseInt(parts[1]),
-                        Integer.parseInt(parts[2]),
-                        Integer.parseInt(parts[3]));
-                Data datum = DataLogic.readFile(new FileInputStream(dataFile), true);
-                data.put(position, datum);
-            }
+                    dataFile.getName().startsWith(prefix))
+                readDataFromEntityFile(dataFile, data);
+        if (data.size() == 0)
+            for (File dataFile : dataDir.listFiles())
+                if (dataFile.getName().endsWith(".smd2") && 
+                        dataFile.getName().startsWith("ENTITY_SHIP_"))
+                    readDataFromEntityFile(dataFile, data);
         return data;
+    }
+
+    private static void readDataFromEntityFile(File dataFile,
+            Map<Point3i, Data> data) throws IOException, FileNotFoundException
+    {
+        String[] parts = dataFile.getName().split("\\.");
+        Point3i position = new Point3i(Integer.parseInt(parts[1]),
+                Integer.parseInt(parts[2]),
+                Integer.parseInt(parts[3]));
+        Data datum = DataLogic.readFile(new FileInputStream(dataFile), true);
+        data.put(position, datum);
     }
     
     public static Data readFile(InputStream is, boolean close) throws IOException

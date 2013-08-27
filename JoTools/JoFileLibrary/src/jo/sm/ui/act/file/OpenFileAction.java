@@ -14,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.DebugLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
@@ -127,6 +128,15 @@ public class OpenFileAction extends GenericAction
            spec.setFile(smb2);
            mFrame.setSpec(spec);
            mFrame.getClient().setGrid(grid);
+           if (DebugLogic.DEBUG)
+           {
+               if (header != null)
+                   HeaderLogic.dump(header);
+               if (meta != null)
+                   MetaLogic.dump(meta);
+               if (logic != null)
+                   LogicLogic.dump(logic, grid);
+           }
        }
        catch (IOException e)
        {

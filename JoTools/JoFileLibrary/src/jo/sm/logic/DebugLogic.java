@@ -2,6 +2,7 @@ package jo.sm.logic;
 
 public class DebugLogic
 {
+    public static boolean DEBUG = false;
     
     private static String mIndent = "";
 
@@ -17,7 +18,8 @@ public class DebugLogic
     
     public static void debug(String msg)
     {
-        //System.out.println(mIndent+msg);
+        if (DEBUG)
+            System.out.println(mIndent+msg);
     }
 
 }
