@@ -13,17 +13,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Path2D;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import javax.swing.JPanel;
 
-import jo.sm.data.RenderTile;
+import jo.sm.data.RenderPoly;
+import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
-import jo.sm.logic.RenderLogic;
+import jo.sm.logic.RenderPolyLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.logic.ShipSpec;
-import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
@@ -50,7 +49,7 @@ public class RenderPanel extends JPanel
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private Set<Short>          mFilter;
-    private List<RenderTile>    mTiles;
+    private RenderSet			mTiles;
     private Matrix4f            mTransform;
     private Vector3f            mPreTranslate;
     private float               mScale;
@@ -59,12 +58,9 @@ public class RenderPanel extends JPanel
     private Vector3f            mPOVTranslate;
     private Vector3f            mPostTranslate;
     
-    private Point3f             mUnitX;
-    private Point3f             mUnitY;
-    private Point3f             mUnitZ;
-    
     public RenderPanel()
     {
+    	mTiles = new RenderSet();
         mTransform = new Matrix4f();
         mPreTranslate = new Vector3f();
         mPOVTranslate = new Vector3f();
@@ -123,20 +119,7 @@ public class RenderPanel extends JPanel
         Matrix4fLogic.translate(mTransform, mPOVTranslate);
         Matrix4fLogic.scale(mTransform, mScale);
         Matrix4fLogic.translate(mTransform, mPostTranslate);
-        
-        Matrix3f rot = new Matrix3f();
-        mTransform.get(rot);
-        mUnitX = new Point3f(mScale, 0, 0);
-        rot.transform(mUnitX);
-        mUnitY = new Point3f(0, mScale, 0);
-        rot.transform(mUnitY);
-        mUnitZ = new Point3f(0, 0, mScale);
-        rot.transform(mUnitZ);
-        //System.out.println("UnitX="+mUnitX);
-        //System.out.println("UnitY="+mUnitY);
-        //System.out.println("UnitZ="+mUnitZ);
-        if (mTiles != null)
-            RenderLogic.transformAndSort(mTiles, mTransform);
+        RenderPolyLogic.transformAndSort(mTiles, mTransform);
         repaint();
     }
     
@@ -224,19 +207,7 @@ public class RenderPanel extends JPanel
         g.setColor(Color.black);
         g.fillRect(0, 0, s.width, s.height);
         Graphics2D g2 = (Graphics2D)g;
-        RenderLogic.draw(g2, mTiles, mUnitX, mUnitY, mUnitZ, mFancyGraphics);
-    }
-
-    
-    public List<RenderTile> getTiles()
-    {
-        return mTiles;
-    }
-
-    public void setTiles(List<RenderTile> tiles)
-    {
-        mTiles = tiles;
-        updateTransform();
+        RenderPolyLogic.draw(g2, mTiles, mFancyGraphics);
     }
 
     public SparseMatrix<Block> getGrid()
@@ -257,7 +228,7 @@ public class RenderPanel extends JPanel
         Dimension s = getSize();
         float maxScreen = Math.max(s.width, s.height);
         mScale = maxScreen/maxModel/2f;
-        System.out.println("Scale="+mScale+", preTrans="+mPreTranslate);
+        //System.out.println("Scale="+mScale+", preTrans="+mPreTranslate);
         //mTransform.setTranslation(new Vector3f(s.width/2f, s.height/2f, 0));
         updateTiles();
     }
@@ -277,28 +248,23 @@ public class RenderPanel extends JPanel
                     mFilteredGrid.set(p, b);
             }
         }
-        mTiles = RenderLogic.getRender(mFilteredGrid);
+        RenderPolyLogic.fillPolys(mFilteredGrid, mTiles);
         updateTransform();
     }
     
-    public RenderTile getTileAt(double x, double y)
+    public Block getBlockAt(double x, double y)
     {
-        float[][] corners = new float[4][2];
-        for (int i = mTiles.size() - 1; i >= 0; i--)
+        for (RenderPoly tile : mTiles.getVisiblePolys())
         {
-            RenderTile tile = mTiles.get(i);
-            Point3f corner = tile.getVisual();
-            if (corner == null)
-                continue;
-            RenderLogic.getCorners(tile, corner, corners, mUnitX, mUnitY, mUnitZ);
+            Point3f[] corners = RenderPolyLogic.getCorners(tile, mTiles);
             Path2D p = new Path2D.Float();
-            p.moveTo(corners[0][0], corners[0][1]);
-            p.lineTo(corners[1][0], corners[1][1]);
-            p.lineTo(corners[2][0], corners[2][1]);
-            p.lineTo(corners[3][0], corners[3][1]);
-            p.lineTo(corners[0][0], corners[0][1]);
+            p.moveTo(corners[0].x, corners[0].y);
+            p.lineTo(corners[1].x, corners[1].y);
+            p.lineTo(corners[2].x, corners[2].y);
+            p.lineTo(corners[3].x, corners[3].y);
+            p.lineTo(corners[0].x, corners[0].y);
             if (p.contains(x, y))
-                return tile;
+                return tile.getBlock();
         }
         return null;
     }

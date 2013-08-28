@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import jo.sm.data.BlockTypes;
-import jo.sm.data.RenderTile;
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
@@ -202,13 +201,13 @@ public class EditPanel extends JPanel
     {
         if (mCurrentBlockID < 0)
             return;
-        RenderTile tile = mRenderer.getTileAt(x, y);
-        if (tile == null)
+        Block b = mRenderer.getBlockAt(x, y);
+        if (b == null)
             return;
-        short newID = BlockTypes.getColoredBlock(tile.getBlock().getBlockID(), mCurrentBlockID);
+        short newID = BlockTypes.getColoredBlock(b.getBlockID(), mCurrentBlockID);
         if (newID != -1)
         {
-            tile.getBlock().setBlockID(newID);
+            b.setBlockID(newID);
             mRenderer.repaint();
         }
     }

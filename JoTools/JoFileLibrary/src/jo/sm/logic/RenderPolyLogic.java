@@ -3,16 +3,16 @@ package jo.sm.logic;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.data.RenderPoly;
+import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.BlockTypeColors;
@@ -23,14 +23,14 @@ import jo.vecmath.Point3i;
 
 public class RenderPolyLogic
 {
-    public static List<RenderPoly> getRender(SparseMatrix<Block> blocks)
+    public static void fillPolys(SparseMatrix<Block> blocks, RenderSet set)
     {
-        List<RenderPoly> polys = new ArrayList<RenderPoly>();
+        set.getAllPolys().clear();
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
         blocks.getBounds(lower, upper);
-        getBasicPolys(blocks, upper, lower, polys);
-        return polys;
+        getBasicPolys(blocks, upper, lower, set.getAllPolys());
+        //System.out.println("FillPolys: count="+set.getAllPolys().size());
     }
 
     private static void getBasicPolys(SparseMatrix<Block> blocks,
@@ -61,20 +61,21 @@ public class RenderPolyLogic
             }
         }
         */
-        for (CubeIterator i = new CubeIterator(lower, upper); i.hasNext(); )
+        for (Iterator<Point3i> i = blocks.iteratorNonNull(); i.hasNext(); )
         {
             Point3i p = i.next();
-            if (!blocks.contains(p))
-                continue;
             Block b = blocks.get(p);
-            if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()))
+            short blockID = b.getBlockID();
+            if (BlockTypes.isCorner(blockID) || BlockTypes.isPowerCorner(blockID))
                 doCorner(blocks, p, polys);
-            else if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()))
+            else if (BlockTypes.isWedge(blockID) || BlockTypes.isPowerWedge(blockID))
                 doWedge(blocks, p, polys);
             else
-               doCube(blocks, p, polys);
+                doCube(blocks, p, polys);
         }
     }
+    
+    
     
     private static void doCorner(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
     {
@@ -82,7 +83,6 @@ public class RenderPolyLogic
 
     private static void doWedge(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
     {
-        /*
         switch (blocks.get(p).getOrientation())
         {
             case 0: // YPZM
@@ -161,8 +161,8 @@ public class RenderPolyLogic
             case 12: // ???
                 // no XP face
                 doXMSquare(blocks, p, polys, RenderPoly.SQUARE);
-                doYPSquare(blocks, p, polys, RenderPoly.TRI2);
-                doYMSquare(blocks, p, polys, RenderPoly.TRI2);
+                doYPSquare(blocks, p, polys, RenderPoly.TRI4);
+                doYMSquare(blocks, p, polys, RenderPoly.TRI4);
                 doZPSquare(blocks, p, polys, RenderPoly.SQUARE);
                 // no ZM face
                 doRect(blocks, p, polys, RenderPoly.ZMXP);
@@ -179,8 +179,8 @@ public class RenderPolyLogic
             case 11: // XMZP
                 doXPSquare(blocks, p, polys, RenderPoly.SQUARE);
                 // no XM face
-                doYPSquare(blocks, p, polys, RenderPoly.TRI4);
-                doYMSquare(blocks, p, polys, RenderPoly.TRI4);
+                doYPSquare(blocks, p, polys, RenderPoly.TRI2);
+                doYMSquare(blocks, p, polys, RenderPoly.TRI2);
                 // no ZP face
                 doZMSquare(blocks, p, polys, RenderPoly.SQUARE);
                 doRect(blocks, p, polys, RenderPoly.ZPXM);
@@ -198,7 +198,6 @@ public class RenderPolyLogic
                 System.out.println("Wedge with unknown ori="+blocks.get(p).getOrientation());
                 break;
         }
-        */
     }
     
     private static void doCube(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
@@ -211,23 +210,79 @@ public class RenderPolyLogic
         doZMSquare(blocks, p, polys, RenderPoly.SQUARE);
     }
 
-    /*
     private static void doRect(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int facing)
     {
         RenderPoly rp = new RenderPoly();
         rp.setBlock(blocks.get(p));
         rp.setNormal(facing);
-        rp.setCenter(new Point3i(p));
-        rp.setType(RenderPoly.RECTANGLE);
+        switch (facing)
+        {
+    	    case RenderPoly.XPYP:
+    	    case RenderPoly.XMYM:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 1, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 0, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 1, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 1, p.z + 0),
+                });
+        		break;
+    	    case RenderPoly.XPYM:
+    	    case RenderPoly.XMYP:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 0, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 0, p.z + 1),
+                });
+        		break;
+    	    case RenderPoly.YPZP:
+    	    case RenderPoly.YMZM:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 0, p.y + 1, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 0, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 0, p.z + 1),
+                });
+        		break;
+    	    case RenderPoly.YPZM:
+    	    case RenderPoly.YMZP:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 0, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 1, p.z + 1),
+                });
+        		break;
+    	    case RenderPoly.ZPXP:
+    	    case RenderPoly.ZMXM:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 1, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 0),
+                        new Point3i(p.x + 0, p.y + 1, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 0, p.z + 1),
+                });
+        		break;
+    	    case RenderPoly.ZPXM:
+    	    case RenderPoly.ZMXP:
+                rp.setModelPoints(new Point3i[] {
+                        new Point3i(p.x + 0, p.y + 0, p.z + 0),
+                        new Point3i(p.x + 1, p.y + 0, p.z + 1),
+                        new Point3i(p.x + 1, p.y + 1, p.z + 1),
+                        new Point3i(p.x + 0, p.y + 1, p.z + 0),
+                });
+        		break;
+        	default:
+        		return;
+        }
+        rp.setType(RenderPoly.SQUARE);
         polys.add(rp);
     }
-    */
 
     private static void doZMSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x, p.y, p.z - 1)))
+        if (!opaque(blocks, p.x, p.y, p.z - 1))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -246,7 +301,7 @@ public class RenderPolyLogic
     private static void doZPSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x, p.y, p.z + 1)))
+        if (!opaque(blocks, p.x, p.y, p.z + 1))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -265,7 +320,7 @@ public class RenderPolyLogic
     private static void doYMSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x, p.y - 1, p.z)))
+        if (!opaque(blocks, p.x, p.y - 1, p.z))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -284,7 +339,7 @@ public class RenderPolyLogic
     private static void doYPSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x, p.y + 1, p.z)))
+        if (!opaque(blocks, p.x, p.y + 1, p.z))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -303,7 +358,7 @@ public class RenderPolyLogic
     private static void doXMSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x - 1, p.y, p.z)))
+        if (!opaque(blocks, p.x - 1, p.y, p.z))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -322,7 +377,7 @@ public class RenderPolyLogic
     private static void doXPSquare(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int type)
     {
-        if (!blocks.contains(new Point3i(p.x + 1, p.y, p.z)))
+        if (!opaque(blocks, p.x + 1, p.y, p.z))
         {
             RenderPoly rp = new RenderPoly();
             rp.setBlock(blocks.get(p));
@@ -338,87 +393,117 @@ public class RenderPolyLogic
         }
     }
     
-    public static void transformAndSort(List<RenderPoly> tiles, Matrix4f transform)
+    private static boolean opaque(SparseMatrix<Block> grid, int x, int y, int z)
     {
+    	Block b = grid.get(x, y, z);
+    	if ((b == null) || BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isWedge(b.getBlockID()))
+    		return false;
+    	return true;
+    }
+    
+    public static void transformAndSort(final RenderSet set, Matrix4f transform)
+    {
+    	List<RenderPoly> tiles = set.getAllPolys();
+    	List<RenderPoly> visible = set.getVisiblePolys();
+    	visible.clear();
+
+    	Point3f o = new Point3f();
+        transform.transform(o);
+        set.setOrigin(o);
+
         Matrix3f rot = new Matrix3f();
         transform.get(rot);
-
+        float scale = transform.getScale();
         boolean[] showing = new boolean[6+12];
-        calcShowing(showing, rot, 1, 0, 0, RenderPoly.XP, RenderPoly.XM);
-        calcShowing(showing, rot, 0, 1, 0, RenderPoly.YP, RenderPoly.YM);
-        calcShowing(showing, rot, 0, 0, 1, RenderPoly.ZP, RenderPoly.ZM);
+        Point3f unitX = calcShowing(showing, rot, 1, 0, 0, RenderPoly.XP, RenderPoly.XM);
+        Point3f unitY = calcShowing(showing, rot, 0, 1, 0, RenderPoly.YP, RenderPoly.YM);
+        Point3f unitZ = calcShowing(showing, rot, 0, 0, 1, RenderPoly.ZP, RenderPoly.ZM);
         calcShowing(showing, rot, 1, 1, 0, RenderPoly.XPYP, RenderPoly.XMYM);
         calcShowing(showing, rot, -1, 1, 0, RenderPoly.XMYP, RenderPoly.XPYM);
         calcShowing(showing, rot, 0, 1, 1, RenderPoly.YPZP, RenderPoly.YMZM);
         calcShowing(showing, rot, 0, -1, 1, RenderPoly.YMZP, RenderPoly.YPZM);
         calcShowing(showing, rot, 1, 0, 1, RenderPoly.ZPXP, RenderPoly.ZMXM);
         calcShowing(showing, rot, 1, 0, -1, RenderPoly.ZMXP, RenderPoly.ZPXM);
+        unitX.scale(scale);
+        set.setUnitX(unitX);
+        unitY.scale(scale);
+        set.setUnitY(unitY);
+        unitZ.scale(scale);
+        set.setUnitZ(unitZ);
+        //System.out.println("Unit X="+unitX+", Y="+unitY+", Z="+unitZ);
         //System.out.println("Showing +x="+showing[0]+", -x="+showing[1]+", +y="+showing[2]+", -y="+showing[3]+", +z="+showing[4]+", -z="+showing[5]);
+        //System.out.println("Showing XPYP="+showing[RenderPoly.XPYP]);
         for (RenderPoly tile : tiles)
         {
-            if (!showing[tile.getNormal()])
-            {
-                tile.setVisualPoints(null);
-                continue;
-            }
-            Point3i[] model = tile.getModelPoints();
-            Point3f[] visual = new Point3f[model.length];
-            for (int i = 0; i < visual.length; i++)
-            {
-                visual[i] = new Point3f(model[i].x, model[i].y, model[i].z);
-                transform.transform(visual[i]);
-            }
-            tile.setVisualPoints(visual);
+            if (showing[tile.getNormal()])
+            	visible.add(tile);
         }
-        Collections.sort(tiles, new Comparator<RenderPoly>(){
+        Collections.sort(visible, new Comparator<RenderPoly>(){
             @Override
             public int compare(RenderPoly tile1, RenderPoly tile2)
             {
-                if (tile1.getVisualPoints() == null)
-                    if (tile2.getVisualPoints() == null)
-                        return 0;
-                    else
-                        return 1;
-                else
-                    if (tile2.getVisualPoints() == null)
-                        return -1;
-                    else
-                        return (int)Math.signum(tile2.getVisualPoints()[0].z - tile1.getVisualPoints()[0].z);
+                return (int)Math.signum(getMidZ(tile2, set) - getMidZ(tile1, set));
             }            
         });
+        //System.out.println("TransformAndSort, visible="+set.getVisiblePolys().size());
     }
     
-    private static void calcShowing(boolean[] showing, Matrix3f rot, int dx, int dy, int dz, int axis, int naxis)
+    private static float getX(Point3i p, RenderSet set)
+    {
+    	float z = set.getOrigin().x + p.x*set.getUnitX().x + p.y*set.getUnitY().x + p.z*set.getUnitZ().x;
+    	return z;
+    }
+    
+    private static float getY(Point3i p, RenderSet set)
+    {
+    	float z = set.getOrigin().y + p.x*set.getUnitX().y + p.y*set.getUnitY().y + p.z*set.getUnitZ().y;
+    	return z;
+    }
+    
+    private static float getZ(Point3i p, RenderSet set)
+    {
+    	float z = set.getOrigin().z + p.x*set.getUnitX().z + p.y*set.getUnitY().z + p.z*set.getUnitZ().z;
+    	return z;
+    }
+    
+    private static float getMidZ(RenderPoly tile, RenderSet set)
+    {
+    	float z = 0;
+    	for (Point3i p : tile.getModelPoints())
+    		z += getZ(p, set);
+    	z /= tile.getModelPoints().length;
+    	return z;
+    }
+    
+    private static Point3f calcShowing(boolean[] showing, Matrix3f rot, int dx, int dy, int dz, int axis, int naxis)
     {
         Point3f xp = new Point3f(dx, dy, dz);
         rot.transform(xp);
         showing[axis] = xp.z < 0;
         showing[naxis] = !showing[axis];
+        return xp;
     }
     
-    public static void draw(Graphics2D g2, List<RenderPoly> tiles, Point3f unitX, Point3f unitY, Point3f unitZ,
-    		boolean fancyGraphics)
+    public static void draw(Graphics2D g2, RenderSet set, boolean fancyGraphics)
     {
-        for (RenderPoly tile : tiles)
+        for (RenderPoly tile : set.getVisiblePolys())
         {
-            Point3f[] points = tile.getVisualPoints();
-            if (points == null)
-                break;
             ImageIcon icon = null;
             if (fancyGraphics)
             	icon = BlockTypeColors.getBlockImage(tile.getBlock().getBlockID());
             if (tile.getType() == RenderPoly.SQUARE)
-                renderSquare(g2, points, tile, icon);
+                renderSquare(g2, set, tile, icon);
             else if ((tile.getType() >= RenderPoly.TRI1) && (tile.getType() <= RenderPoly.TRI4))
-                renderTriangle(g2, points, tile, icon);
+                renderTriangle(g2, set, tile, icon);
         }
         
     }
 
-    private static void renderTriangle(Graphics2D g2, Point3f[] corners,
+    private static void renderTriangle(Graphics2D g2, RenderSet set,
             RenderPoly tile, ImageIcon icon)
     {
         //System.out.println("Render triangle "+tile.getType());
+    	Point3f[] corners = getCorners(tile, set);
         int pCenter = (tile.getType() - RenderPoly.TRI1);
         int pLeft = (pCenter + 1)%4;
         int pRight = (pCenter + 3)%4;
@@ -447,9 +532,10 @@ public class RenderPolyLogic
         }
     }
 
-    private static void renderSquare(Graphics2D g2, Point3f[] corners,
+    private static void renderSquare(Graphics2D g2, RenderSet set,
             RenderPoly tile, ImageIcon icon)
     {
+    	Point3f[] corners = getCorners(tile, set);
         if (icon != null)
         {
             float m00 = (corners[1].x - corners[0].x)/64f;
@@ -475,5 +561,18 @@ public class RenderPolyLogic
             g2.draw(p);
         }
     }
+
+	public static Point3f[] getCorners(RenderPoly tile, RenderSet set)
+	{
+		Point3f[] corners = new Point3f[tile.getModelPoints().length];
+		for (int i = 0; i < corners.length; i++)
+		{
+			Point3i p = tile.getModelPoints()[i];
+			corners[i] = new Point3f();
+			corners[i].x = getX(p, set);
+			corners[i].y = getY(p, set);
+		}
+		return corners;
+	}
 
   }

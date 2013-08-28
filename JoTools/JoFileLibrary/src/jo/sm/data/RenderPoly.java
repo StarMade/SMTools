@@ -2,7 +2,6 @@ package jo.sm.data;
 
 
 import jo.sm.ship.data.Block;
-import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 
 public class RenderPoly
@@ -37,7 +36,6 @@ public class RenderPoly
     private int             mNormal;
     private Block           mBlock;
     private Point3i[]       mModelPoints;
-    private Point3f[]       mVisualPoints;
 
     public Block getBlock()
     {
@@ -67,16 +65,6 @@ public class RenderPoly
     public void setModelPoints(Point3i[] modelPoints)
     {
         mModelPoints = modelPoints;
-    }
-
-    public Point3f[] getVisualPoints()
-    {
-        return mVisualPoints;
-    }
-
-    public void setVisualPoints(Point3f[] visualPoints)
-    {
-        mVisualPoints = visualPoints;
     }
 
     public int getNormal()
