@@ -79,6 +79,7 @@ public class RenderPolyLogic
     
     private static void doCorner(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
     {
+    	System.out.println("Corner, ori="+blocks.get(p).getOrientation());
     }
 
     private static void doWedge(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
@@ -507,6 +508,11 @@ public class RenderPolyLogic
         int pCenter = (tile.getType() - RenderPoly.TRI1);
         int pLeft = (pCenter + 1)%4;
         int pRight = (pCenter + 3)%4;
+        Path2D p = new Path2D.Float();
+        p.moveTo(corners[pCenter].x, corners[pCenter].y);
+        p.lineTo(corners[pLeft].x, corners[pLeft].y);
+        p.lineTo(corners[pRight].x, corners[pRight].y);
+        p.lineTo(corners[pCenter].x, corners[pCenter].y);
         if (icon != null)
         {
             float m00 = (corners[pRight].x - corners[pCenter].x)/64f;
@@ -516,15 +522,12 @@ public class RenderPolyLogic
             float m02 = corners[pCenter].x;
             float m12 = corners[pCenter].y;
             AffineTransform t = new AffineTransform(m00, m10, m01, m11, m02, m12);
-            g2.drawImage(icon.getImage(), t, null);
+            Graphics2D g3 = (Graphics2D)g2.create();
+            g3.clip(p);
+            g3.drawImage(icon.getImage(), t, null);
         }
         else
         {
-            Path2D p = new Path2D.Float();
-            p.moveTo(corners[pCenter].x, corners[pCenter].y);
-            p.lineTo(corners[pLeft].x, corners[pLeft].y);
-            p.lineTo(corners[pRight].x, corners[pRight].y);
-            p.lineTo(corners[pCenter].x, corners[pCenter].y);
             g2.setPaint(BlockTypeColors.getFillColor(tile.getBlock().getBlockID()));
             g2.fill(p);
             g2.setPaint(BlockTypeColors.getOutlineColor(tile.getBlock().getBlockID()));
