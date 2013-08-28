@@ -209,6 +209,7 @@ public class EditPanel extends JPanel
         {
             b.setBlockID(newID);
             mRenderer.repaint();
+            System.out.println(BlockTypes.BLOCK_NAMES.get(newID)+", ori="+b.getOrientation());
         }
     }
 }

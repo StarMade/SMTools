@@ -34,57 +34,109 @@ public class SmoothLogic
                 if (edges[j])
                     tot++;
             }
-            if (tot != 2)
-                continue;
-            int ori = -1;
-            if (edges[RenderTile.XM])
-            {
-                if (edges[RenderTile.YM])
-                    ori = 3;
-                else if (edges[RenderTile.YP])
-                    ori = 5;
-                else if (edges[RenderTile.ZM])
-                    ori = 13;
-                else if (edges[RenderTile.ZP])
-                    ori = 8;
-            }
-            else if (edges[RenderTile.XP])
-            {
-                if (edges[RenderTile.YM])
-                    ori = 1;
-                else if (edges[RenderTile.YP])
-                    ori = 7;
-                else if (edges[RenderTile.ZM])
-                    ori = 11;
-                else if (edges[RenderTile.ZP])
-                    ori = 10;
-            }
-            else if (edges[RenderTile.YM])
+            if (tot == 2)
+                doWedge(grid, p, edges);
+            else if (tot == 3)
+                doCorner(grid, p, edges);
+        }
+    }
+    
+    private static void doCorner(SparseMatrix<Block> grid, Point3i p, boolean[] edges)
+    {
+        int ori = -1;
+        if (edges[RenderTile.XM])
+        {
+            if (edges[RenderTile.YM])
             {
                 if (edges[RenderTile.ZM])
-                    ori = 2;
+                    ori = 1;
                 else if (edges[RenderTile.ZP])
                     ori = 0;
             }
             else if (edges[RenderTile.YP])
             {
                 if (edges[RenderTile.ZM])
-                    ori = 6;
+                    ori = 5;
                 else if (edges[RenderTile.ZP])
                     ori = 4;
             }
-            if (ori < 0)
-                continue;
-            Block b = new Block();
-            b.setActive(false);
-            b.setBlockID(calculateType(grid, p, edges));
-            b.setHitPoints((short)100);
-            b.setOrientation((short)ori);
-            grid.set(p, b);
         }
+        else if (edges[RenderTile.XP])
+        {
+            if (edges[RenderTile.YM])
+            {
+                if (edges[RenderTile.ZM])
+                    ori = 2;
+                else if (edges[RenderTile.ZP])
+                    ori = 3;
+            }
+            else if (edges[RenderTile.YP])
+            {
+                if (edges[RenderTile.ZM])
+                    ori = 6;
+                else if (edges[RenderTile.ZP])
+                    ori = 7;
+            }
+        }
+        if (ori < 0)
+            return;
+        Block b = new Block();
+        b.setActive(false);
+        b.setBlockID(calculateCornerType(grid, p, edges));
+        b.setOrientation((short)ori);
+        grid.set(p, b);
+    }
+    
+    private static void doWedge(SparseMatrix<Block> grid, Point3i p, boolean[] edges)
+    {
+        int ori = -1;
+        if (edges[RenderTile.XM])
+        {
+            if (edges[RenderTile.YM])
+                ori = 3;
+            else if (edges[RenderTile.YP])
+                ori = 5;
+            else if (edges[RenderTile.ZM])
+                ori = 13;
+            else if (edges[RenderTile.ZP])
+                ori = 8;
+        }
+        else if (edges[RenderTile.XP])
+        {
+            if (edges[RenderTile.YM])
+                ori = 1;
+            else if (edges[RenderTile.YP])
+                ori = 7;
+            else if (edges[RenderTile.ZM])
+                ori = 11;
+            else if (edges[RenderTile.ZP])
+                ori = 10;
+        }
+        else if (edges[RenderTile.YM])
+        {
+            if (edges[RenderTile.ZM])
+                ori = 2;
+            else if (edges[RenderTile.ZP])
+                ori = 0;
+        }
+        else if (edges[RenderTile.YP])
+        {
+            if (edges[RenderTile.ZM])
+                ori = 6;
+            else if (edges[RenderTile.ZP])
+                ori = 4;
+        }
+        if (ori < 0)
+            return;
+        Block b = new Block();
+        b.setActive(false);
+        b.setBlockID(calculateWedgeType(grid, p, edges));
+        b.setOrientation((short)ori);
+        grid.set(p, b);
+        
     }
 
-    private static short calculateType(SparseMatrix<Block> grid, Point3i p,
+    private static short calculateWedgeType(SparseMatrix<Block> grid, Point3i p,
             boolean[] edges)
     {
         short type1 = -1;
@@ -119,6 +171,7 @@ public class SmoothLogic
             case BlockTypes.HULL_COLOR_GREEN_ID: return BlockTypes.HULL_COLOR_WEDGE_GREEN_ID; 
             case BlockTypes.HULL_COLOR_YELLOW_ID: return BlockTypes.HULL_COLOR_WEDGE_YELLOW_ID; 
             case BlockTypes.HULL_COLOR_WHITE_ID: return BlockTypes.HULL_COLOR_WEDGE_WHITE_ID; 
+            case BlockTypes.GLASS_ID: return BlockTypes.GLASS_WEDGE_ID; 
             case BlockTypes.POWERHULL_COLOR_GREY: return BlockTypes.POWERHULL_COLOR_WEDGE_GREY; 
             case BlockTypes.POWERHULL_COLOR_PURPLE: return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
             case BlockTypes.POWERHULL_COLOR_BROWN: return BlockTypes.POWERHULL_COLOR_WEDGE_BROWN; 
@@ -126,8 +179,64 @@ public class SmoothLogic
             case BlockTypes.POWERHULL_COLOR_RED: return BlockTypes.POWERHULL_COLOR_WEDGE_RED; 
             case BlockTypes.POWERHULL_COLOR_BLUE: return BlockTypes.POWERHULL_COLOR_WEDGE_BLUE; 
             case BlockTypes.POWERHULL_COLOR_GREEN: return BlockTypes.POWERHULL_COLOR_WEDGE_GREEN; 
-            //case BlockTypes.POWERHULL_COLOR_YELLOW: return BlockTypes.POWERHULL_COLOR_WEDGE_YELLOW; 
+            case BlockTypes.POWERHULL_COLOR_GOLD: return BlockTypes.POWERHULL_COLOR_WEDGE_GOLD; 
             case BlockTypes.POWERHULL_COLOR_WHITE: return BlockTypes.POWERHULL_COLOR_WEDGE_WHITE; 
+
+        }
+        return type1;
+    }
+    
+    private static short calculateCornerType(SparseMatrix<Block> grid, Point3i p,
+            boolean[] edges)
+    {
+        short type1 = -1;
+        short type2 = -1;
+        short type3 = -1;
+        for (int i = 0; i < edges.length; i++)
+        {
+            if (!edges[i])
+                continue;
+            Point3i p2 = new Point3i();
+            p2.add(p, DELTAS[i]);
+            Block b = grid.get(p2);
+            if (b == null)
+                continue;
+            if (type1 == -1)
+                type1 = b.getBlockID();
+            else if (type2 == -1)
+                type2 = b.getBlockID();
+            else if (type3 == -1)
+            {
+                type3 = b.getBlockID();
+                break;
+            }
+        }
+        if (type1 != type2)
+            if (type2 == type3)
+                type1 = type2;
+            else if (type1 != type3)
+                type1 = (short)Math.min(type1, Math.min(type2, type3));
+        switch (type1)
+        {
+            case BlockTypes.HULL_COLOR_GREY_ID: return BlockTypes.HULL_COLOR_CORNER_GREY_ID; 
+            case BlockTypes.HULL_COLOR_PURPLE_ID: return BlockTypes.HULL_COLOR_CORNER_PURPLE_ID; 
+            case BlockTypes.HULL_COLOR_BROWN_ID: return BlockTypes.HULL_COLOR_CORNER_BROWN_ID; 
+            case BlockTypes.HULL_COLOR_BLACK_ID: return BlockTypes.HULL_COLOR_CORNER_BLACK_ID; 
+            case BlockTypes.HULL_COLOR_RED_ID: return BlockTypes.HULL_COLOR_CORNER_RED_ID; 
+            case BlockTypes.HULL_COLOR_BLUE_ID: return BlockTypes.HULL_COLOR_CORNER_BLUE_ID; 
+            case BlockTypes.HULL_COLOR_GREEN_ID: return BlockTypes.HULL_COLOR_CORNER_GREEN_ID; 
+            case BlockTypes.HULL_COLOR_YELLOW_ID: return BlockTypes.HULL_COLOR_CORNER_YELLOW_ID; 
+            case BlockTypes.HULL_COLOR_WHITE_ID: return BlockTypes.HULL_COLOR_CORNER_WHITE_ID; 
+            case BlockTypes.GLASS_ID: return BlockTypes.GLASS_CORNER_ID; 
+            case BlockTypes.POWERHULL_COLOR_GREY: return BlockTypes.POWERHULL_COLOR_CORNER_GREY; 
+            case BlockTypes.POWERHULL_COLOR_PURPLE: return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
+            case BlockTypes.POWERHULL_COLOR_BROWN: return BlockTypes.POWERHULL_COLOR_CORNER_BROWN; 
+            case BlockTypes.POWERHULL_COLOR_BLACK: return BlockTypes.POWERHULL_COLOR_CORNER_BLACK; 
+            case BlockTypes.POWERHULL_COLOR_RED: return BlockTypes.POWERHULL_COLOR_CORNER_RED; 
+            case BlockTypes.POWERHULL_COLOR_BLUE: return BlockTypes.POWERHULL_COLOR_CORNER_BLUE; 
+            case BlockTypes.POWERHULL_COLOR_GREEN: return BlockTypes.POWERHULL_COLOR_CORNER_GREEN; 
+            case BlockTypes.POWERHULL_COLOR_GOLD: return BlockTypes.POWERHULL_COLOR_CORNER_GOLD; 
+            case BlockTypes.POWERHULL_COLOR_WHITE: return BlockTypes.POWERHULL_COLOR_CORNER_WHITE; 
 
         }
         return type1;
@@ -142,6 +251,6 @@ public class SmoothLogic
         short type = grid.get(p2).getBlockID();
         if (BlockTypes.isWedge(type) || BlockTypes.isPowerWedge(type))
             return false;
-        return BlockTypes.isHull(type) || BlockTypes.isPowerHull(type);
+        return BlockTypes.isHull(type) || BlockTypes.isPowerHull(type) || (type == BlockTypes.GLASS_ID);
     }
 }

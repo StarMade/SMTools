@@ -109,7 +109,6 @@ public class ImportPlugin implements IBlocksPlugin
         {
             Block b = new Block();
             b.setBlockID(BlockTypes.CORE_ID);
-            b.setHitPoints((short)100);
             modified.set(8, 8, 8, b);
         }
         return modified;
@@ -142,7 +141,6 @@ public class ImportPlugin implements IBlocksPlugin
                         {
                             Block b = new Block();
                             b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
-                            b.setHitPoints((short)100);
                             modified.set(x, y, z, b);
                         }
                         z++;

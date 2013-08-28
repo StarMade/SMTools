@@ -254,8 +254,9 @@ public class RenderPanel extends JPanel
     
     public Block getBlockAt(double x, double y)
     {
-        for (RenderPoly tile : mTiles.getVisiblePolys())
+        for (int i = mTiles.getVisiblePolys().size() - 1; i >= 0; i--)
         {
+            RenderPoly tile = mTiles.getVisiblePolys().get(i);
             Point3f[] corners = RenderPolyLogic.getCorners(tile, mTiles);
             Path2D p = new Path2D.Float();
             p.moveTo(corners[0].x, corners[0].y);

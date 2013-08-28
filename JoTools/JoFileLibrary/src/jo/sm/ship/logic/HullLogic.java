@@ -20,7 +20,7 @@ public class HullLogic
             filter.put(BlockTypes.HULL_COLOR_MAP[BlockTypes.WEDGE_COLORS][color], BlockTypes.HULL_COLOR_MAP[BlockTypes.POWERWEDGE_COLORS][color]);
             filter.put(BlockTypes.HULL_COLOR_MAP[BlockTypes.CORNER_COLORS][color], BlockTypes.HULL_COLOR_MAP[BlockTypes.POWERCORNER_COLORS][color]);
         }
-        doFilter(grid, filter, 200);
+        doFilter(grid, filter);
     }
     
     public static void unpower(SparseMatrix<Block> grid)
@@ -32,11 +32,11 @@ public class HullLogic
             filter.put(BlockTypes.HULL_COLOR_MAP[BlockTypes.POWERWEDGE_COLORS][color], BlockTypes.HULL_COLOR_MAP[BlockTypes.WEDGE_COLORS][color]);
             filter.put(BlockTypes.HULL_COLOR_MAP[BlockTypes.POWERCORNER_COLORS][color], BlockTypes.HULL_COLOR_MAP[BlockTypes.CORNER_COLORS][color]);
         }
-        doFilter(grid, filter, 100);
+        doFilter(grid, filter);
     }
     
        
-    private static void doFilter(SparseMatrix<Block> grid, Map<Short, Short> filter, int hitPoints)
+    private static void doFilter(SparseMatrix<Block> grid, Map<Short, Short> filter)
     {
         for (Iterator<Point3i> i = grid.iterator(); i.hasNext(); )
         {
@@ -51,7 +51,6 @@ public class HullLogic
             if (newID != -1)
             {
                 block.setBlockID(newID);
-                block.setHitPoints((short)hitPoints);
             }
         }
     }

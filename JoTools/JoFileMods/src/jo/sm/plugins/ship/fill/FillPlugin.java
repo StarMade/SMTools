@@ -104,7 +104,6 @@ public class FillPlugin implements IBlocksPlugin
     {
         Block b = new Block();
         b.setBlockID(blockID);
-        b.setHitPoints((short)100);
         Point3i p = interior.get(0);
         interior.remove(0);
         modified.set(p,  b);

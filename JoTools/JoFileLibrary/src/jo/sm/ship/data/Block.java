@@ -1,5 +1,7 @@
 package jo.sm.ship.data;
 
+import jo.sm.data.BlockTypes;
+
 public class Block
 {
     private short   mBlockID;
@@ -35,6 +37,10 @@ public class Block
     public void setBlockID(short blockID)
     {
         mBlockID = blockID;
+        if (BlockTypes.isPowerHull(mBlockID) || BlockTypes.isPowerWedge(mBlockID) || BlockTypes.isPowerCorner(mBlockID))
+            mHitPoints = 200;
+        else
+            mHitPoints = 100;
     }
     public boolean isActive()
     {

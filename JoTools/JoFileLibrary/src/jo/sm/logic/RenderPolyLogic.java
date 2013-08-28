@@ -80,6 +80,65 @@ public class RenderPolyLogic
     private static void doCorner(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
     {
     	System.out.println("Corner, ori="+blocks.get(p).getOrientation());
+        switch (blocks.get(p).getOrientation())
+        {
+            case 0: // spire: xp,zm>yp
+                doYMSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXMSquare(blocks, p, polys, RenderPoly.TRI4); // back
+                doZPSquare(blocks, p, polys, RenderPoly.TRI1); // back
+                doRect(blocks, p, polys, RenderPoly.XPYP, RenderPoly.TRI2);
+                doRect(blocks, p, polys, RenderPoly.YPZM, RenderPoly.TRI1);
+                break;
+            case 1: // spire: xp,zp>yp
+                doYMSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXMSquare(blocks, p, polys, RenderPoly.TRI1); // back
+                doZMSquare(blocks, p, polys, RenderPoly.TRI1); // back
+                doRect(blocks, p, polys, RenderPoly.XPYP, RenderPoly.TRI1);
+                doRect(blocks, p, polys, RenderPoly.YPZP, RenderPoly.TRI4);
+                break;
+            case 2: // spire: xm,zp>yp
+                doYMSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXPSquare(blocks, p, polys, RenderPoly.TRI1); // back
+                doZMSquare(blocks, p, polys, RenderPoly.TRI2); // back
+                doRect(blocks, p, polys, RenderPoly.XMYP, RenderPoly.TRI1);
+                doRect(blocks, p, polys, RenderPoly.YPZP, RenderPoly.TRI3);
+                break;
+            case 3: // spire: xm,zp>yp
+                doYMSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXPSquare(blocks, p, polys, RenderPoly.TRI4); // back
+                doZPSquare(blocks, p, polys, RenderPoly.TRI2); // back
+                doRect(blocks, p, polys, RenderPoly.XMYP, RenderPoly.TRI4);
+                doRect(blocks, p, polys, RenderPoly.YPZM, RenderPoly.TRI2);
+                break;
+            case 4: // spire: xm,zp>yp
+                doYPSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXMSquare(blocks, p, polys, RenderPoly.TRI3); // back
+                doZPSquare(blocks, p, polys, RenderPoly.TRI4); // back
+                doRect(blocks, p, polys, RenderPoly.XPYM, RenderPoly.TRI3);
+                doRect(blocks, p, polys, RenderPoly.YMZM, RenderPoly.TRI1);
+                break;
+            case 5: // spire: xm,zp>yp
+                doYPSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXMSquare(blocks, p, polys, RenderPoly.TRI2); // back
+                doZMSquare(blocks, p, polys, RenderPoly.TRI4); // back
+                doRect(blocks, p, polys, RenderPoly.XPYM, RenderPoly.TRI2);
+                doRect(blocks, p, polys, RenderPoly.YMZP, RenderPoly.TRI4);
+                break;
+            case 6: // spire: xm,zp>yp
+                doYPSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXPSquare(blocks, p, polys, RenderPoly.TRI2); // back
+                doZMSquare(blocks, p, polys, RenderPoly.TRI3); // back
+                doRect(blocks, p, polys, RenderPoly.XMYM, RenderPoly.TRI4);
+                doRect(blocks, p, polys, RenderPoly.YMZP, RenderPoly.TRI3);
+                break;
+            case 7: // spire: xm,zp>yp
+                doYPSquare(blocks, p, polys, RenderPoly.SQUARE); // bottom
+                doXPSquare(blocks, p, polys, RenderPoly.TRI3); // back
+                doZPSquare(blocks, p, polys, RenderPoly.TRI3); // back
+                doRect(blocks, p, polys, RenderPoly.XMYM, RenderPoly.TRI3);
+                doRect(blocks, p, polys, RenderPoly.YMZM, RenderPoly.TRI2);
+                break;
+        }
     }
 
     private static void doWedge(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
@@ -214,6 +273,11 @@ public class RenderPolyLogic
     private static void doRect(SparseMatrix<Block> blocks, Point3i p,
             List<RenderPoly> polys, int facing)
     {
+        doRect(blocks, p, polys, facing, RenderPoly.SQUARE);
+    }
+    private static void doRect(SparseMatrix<Block> blocks, Point3i p,
+            List<RenderPoly> polys, int facing, int type)
+    {
         RenderPoly rp = new RenderPoly();
         rp.setBlock(blocks.get(p));
         rp.setNormal(facing);
@@ -276,7 +340,7 @@ public class RenderPolyLogic
         	default:
         		return;
         }
-        rp.setType(RenderPoly.SQUARE);
+        rp.setType(type);
         polys.add(rp);
     }
 

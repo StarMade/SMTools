@@ -6,6 +6,7 @@ import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.CornerLogic;
 import jo.sm.ship.logic.WedgeLogic;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
@@ -74,14 +75,23 @@ public class RotatePlugin implements IBlocksPlugin
             Point3f fPoint = new Point3f(xyz.x, xyz.y, xyz.z);
             t.transform(fPoint);
             //System.out.println("  "+xyz+" -> "+fPoint);
-            if (BlockTypes.isWedge(b.getBlockID()))
+            if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
                 short ori = b.getOrientation();
                 ori = WedgeLogic.rotate(ori, params.getXRotate()/90, params.getYRotate()/90, params.getZRotate()/90);
                 if (ori >= 0)
                     b.setOrientation(ori);
                 else
-                    System.out.println("Could not rotate ori="+b.getOrientation());
+                    System.out.println("Could not rotate wedge ori="+b.getOrientation());
+            }
+            if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_CORNER_ID))
+            {
+                short ori = b.getOrientation();
+                ori = CornerLogic.rotate(ori, params.getXRotate()/90, params.getYRotate()/90, params.getZRotate()/90);
+                if (ori >= 0)
+                    b.setOrientation(ori);
+                else
+                    System.out.println("Could not rotate corner ori="+b.getOrientation());
             }
             modified.set(toInt(fPoint.x), toInt(fPoint.y), toInt(fPoint.z), b);
         }
