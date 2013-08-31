@@ -1069,4 +1069,14 @@ public class BlockTypes
     {
         return CONTROLLER_IDS.containsKey(controllerID) && (blockID == CONTROLLER_IDS.get(controllerID));
     }
+
+    public static boolean isAnyWedge(short id)
+    {
+        return isWedge(id) || isPowerWedge(id) || (id == GLASS_WEDGE_ID);
+    }
+
+    public static boolean isAnyCorner(short id)
+    {
+        return isCorner(id) || isPowerCorner(id) || (id == GLASS_CORNER_ID);
+    }
 }

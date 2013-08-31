@@ -228,6 +228,7 @@ public class RenderPolyLogic
                 doRect(blocks, p, polys, RenderPoly.ZMXP);
                 break;
             case 10: // XMZM
+            case 14:
                 doXPSquare(blocks, p, polys, RenderPoly.SQUARE);
                 // no XM face
                 doYPSquare(blocks, p, polys, RenderPoly.TRI3);
@@ -461,7 +462,7 @@ public class RenderPolyLogic
     private static boolean opaque(SparseMatrix<Block> grid, int x, int y, int z)
     {
     	Block b = grid.get(x, y, z);
-    	if ((b == null) || BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isWedge(b.getBlockID()))
+    	if ((b == null) || BlockTypes.isAnyCorner(b.getBlockID()) || BlockTypes.isAnyWedge(b.getBlockID()))
     		return false;
     	return true;
     }
