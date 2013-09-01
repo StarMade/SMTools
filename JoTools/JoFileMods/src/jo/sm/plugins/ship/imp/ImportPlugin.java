@@ -118,6 +118,8 @@ public class ImportPlugin implements IBlocksPlugin
             float scale, Point3i lowerGrid, Point3i upperGrid)
     {
         for (int x = lowerGrid.x; x <= upperGrid.x; x++)
+        {
+        	System.out.println("    x="+x);
             for (int y = lowerGrid.y; y <= upperGrid.y; y++)
             {
                 Point3f o = new Point3f(x/scale, y/scale, 0);
@@ -148,6 +150,7 @@ public class ImportPlugin implements IBlocksPlugin
                     inside = !inside;
                 }
             }
+        }
     }
 
     private float getScale(Hull3f hull, ImportParameters params, Point3i lowerGrid, Point3i upperGrid)

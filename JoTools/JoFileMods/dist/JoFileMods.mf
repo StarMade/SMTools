@@ -7,6 +7,7 @@ BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.ship.hull.HullPlugin,
  jo.sm.plugins.ship.imp.ImportPlugin,
  jo.sm.plugins.ship.move.MovePlugin,
+ jo.sm.plugins.ship.replace.ReplacePlugin,
  jo.sm.plugins.ship.rotate.RotatePlugin,
  jo.sm.plugins.ship.scale.ScalePlugin,
  jo.sm.plugins.ship.stripes.StripesPlugin

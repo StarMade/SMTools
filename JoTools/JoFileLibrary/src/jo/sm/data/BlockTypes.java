@@ -1012,6 +1012,26 @@ public class BlockTypes
     	return newBlockID;
     }
     
+    public static short getColor(short blockID)
+    {
+    	int idx = -1;
+    	if (isHull(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[HULL_COLORS], blockID);
+    	else if (isWedge(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[WEDGE_COLORS], blockID);
+    	else if (isCorner(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[CORNER_COLORS], blockID);
+    	else if (isPowerHull(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[POWERHULL_COLORS], blockID);
+    	else if (isPowerWedge(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[POWERWEDGE_COLORS], blockID);
+    	else if (isPowerCorner(blockID))
+    		idx = indexOf(HULL_COLOR_MAP[POWERCORNER_COLORS], blockID);
+    	if (idx < 0)
+    		return -1;
+    	return HULL_COLOR_MAP[HULL_COLORS][idx];
+    }
+    
     public static short getPoweredBlock(short blockID)
     {
     	int idx = indexOf(HULL_COLOR_MAP[HULL_COLORS], blockID);

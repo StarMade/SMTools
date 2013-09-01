@@ -53,7 +53,7 @@ public class ColorPropertyEditor extends PropertyEditorSupport
                 txt = "White";
                 break;
         }
-        System.out.println("Getting "+getValue()+" -> "+txt);
+        //System.out.println("Getting "+getValue()+" -> "+txt);
         return txt;
     }
     
@@ -94,9 +94,9 @@ public class ColorPropertyEditor extends PropertyEditorSupport
         else if (text.equals("Yellow"))
             setValue(BlockTypes.HULL_COLOR_YELLOW_ID);
         else if (text.equals("White"))
-            setValue(BlockTypes.HULL_COLOR_YELLOW_ID);
+            setValue(BlockTypes.HULL_COLOR_WHITE_ID);
         else
             setValue(BlockTypes.HULL_COLOR_GREY_ID);
-        System.out.println("Setting "+text+" -> "+getValue());
+        //System.out.println("Setting "+text+" -> "+getValue());
     }
 }
