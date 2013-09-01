@@ -8,6 +8,7 @@ public class ImportParameters
 //    private float   mCenterY;
 //    private float   mCenterZ;
     private int   mLongestDimension;
+    private boolean	mForceConvex;
     
     public ImportParameters()
     {
@@ -66,4 +67,14 @@ public class ImportParameters
     {
         mLongestDimension = longestDimension;
     }
+
+	public boolean isForceConvex()
+	{
+		return mForceConvex;
+	}
+
+	public void setForceConvex(boolean forceConvex)
+	{
+		mForceConvex = forceConvex;
+	}
 }

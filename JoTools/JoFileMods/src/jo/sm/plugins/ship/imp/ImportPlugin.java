@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -21,6 +20,7 @@ import jo.vecmath.ext.Hull3f;
 import jo.vecmath.ext.Line3f;
 import jo.vecmath.ext.Triangle3f;
 import jo.vecmath.logic.ext.Hull3fLogic;
+import jo.vecmath.logic.ext.Triangle3fLogic;
 
 public class ImportPlugin implements IBlocksPlugin
 {
@@ -75,8 +75,7 @@ public class ImportPlugin implements IBlocksPlugin
             Point3i upperGrid = new Point3i();
             float scale = getScale(hull, params, lowerGrid, upperGrid);
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            mapHull(modified, hull, scale, lowerGrid, upperGrid);
-            modified = centerGrid(modified, lowerGrid, upperGrid);
+            mapHull(modified, hull, scale, lowerGrid, upperGrid, params.isForceConvex());
             return modified;
         }
         catch (IOException e)
@@ -85,73 +84,77 @@ public class ImportPlugin implements IBlocksPlugin
             return null;
         }
     }
-    
-    private SparseMatrix<Block> centerGrid(SparseMatrix<Block> grid, Point3i lowerGrid, Point3i upperGrid)
+
+    private void mapHull(SparseMatrix<Block> modified, Hull3f hull,
+            float scale, Point3i lowerGrid, Point3i upperGrid, boolean forceConvex)
     {
         Point3i center = new Point3i();
         center.x = (lowerGrid.x + upperGrid.x)/2;
         center.y = (lowerGrid.x + upperGrid.x)/2;
         center.z = (lowerGrid.x + upperGrid.x)/2;
-        SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
-        {
-            Point3i gridPoint = i.next();
-            Point3i modifiedPoint = new Point3i();
-            modifiedPoint.x = gridPoint.x - center.x + 8;
-            modifiedPoint.y = gridPoint.y - center.y + 8;
-            modifiedPoint.z = gridPoint.z - center.z + 8;
-            modified.set(modifiedPoint, grid.get(gridPoint));
-        }
-        // place core
-        if (modified.contains(8, 8, 8))
-            modified.get(8, 8, 8).setBlockID(BlockTypes.CORE_ID);
-        else
-        {
-            Block b = new Block();
-            b.setBlockID(BlockTypes.CORE_ID);
-            modified.set(8, 8, 8, b);
-        }
-        return modified;
-    }
-
-    private void mapHull(SparseMatrix<Block> modified, Hull3f hull,
-            float scale, Point3i lowerGrid, Point3i upperGrid)
-    {
         for (int x = lowerGrid.x; x <= upperGrid.x; x++)
         {
-        	System.out.println("    x="+x);
             for (int y = lowerGrid.y; y <= upperGrid.y; y++)
             {
                 Point3f o = new Point3f(x/scale, y/scale, 0);
                 Line3f line = new Line3f(o, new Point3f(0, 0, 1));
                 List<Point3f> hits = Hull3fLogic.intersections(hull, line);
-                Collections.sort(hits, new Comparator<Point3f>() {
-                    @Override
-                    public int compare(Point3f p1, Point3f p2)
-                    {
-                        return (int)Math.signum(p1.z - p2.z);
-                    }
-                });
-                boolean inside = false;
-                int z = lowerGrid.z;
-                for (Point3f hit : hits)
+                if (hits.size() == 0)
+                	continue;
+                if (forceConvex)
                 {
-                    int hitz = (int)(hit.z*scale);
-                    while (z < hitz)
-                    {
-                        if (!inside)
-                        {
-                            Block b = new Block();
-                            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
-                            modified.set(x, y, z, b);
-                        }
-                        z++;
-                    }
-                    inside = !inside;
+                	float lowZ = hits.get(0).z;
+                	float highZ = lowZ;
+                	for (int i = 1; i < hits.size(); i++)
+                	{
+                		float z = hits.get(i).z;
+                		lowZ = Math.min(lowZ, z);
+                		highZ = Math.max(highZ, z);
+                	}
+                	int lowHull = (int)(lowZ*scale);
+                	int highHull = (int)(highZ*scale);
+                	System.out.println("    x="+x+", y="+y+", z="+lowZ+" -- "+highZ+" out of "+hits.size());
+                	for (int z = lowHull; z <= highHull; z++)
+    		        {
+    		            Block b = new Block();
+    		            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
+    		            modified.set(x - center.x + 8, y - center.y + 8, z - center.z + 8, b);
+    		        }
                 }
+                else
+                	concaveHull(modified, scale, lowerGrid, center, x, y, hits);
             }
         }
     }
+
+	private void concaveHull(SparseMatrix<Block> modified, float scale,
+			Point3i lowerGrid, Point3i center, int x, int y, List<Point3f> hits)
+	{
+		Collections.sort(hits, new Comparator<Point3f>() {
+		    @Override
+		    public int compare(Point3f p1, Point3f p2)
+		    {
+		        return (int)Math.signum(p1.z - p2.z);
+		    }
+		});
+		boolean inside = false;
+		int z = lowerGrid.z;
+		for (Point3f hit : hits)
+		{
+		    int hitz = (int)(hit.z*scale);
+		    while (z < hitz)
+		    {
+		        if (!inside)
+		        {
+		            Block b = new Block();
+		            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
+		            modified.set(x - center.x + 8, y - center.y + 8, z - center.z + 8, b);
+		        }
+		        z++;
+		    }
+		    inside = !inside;
+		}
+	}
 
     private float getScale(Hull3f hull, ImportParameters params, Point3i lowerGrid, Point3i upperGrid)
     {
@@ -215,9 +218,10 @@ public class ImportPlugin implements IBlocksPlugin
                 {
                     Triangle3f tri = new Triangle3f();
                     tri.setA(points.get(0));
-                    tri.setB(points.get(1));
+                    tri.setB(points.get(third - 1));
                     tri.setC(points.get(third));
-                    hull.getTriangles().add(tri);
+                    if (!Triangle3fLogic.isDegenerate(tri))
+                    	hull.getTriangles().add(tri);
                 }
             }
         }
