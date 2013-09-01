@@ -22,9 +22,9 @@ import jo.vecmath.ext.Triangle3f;
 import jo.vecmath.logic.ext.Hull3fLogic;
 import jo.vecmath.logic.ext.Triangle3fLogic;
 
-public class ImportPlugin implements IBlocksPlugin
+public class ImportOBJPlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Import";
+    public static final String NAME = "Import/OBJ";
     public static final String DESC = "Import OBJ file";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
@@ -53,7 +53,7 @@ public class ImportPlugin implements IBlocksPlugin
     @Override
     public Object getParameterBean()
     {
-        return new ImportParameters();
+        return new ImportOBJParameters();
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ImportPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p)
     {
-        ImportParameters params = (ImportParameters)p;        
+        ImportOBJParameters params = (ImportOBJParameters)p;        
         try
         {
             Hull3f hull = readFile(params.getFile());
@@ -125,6 +125,7 @@ public class ImportPlugin implements IBlocksPlugin
                 	concaveHull(modified, scale, lowerGrid, center, x, y, hits);
             }
         }
+        modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
     }
 
 	private void concaveHull(SparseMatrix<Block> modified, float scale,
@@ -156,7 +157,7 @@ public class ImportPlugin implements IBlocksPlugin
 		}
 	}
 
-    private float getScale(Hull3f hull, ImportParameters params, Point3i lowerGrid, Point3i upperGrid)
+    private float getScale(Hull3f hull, ImportOBJParameters params, Point3i lowerGrid, Point3i upperGrid)
     {
         Point3f lowerModel = new Point3f();
         Point3f upperModel = new Point3f();
