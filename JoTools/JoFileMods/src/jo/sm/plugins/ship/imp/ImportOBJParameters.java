@@ -1,7 +1,7 @@
 package jo.sm.plugins.ship.imp;
 
 
-public class ImportParameters
+public class ImportOBJParameters
 {
     private String  mFile;
 //    private float   mCenterX;
@@ -10,7 +10,7 @@ public class ImportParameters
     private int   mLongestDimension;
     private boolean	mForceConvex;
     
-    public ImportParameters()
+    public ImportOBJParameters()
     {
 //        mCenterX = 0.01f;
 //        mCenterY = 0.01f;
