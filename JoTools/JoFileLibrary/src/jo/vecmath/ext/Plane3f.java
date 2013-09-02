@@ -2,7 +2,6 @@ package jo.vecmath.ext;
 
 import jo.vecmath.Point3f;
 import jo.vecmath.logic.Point3fLogic;
-import jo.vecmath.logic.ext.Triangle3fLogic;
 
 public class Plane3f 
 {
@@ -27,7 +26,10 @@ public class Plane3f
     {
         this();
         mR.set(p1);
-        mN = Triangle3fLogic.getNormal(p1, p2, p3);
+        Point3f u = Point3fLogic.sub(p2,  p1);
+        Point3f v = Point3fLogic.sub(p3,  p1);
+        mN.set(Point3fLogic.cross(u, v));
+        Point3fLogic.normalize(mN);
     }
     
 	public Plane3f(Point3f n, float radius)

@@ -47,27 +47,17 @@ public class Triangle3fLogic
         return p;
     }
     
-	public static Point3f getNormal(Triangle3f tri)
-	{
-		return getNormal(tri.getA(), tri.getB(), tri.getC());
-	}
-	
-	public static Point3f getNormal(Point3f a, Point3f b, Point3f c)
-	{
-		if (a.equals(b) || a.equals(c) || b.equals(c))
-			return null;
-        Point3f u = Point3fLogic.sub(c, a);
-        Point3f v = Point3fLogic.sub(c, a);
-        Point3f cross = Point3fLogic.cross(u, v);
-        if (MathUtils.isZero(cross.x) && MathUtils.isZero(cross.y) && MathUtils.isZero(cross.z))
-        	return null;
-        Point3fLogic.normalize(cross);
-        return cross;
-	}
-    
 	public static boolean isDegenerate(Triangle3f tri)
 	{
-		return getNormal(tri) == null;
+		if (tri.getA().equals(tri.getB()) || tri.getA().equals(tri.getC()) || tri.getB().equals(tri.getC()))
+			return true;
+        Point3f u = Point3fLogic.sub(tri.getB(),  tri.getA());
+        Point3f v = Point3fLogic.sub(tri.getC(),  tri.getA());
+        Point3f cross = Point3fLogic.cross(u, v);
+        if (MathUtils.isZero(cross.x) && MathUtils.isZero(cross.y) && MathUtils.isZero(cross.z))
+        	return true;
+        return false;
+
 	}
 
 }
