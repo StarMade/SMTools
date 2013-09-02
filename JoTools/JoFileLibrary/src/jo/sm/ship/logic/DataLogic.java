@@ -162,7 +162,7 @@ public class DataLogic
         for (int i = 0; i < data.getChunks().length; i++)
         {
             Chunk chunk = data.getChunks()[i];
-            //System.out.println("Chunk "+chunk.getPosition());
+            if (chunk.getPosition().z < -256) System.out.println("Chunk "+chunk.getPosition());
             ByteArrayOutputStream baos3 = new ByteArrayOutputStream();
             DataOutputStream dos3 = new DataOutputStream(new DeflaterOutputStream(baos3));
             //int blockCount = 0;
@@ -201,10 +201,10 @@ public class DataLogic
             int cx = chunk.getPosition().x/16 + 8;
             int cy = chunk.getPosition().y/16 + 8;
             int cz = chunk.getPosition().z/16 + 8;
+            if (chunk.getPosition().z < -256) System.out.println("  idx="+cx+","+cy+","+cz);
             offsetSizeTable[cz][cy][cx][1] = 25 + compressedData.length;
             offsetSizeTable[cz][cy][cx][0] = i;
             timestampTable[cz][cy][cx] = chunk.getTimestamp();
-            //System.out.println("  idx="+cx+","+cy+","+cz);
         }
         dos2.flush();
 

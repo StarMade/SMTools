@@ -94,10 +94,15 @@ public class ShipLogic
     public static SparseMatrix<Block> getBlocks(Map<Point3i, Data> data)
     {
         SparseMatrix<Block> blocks = new SparseMatrix<Block>();
-        for (Data datum : data.values())
+        for (Point3i dataOrigin : data.keySet())
+        {
+        	Data datum = data.get(dataOrigin);
             for (Chunk c : datum.getChunks())
             {
                 Point3i p = c.getPosition();
+                p.x += dataOrigin.x*256;
+                p.y += dataOrigin.y*256;
+                p.z += dataOrigin.z*256;
                 for (CubeIterator i = new CubeIterator(new Point3i(0,0,0), new Point3i(15,15,15)); i.hasNext(); )
                 {
                     Point3i xyz = i.next();
@@ -106,6 +111,7 @@ public class ShipLogic
                         blocks.set(p.x + xyz.x, p.y + xyz.y, p.z + xyz.z, b);
                 }
             }
+        }
         return blocks;
     }
     
@@ -130,14 +136,18 @@ public class ShipLogic
         {
             Point3i p = i.next();
             Data datum = new Data();
-            Point3i lowerChunk = new Point3i(p.x*256 - 128, p.y*256 - 128, p.z*256 - 128);
-            Point3i upperChunk = new Point3i(lowerChunk.x + 255, lowerChunk.y + 255, lowerChunk.z + 255);
+            Point3i origin = new Point3i(p.x*256, p.y*256, p.z*256);
+            Point3i lowerChunk = new Point3i(origin.x - 128, origin.y - 128, origin.z - 128);
+            Point3i upperChunk = new Point3i(origin.x + 127, origin.y + 127, origin.z + 127);
             List<Chunk> chunks = new ArrayList<Chunk>();
+            System.out.println("Splitting "+p+" -> "+lowerChunk+" / "+upperChunk);
             for (Iterator<Point3i> j = new CubeIterator(lowerChunk, upperChunk, new Point3i(16, 16, 16)); j.hasNext(); )
             {
                 Point3i q = j.next();
+                Point3i chunkPos = new Point3i(q);
+                chunkPos.sub(origin);
                 Chunk chunk = new Chunk();
-                chunk.setPosition(q);
+                chunk.setPosition(chunkPos);
                 chunk.setBlocks(new Block[16][16][16]);
                 chunk.setTimestamp(now);
                 chunk.setType(1);
@@ -152,7 +162,10 @@ public class ShipLogic
                     doneAny = true;
                 }
                 if (doneAny)
+                {
                     chunks.add(chunk);
+                    if (chunk.getPosition().z < -256) System.out.println("  Chunk "+q+" -> "+chunkPos);
+                }
             }
             if (chunks.size() == 0)
                 continue;
