@@ -2,6 +2,7 @@ package jo.vecmath.logic.ext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import jo.vecmath.Point3f;
 import jo.vecmath.ext.Hull3f;
@@ -14,7 +15,7 @@ public class Hull3fLogic
     public static boolean isInside(Hull3f hull, Point3f p)
     {
         Line3f line = new Line3f(p, new Point3f(0,0,1));
-        List<Point3f> hits = intersections(hull, line);
+        List<Point3f> hits = intersections(hull, line, null);
         int above = 0;
         for (Point3f hit : hits)
             if (hit.z > p.z)
@@ -22,14 +23,18 @@ public class Hull3fLogic
         return above%2 == 1;
     }
     
-    public static List<Point3f> intersections(Hull3f hull, Line3f line)
+    public static List<Point3f> intersections(Hull3f hull, Line3f line, Map<Point3f,Triangle3f> tris)
     {
         List<Point3f> points = new ArrayList<Point3f>();
         for (Triangle3f tri : hull.getTriangles())
         {
             Point3f p = Triangle3fLogic.intersection(tri, line);
             if (p != null)
+            {
                 points.add(p);
+                if (tris != null)
+                	tris.put(p, tri);
+            }
         }
         return points;
     }
