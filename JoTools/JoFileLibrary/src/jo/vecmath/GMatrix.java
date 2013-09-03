@@ -1370,6 +1370,7 @@ import jo.vecmath.SingularMatrixException;
       return buffer.toString();
     }
 
+     /*
     private static void checkMatrix( GMatrix m) 
     {
       int i, j;
@@ -1385,6 +1386,7 @@ import jo.vecmath.SingularMatrixException;
           System.out.print("\n");
       }
     }
+    */
 
 
     /**
@@ -1969,8 +1971,10 @@ import jo.vecmath.SingularMatrixException;
       int i, j, k;
       int nr, nc, si;
 
-      int converged, rank;
-      double cs, sn, r, mag,scale, t;
+      //int converged;
+      int rank;
+      //double cs, sn,r,  
+      double mag,scale, t;
       int eLength, sLength, vecLength;
 
       GMatrix tmp = new GMatrix(mat.nRow, mat.nCol);
@@ -2267,9 +2271,9 @@ import jo.vecmath.SingularMatrixException;
     static void compute_qr(int start, int end, double[] s, double[] e,
                      GMatrix u, GMatrix v) {
 
-      int i, j, k, n, sl;
+      int i, k, n, sl;
       boolean converged;
-      double shift, r, utemp, vtemp, f, g;
+      double shift, r, f, g;
       double[] cosl = new double[1];
       double[] cosr = new double[1];
       double[] sinl = new double[1];
@@ -2302,7 +2306,7 @@ import jo.vecmath.SingularMatrixException;
       }
 
       double c_b48 =  1.0;
-      double c_b71 = -1.0;
+      //double c_b71 = -1.0;
       converged = false;
 
       if (debug)
@@ -2432,10 +2436,12 @@ import jo.vecmath.SingularMatrixException;
       return;
     }
 
+    /*
     private static void print_se(double[] s, double[] e) {
       System.out.println("\ns =" + s[0] + " " + s[1] + " " + s[2]);
       System.out.println("e =" + e[0] + " " + e[1]);
     }
+    */
 
     private static void update_v(int index, GMatrix v,
                          double[] cosr, double[] sinr) {
@@ -2451,6 +2457,7 @@ import jo.vecmath.SingularMatrixException;
       }
     }
 
+    /*
     private static void chase_up(double[] s, double[] e, int k, GMatrix v) {
       double f, g, r;
       double[] cosr = new double[1];
@@ -2484,7 +2491,9 @@ import jo.vecmath.SingularMatrixException;
       s[i+1] = compute_rot(f, g, sinr, cosr);
       update_v_split(i, k+1, v, cosr, sinr, t, m);
     }
+    */
     
+    /*
     private static void chase_across(double[] s, double[] e, int k, GMatrix u) {
       double f, g, r;
       double[] cosl = new double[1];
@@ -2518,7 +2527,9 @@ import jo.vecmath.SingularMatrixException;
       s[i+1] = compute_rot(f, g, sinl, cosl);
       update_u_split(k, i + 1, u, cosl, sinl, t, m);
     }
+    */
 
+    /*
     private static void update_v_split(int topr, int bottomr, GMatrix v,
                                double[] cosr, double[] sinr,
                                GMatrix t, GMatrix m) {
@@ -2554,7 +2565,9 @@ import jo.vecmath.SingularMatrixException;
       System.out.println("\nt*m =");
       checkMatrix(m);
     }
+    */
 
+    /*
     private static void update_u_split(int topr, int bottomr, GMatrix u,
                                double[] cosl, double[] sinl,
                                GMatrix t, GMatrix m) {
@@ -2585,6 +2598,7 @@ import jo.vecmath.SingularMatrixException;
       System.out.println("\nt*m=");
       checkMatrix(m);
     }
+    */
 
     private static void update_u(int index, GMatrix u,
                          double[] cosl, double[] sinl) {
@@ -2605,7 +2619,7 @@ import jo.vecmath.SingularMatrixException;
 
       mtmp.mul(u, mtmp);
       mtmp.mul(mtmp, v);
-      System.out.println("\n m = \n" + mtmp.toString(mtmp));
+      System.out.println("\n m = \n" + GMatrix.toString(mtmp));
             
     }
 
@@ -2909,8 +2923,7 @@ import jo.vecmath.SingularMatrixException;
     }
 
     static double compute_rot(double f, double g, double[] sin, double[] cos) {
-      int i__1;
-      double d__1, d__2;
+      //double d__1, d__2;
       double cs, sn;
       int i;
       double scale;
@@ -2943,7 +2956,6 @@ import jo.vecmath.SingularMatrixException;
             r = Math.sqrt(f1*f1 + g1*g1);
             cs = f1 / r;
             sn = g1 / r;
-            i__1 = count;
             for (i = 1; i <= count; ++i) {
                 r *= safmx2;
             }
@@ -2958,7 +2970,6 @@ import jo.vecmath.SingularMatrixException;
             r = Math.sqrt(f1*f1 + g1*g1);
             cs = f1 / r;
             sn = g1 / r;
-            i__1 = count;
             for (i = 1; i <= count; ++i) {
                 r *= safmn2;
             }

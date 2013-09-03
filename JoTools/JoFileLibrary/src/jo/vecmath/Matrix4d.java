@@ -1996,7 +1996,8 @@ import jo.vecmath.Vector4d;
      final void invertGeneral(Matrix4d  m1) {
       double result[] = new double[16];
       int row_perm[] = new int[4];
-      int i, r, c;
+      int i;
+      //int r, c;
 
       // Use LU decomposition and backsubstitution code specifically
       // for floating-point 4x4 matrices.
@@ -3122,7 +3123,7 @@ import jo.vecmath.Vector4d;
    */
      public final void transform(Tuple4d vec, Tuple4d vecOut)
     {
-           double x,y,z,w;
+           double x,y,z;
            x = (m00*vec.x + m01*vec.y
                   + m02*vec.z + m03*vec.w);
            y = (m10*vec.x + m11*vec.y

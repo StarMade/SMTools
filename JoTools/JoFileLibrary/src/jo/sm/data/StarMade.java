@@ -16,10 +16,12 @@ public class StarMade
     private ClassLoader     mModLoader;
     private List<IBlocksPlugin> mBlocksPlugins;
     private Properties      mProps;
+    private short           mSelectedBlockType;
     
     public StarMade()
     {
         mBlocksPlugins = new ArrayList<IBlocksPlugin>();
+        mSelectedBlockType = -1;
     }
     
     public File getBaseDir()
@@ -79,5 +81,15 @@ public class StarMade
     public void setProps(Properties props)
     {
         mProps = props;
+    }
+
+    public short getSelectedBlockType()
+    {
+        return mSelectedBlockType;
+    }
+
+    public void setSelectedBlockType(short selectedBlockType)
+    {
+        mSelectedBlockType = selectedBlockType;
     }
 }

@@ -1,6 +1,7 @@
 package jo.sm.mods;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.ship.data.Block;
 
 public interface IBlocksPlugin extends IStarMadePlugin
@@ -16,5 +17,5 @@ public interface IBlocksPlugin extends IStarMadePlugin
     public static final int SUBTYPE_GENERATE = 3;
     public static final int SUBTYPE_EDIT = 4;
 
-    public SparseMatrix<Block> modify(SparseMatrix<Block> original, Object params);
+    public SparseMatrix<Block> modify(SparseMatrix<Block> original, Object params, StarMade sm, IPluginCallback cb);
 }

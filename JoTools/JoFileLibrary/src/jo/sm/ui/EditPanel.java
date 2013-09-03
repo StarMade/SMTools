@@ -29,7 +29,6 @@ import jo.vecmath.Point3i;
 @SuppressWarnings("serial")
 public class EditPanel extends JPanel
 {
-    private short               mCurrentBlockID;
     private boolean             mPainting;
 
     private RenderPanel         mRenderer;
@@ -51,7 +50,6 @@ public class EditPanel extends JPanel
     public EditPanel(RenderPanel renderer)
     {
         mRenderer = renderer;
-        mCurrentBlockID = -1;
         // instantiate
         mCurrent = new JLabel("blank");
         mGrey = newButton(BlockTypes.HULL_COLOR_GREY_ID);
@@ -164,8 +162,8 @@ public class EditPanel extends JPanel
     
     private void doColorClick(Icon color, short blockID)
     {
-        mCurrentBlockID = blockID;
-        if (mCurrentBlockID == -1)
+        StarMadeLogic.getInstance().setSelectedBlockType(blockID);
+        if (StarMadeLogic.getInstance().getSelectedBlockType() == -1)
         {
             mCurrent.setIcon(null);
             mCurrent.setText("blank");
@@ -179,7 +177,7 @@ public class EditPanel extends JPanel
     
     private void doColorAll()
     {
-        if (mCurrentBlockID < 0)
+        if (StarMadeLogic.getInstance().getSelectedBlockType() < 0)
             return;
         SparseMatrix<Block> grid = mRenderer.getGrid();
         for (Iterator<Point3i> i = grid.iterator(); i.hasNext(); )
@@ -188,7 +186,7 @@ public class EditPanel extends JPanel
             Block block = grid.get(coords);
             if (block == null)
                 continue;
-            short newID = BlockTypes.getColoredBlock(block.getBlockID(), mCurrentBlockID);
+            short newID = BlockTypes.getColoredBlock(block.getBlockID(), StarMadeLogic.getInstance().getSelectedBlockType());
             if (newID != -1)
             {
                 block.setBlockID(newID);
@@ -199,12 +197,12 @@ public class EditPanel extends JPanel
 
     private void doMouseClick(int x, int y)
     {
-        if (mCurrentBlockID < 0)
+        if (StarMadeLogic.getInstance().getSelectedBlockType() < 0)
             return;
         Block b = mRenderer.getBlockAt(x, y);
         if (b == null)
             return;
-        short newID = BlockTypes.getColoredBlock(b.getBlockID(), mCurrentBlockID);
+        short newID = BlockTypes.getColoredBlock(b.getBlockID(), StarMadeLogic.getInstance().getSelectedBlockType());
         if (newID != -1)
         {
             b.setBlockID(newID);

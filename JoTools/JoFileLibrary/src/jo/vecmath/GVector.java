@@ -385,7 +385,7 @@ import jo.vecmath.Tuple4f;
       */  
      public final void sub(GVector vector1, GVector vector2) 
       {
-          int i,l;
+          int i;
           
 
       if( vector1.length != vector2.length ) 

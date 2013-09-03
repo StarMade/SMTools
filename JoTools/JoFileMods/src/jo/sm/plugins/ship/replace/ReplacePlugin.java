@@ -3,7 +3,9 @@ package jo.sm.plugins.ship.replace;
 import jo.sm.data.BlockTypes;
 import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
@@ -51,7 +53,7 @@ public class ReplacePlugin implements IBlocksPlugin
 
     @Override
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
-            Object p)
+            Object p, StarMade sm, IPluginCallback cb)
     {
         ReplaceParameters params = (ReplaceParameters)p;
         //System.out.println("Params: color1="+params.getColor1()+", color2="+params.getColor2());

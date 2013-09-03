@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderPanel;
@@ -32,7 +33,7 @@ public class BlocksPluginAction extends GenericAction
         if (!getParams(params))
             return;
         SparseMatrix<Block> original = mPanel.getGrid();
-        SparseMatrix<Block> modified = mPlugin.modify(original, params);
+        SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), null);
         if (modified != null)
             mPanel.setGrid(modified);
     }

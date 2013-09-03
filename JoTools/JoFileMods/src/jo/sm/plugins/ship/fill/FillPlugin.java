@@ -7,7 +7,9 @@ import java.util.List;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
@@ -54,7 +56,7 @@ public class FillPlugin implements IBlocksPlugin
 
     @Override
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
-            Object p)
+            Object p, StarMade sm, IPluginCallback cb)
     {
         FillParameters params = (FillParameters)p;    
         SparseMatrix<Block> modified = new SparseMatrix<Block>();

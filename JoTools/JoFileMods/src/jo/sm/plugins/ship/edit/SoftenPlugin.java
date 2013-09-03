@@ -1,7 +1,9 @@
 package jo.sm.plugins.ship.edit;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.HullLogic;
 
@@ -47,7 +49,7 @@ public class SoftenPlugin implements IBlocksPlugin
 
     @Override
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
-            Object p)
+            Object p, StarMade sm, IPluginCallback cb)
     {
        SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
        HullLogic.unpower(modified);

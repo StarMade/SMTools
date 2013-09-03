@@ -34,7 +34,8 @@ package jo.vecmath;
 /**
  * Indicates that inverse of a matrix can not be computed.
  */
- public class SingularMatrixException extends RuntimeException{
+ @SuppressWarnings("serial")
+public class SingularMatrixException extends RuntimeException{
 
 /**
  * Create the exception object with default values.
