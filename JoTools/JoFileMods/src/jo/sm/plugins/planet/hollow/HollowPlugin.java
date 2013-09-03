@@ -1,5 +1,6 @@
 package jo.sm.plugins.planet.hollow;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
@@ -66,7 +67,7 @@ public class HollowPlugin implements IBlocksPlugin
             Block b = original.get(xyz);
             if (b == null)
                 continue;
-            if (isEdge(original, xyz))
+            if (isEdge(original, xyz) || (b.getBlockID() == BlockTypes.CORE_ID))
                 modified.set(xyz, b);
         }
         return modified;
