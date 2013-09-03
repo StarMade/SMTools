@@ -77,7 +77,7 @@ public class ImportOBJPlugin implements IBlocksPlugin
             Point3i upperGrid = new Point3i();
             float scale = getScale(hull, params, lowerGrid, upperGrid);
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            mapHull(modified, hull, scale, lowerGrid, upperGrid, params.isForceConvex());
+            mapHull(modified, hull, scale, lowerGrid, upperGrid, params.isForceConvex(), cb);
             return modified;
         }
         catch (IOException e)
@@ -88,12 +88,13 @@ public class ImportOBJPlugin implements IBlocksPlugin
     }
 
     private void mapHull(SparseMatrix<Block> modified, Hull3f hull,
-            float scale, Point3i lowerGrid, Point3i upperGrid, boolean forceConvex)
+            float scale, Point3i lowerGrid, Point3i upperGrid, boolean forceConvex, IPluginCallback cb)
     {
         Point3i center = new Point3i();
         center.x = (lowerGrid.x + upperGrid.x)/2;
         center.y = (lowerGrid.x + upperGrid.x)/2;
         center.z = (lowerGrid.x + upperGrid.x)/2;
+        cb.startTask((upperGrid.x - lowerGrid.x + 1)*(upperGrid.y - lowerGrid.y + 1));
         for (int x = lowerGrid.x; x <= upperGrid.x; x++)
         {
             for (int y = lowerGrid.y; y <= upperGrid.y; y++)
@@ -125,9 +126,13 @@ public class ImportOBJPlugin implements IBlocksPlugin
                 }
                 else
                 	concaveHull(modified, scale, lowerGrid, center, x, y, hits);
+                if (cb.isPleaseCancel())
+                    break;
+                cb.workTask(1);
             }
         }
         modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+        cb.endTask();
     }
 
 	private void concaveHull(SparseMatrix<Block> modified, float scale,

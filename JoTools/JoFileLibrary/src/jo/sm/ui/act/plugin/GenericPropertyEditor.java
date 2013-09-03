@@ -7,6 +7,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 
+import jo.sm.logic.ConvertLogic;
+
 public class GenericPropertyEditor implements PropertyEditor
 {
     private Object              mBean;
@@ -95,82 +97,7 @@ public class GenericPropertyEditor implements PropertyEditor
     @Override
     public void setAsText(String sVal) throws IllegalArgumentException
     {
-        Object oVal = null;
-        if (sVal != null)
-        {
-            if (mDescriptor.getPropertyType() == boolean.class)
-                try
-                {
-                    oVal = Boolean.parseBoolean(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = Boolean.FALSE;
-                }
-            else if (mDescriptor.getPropertyType() == byte.class)
-                try
-                {
-                    oVal = Byte.parseByte(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = (byte)0;
-                }
-            else if (mDescriptor.getPropertyType() == short.class)
-                try
-                {
-                    oVal = Short.parseShort(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = (short)0;
-                }
-            else if (mDescriptor.getPropertyType() == int.class)
-                try
-                {
-                    oVal = Integer.parseInt(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = 0;
-                }
-            else if (mDescriptor.getPropertyType() == long.class)
-                try
-                {
-                    oVal = Long.parseLong(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = 0L;
-                }
-            else if (mDescriptor.getPropertyType() == float.class)
-                try
-                {
-                    oVal = Float.parseFloat(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = 0f;
-                }
-            else if (mDescriptor.getPropertyType() == double.class)
-                try
-                {
-                    oVal = Double.parseDouble(sVal);
-                }
-                catch (Exception e)
-                {
-                    oVal = 0.0;
-                }
-            else if (mDescriptor.getPropertyType() == char.class)
-            {
-                if (sVal.trim().length() > 0)
-                    oVal = sVal.trim().charAt(0);
-            }
-            else if (mDescriptor.getPropertyType() == String.class)
-                oVal = sVal;
-            else
-                throw new IllegalArgumentException("Cannot handle editing type '"+mDescriptor.getPropertyType().getName()+"'");
-        }
+        Object oVal = ConvertLogic.toObject(sVal, mDescriptor.getPropertyType());
         setValue(oVal);
     }
 

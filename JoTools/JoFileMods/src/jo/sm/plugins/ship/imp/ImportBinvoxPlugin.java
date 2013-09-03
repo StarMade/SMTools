@@ -61,13 +61,14 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
         try
         {
             FileInputStream fis = new FileInputStream(params.getFile());
+            cb.setStatus("Reading "+params.getFile());
             BinvoxData hull = BinvoxLogic.read(fis);
             fis.close();
             if (hull == null)
                 return null;
-            System.out.println("Dimensions:"+hull.getWidth()+","+hull.getHeight()+","+hull.getDepth());
+            cb.setStatus("Dimensions:"+hull.getWidth()+","+hull.getHeight()+","+hull.getDepth());
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            mapHull(modified, hull);
+            mapHull(modified, hull, cb);
             modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
             return modified;
         }
@@ -78,7 +79,7 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
         }
     }
 
-    private void mapHull(SparseMatrix<Block> modified, BinvoxData hull)
+    private void mapHull(SparseMatrix<Block> modified, BinvoxData hull, IPluginCallback cb)
     {
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
@@ -87,8 +88,11 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
         center.x = (lower.x + upper.x)/2;
         center.y = (lower.y + upper.y)/2;
         center.z = (lower.z + upper.z)/2;
+        cb.startTask((upper.x - lower.x + 1)*(upper.y - lower.y + 1)*(upper.z - lower.z + 1));
+        
         for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
         {
+            cb.workTask(1);
             Point3i p = i.next();
             int o = getIndex(p.x, p.y, p.z, hull);
             if (hull.getVoxels()[o++] == 0)
@@ -96,7 +100,10 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
             Block b = new Block();
             b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
             modified.set(p.x - center.x + 8, p.y - center.y + 8, p.z - center.z + 8, b);
+            if (cb.isPleaseCancel())
+                break;
         }
+        cb.endTask();
     }
 
     private int getIndex(int x, int y, int z, BinvoxData hull) 

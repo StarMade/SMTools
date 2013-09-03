@@ -2,10 +2,16 @@ package jo.sm.ui.act.plugin;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.ConvertLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
@@ -29,13 +35,103 @@ public class BlocksPluginAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        Object params = mPlugin.getParameterBean();
+        final Object params = mPlugin.getParameterBean();
+        loadProps(params);
         if (!getParams(params))
             return;
-        SparseMatrix<Block> original = mPanel.getGrid();
-        SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), null);
-        if (modified != null)
-            mPanel.setGrid(modified);
+        saveProps(params);
+        final PluginProgressDlg progress = new PluginProgressDlg(getFrame(), mPlugin.getName());
+        Thread t = new Thread(mPlugin.getName()) { public void run() {
+            SparseMatrix<Block> original = mPanel.getGrid();
+            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), progress);
+            if ((modified != null) || !progress.isPleaseCancel())
+                mPanel.setGrid(modified);
+            progress.dispose();
+        }
+        };
+        t.start();
+        try
+        {
+            Thread.sleep(1000);
+        }
+        catch (InterruptedException e)
+        {
+        }
+        if (t.isAlive())
+        {
+            progress.setVisible(true);
+            try
+            {
+                t.join();
+            }
+            catch (InterruptedException e)
+            {
+            }
+        }
+    }
+
+    private void saveProps(Object params)
+    {
+        if (params == null)
+            return;
+        Properties props = StarMadeLogic.getProps();
+        String prefix = params.getClass().getName()+"$";
+        try
+        {
+            BeanInfo info = Introspector.getBeanInfo(params.getClass());
+            for (PropertyDescriptor pd : info.getPropertyDescriptors())
+            {
+                if ((pd.getReadMethod() == null) || (pd.getWriteMethod() == null))
+                    continue;
+                try
+                {
+                    Object val = pd.getReadMethod().invoke(params);
+                    if (val != null)
+                        props.setProperty(prefix + pd.getName(), val.toString());
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (IntrospectionException e)
+        {
+            e.printStackTrace();
+        }
+        StarMadeLogic.saveProps();
+    }
+
+    private void loadProps(Object params)
+    {
+        if (params == null)
+            return;
+        Properties props = StarMadeLogic.getProps();
+        String prefix = params.getClass().getName()+"$";
+        try
+        {
+            BeanInfo info = Introspector.getBeanInfo(params.getClass());
+            for (PropertyDescriptor pd : info.getPropertyDescriptors())
+            {
+                if ((pd.getReadMethod() == null) || (pd.getWriteMethod() == null))
+                    continue;
+                if (!props.containsKey(prefix + pd.getName()))
+                    continue;
+                String val = props.getProperty(prefix + pd.getName());
+                try
+                {
+                    pd.getWriteMethod().invoke(params, ConvertLogic.toObject(val, pd.getPropertyType()));
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (IntrospectionException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     private boolean getParams(Object params)

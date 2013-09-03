@@ -6,4 +6,5 @@ public interface IPluginCallback
     public void startTask(int size);
     public void workTask(int amnt);
     public void endTask();
+    public boolean isPleaseCancel();
 }
