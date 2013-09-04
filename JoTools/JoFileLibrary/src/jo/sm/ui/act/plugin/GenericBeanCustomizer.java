@@ -71,7 +71,7 @@ public class GenericBeanCustomizer extends JPanel implements Customizer
             else if (mEditors[i].getTags() != null)
             {
                 final PropertyEditor editor = mEditors[i];
-                final JComboBox combo = new JComboBox(mEditors[i].getTags());
+                final JComboBox<String> combo = new JComboBox<String>(mEditors[i].getTags());
                 combo.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent ev)

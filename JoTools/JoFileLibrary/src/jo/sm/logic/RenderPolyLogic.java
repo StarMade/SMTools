@@ -20,6 +20,7 @@ import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.MathUtils;
 
 public class RenderPolyLogic
 {
@@ -508,7 +509,10 @@ public class RenderPolyLogic
             @Override
             public int compare(RenderPoly tile1, RenderPoly tile2)
             {
-                return (int)Math.signum(getMidZ(tile2, set) - getMidZ(tile1, set));
+            	float delta = getMidZ(tile2, set) - getMidZ(tile1, set);
+            	if (Math.abs(delta) < .01)
+            		return (int)Math.signum(tile1.getBlock().getBlockID() - tile2.getBlock().getBlockID());
+                return (int)Math.signum(delta);
             }            
         });
         //System.out.println("TransformAndSort, visible="+set.getVisiblePolys().size());
@@ -641,6 +645,21 @@ public class RenderPolyLogic
 			corners[i].y = getY(p, set);
 		}
 		return corners;
+	}
+
+	public static void getBounds(RenderPoly tile, Point3i lower, Point3i upper)
+	{
+		lower.set(tile.getModelPoints()[0]);
+		upper.set(tile.getModelPoints()[0]);
+		for (int i = 1; i < tile.getModelPoints().length; i++)
+		{
+			lower.x = Math.min(lower.x, tile.getModelPoints()[i].x);
+			lower.y = Math.min(lower.y, tile.getModelPoints()[i].y);
+			lower.z = Math.min(lower.z, tile.getModelPoints()[i].z);
+			upper.x = Math.max(upper.x, tile.getModelPoints()[i].x);
+			upper.y = Math.max(upper.y, tile.getModelPoints()[i].y);
+			upper.z = Math.max(upper.z, tile.getModelPoints()[i].z);
+		}
 	}
 
   }

@@ -4,10 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -17,10 +15,12 @@ import java.util.Set;
 
 import javax.swing.JPanel;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
 import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.RenderPolyLogic;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.logic.ShipSpec;
 import jo.vecmath.Matrix4f;
@@ -35,14 +35,12 @@ public class RenderPanel extends JPanel
     private static final float  PIXEL_TO_RADIANS = (1f/3.14159f/16f);
     private static final float  ROLL_SCALE = 1.1f;
     
-    private static final int PAN_XM = 'A';
-    private static final int PAN_XP = 'D';
-    private static final int PAN_YM = 'W';
-    private static final int PAN_YP = 'S';
-    private static final int PAN_ZM = 'Q';
-    private static final int PAN_ZP = 'E';
+    private static final int MOUSE_MODE_NULL = 0;
+    private static final int MOUSE_MODE_PIVOT = 1;
+    private static final int MOUSE_MODE_SELECT = 2;
     
     private Point               mMouseDownAt;
+    private int					mMouseMode;
     private boolean				mFancyGraphics;
     
     private ShipSpec            mSpec;
@@ -55,7 +53,7 @@ public class RenderPanel extends JPanel
     private float               mScale;
     private float               mRotX;
     private float               mRotY;
-    private Vector3f            mPOVTranslate;
+    Vector3f            mPOVTranslate;
     private Vector3f            mPostTranslate;
     
     public RenderPanel()
@@ -71,42 +69,33 @@ public class RenderPanel extends JPanel
         mFancyGraphics = true;
         MouseAdapter ma =  new MouseAdapter(){
             public void mousePressed(MouseEvent ev)
-            {
+            {            	
                 if (ev.getButton() == MouseEvent.BUTTON1)
-                    doMouseDown(ev.getPoint());
+                    doMouseDown(ev.getPoint(), ev.getModifiers());
             }
             public void mouseReleased(MouseEvent ev)
             {
                 if (ev.getButton() == MouseEvent.BUTTON1)
-                    doMouseUp(ev.getPoint());
+                    doMouseUp(ev.getPoint(), ev.getModifiers());
             }
             public void mouseDragged(MouseEvent ev)
             {
                 if (mMouseDownAt != null)
-                    doMouseMove(ev.getPoint());
+                    doMouseMove(ev.getPoint(), ev.getModifiers());
             }
             public void mouseWheelMoved(MouseWheelEvent e)
             {
                 doMouseWheel(e.getWheelRotation());
             }
         };
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {			
-			@Override
-			public boolean dispatchKeyEvent(KeyEvent ev)
-			{
-				if (ev.getID() == KeyEvent.KEY_PRESSED)
-					doKeyDown(ev.getKeyCode(), ev.getModifiersEx());
-				else if (ev.getID() == KeyEvent.KEY_RELEASED)
-						doKeyUp(ev.getKeyCode(), ev.getModifiersEx());
-				return false;
-			}
-		});
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
+        		new RenderPanelKeyEventDispatcher(this));
         addMouseListener(ma);
         addMouseMotionListener(ma);
         addMouseWheelListener(ma);
     }
     
-    private void updateTransform()
+    void updateTransform()
     {
         Dimension s = getSize();
         mPostTranslate.x = s.width/2;
@@ -123,65 +112,55 @@ public class RenderPanel extends JPanel
         repaint();
     }
     
-    public void doKeyDown(int keyCode, int keyMod)
-    {
-    	System.out.println("code="+Integer.toHexString(keyCode)+", mod="+Integer.toHexString(keyMod));
-    	if ((keyCode == PAN_XP) && (keyMod == 0))
-    	{
-    		mPOVTranslate.x++;
-    		updateTransform();
-    	}
-    	else if ((keyCode == PAN_XM) && (keyMod == 0))
-    	{
-    		mPOVTranslate.x--;
-    		updateTransform();
-    	}
-    	else if ((keyCode == PAN_YP) && (keyMod == 0))
-    	{
-    		mPOVTranslate.y++;
-    		updateTransform();
-    	}
-    	else if ((keyCode == PAN_YM) && (keyMod == 0))
-    	{
-    		mPOVTranslate.y--;
-    		updateTransform();
-    	}
-    	else if ((keyCode == PAN_ZP) && (keyMod == 0))
-    	{
-    		mPOVTranslate.z++;
-    		updateTransform();
-    	}
-    	else if ((keyCode == PAN_ZM) && (keyMod == 0))
-    	{
-    		mPOVTranslate.z--;
-    		updateTransform();
-    	}
-    }
-    
-    public void doKeyUp(int keyCode, int keyMod)
-    {
-    	
-    }
-    
-    private void doMouseDown(Point p)
+    private void doMouseDown(Point p, int modifiers)
     {
         mMouseDownAt = p;
+        //System.out.println("MouseMod="+Integer.toHexString(modifiers));
+        if ((modifiers&MouseEvent.SHIFT_MASK) != 0)
+        {
+        	RenderPoly tile = getTileAt(p.x, p.y);
+        	if (tile == null)
+        		return;
+        	mMouseMode = MOUSE_MODE_SELECT;
+        	StarMadeLogic.getInstance().setSelectedLower(null);
+        	StarMadeLogic.getInstance().setSelectedUpper(null);
+        	extendSelection(tile);
+        }
+        else
+        	mMouseMode = MOUSE_MODE_PIVOT;
     }
     
-    private void doMouseMove(Point p)
+    private void doMouseMove(Point p, int modifiers)
     {
-        int dx = p.x - mMouseDownAt.x;
-        int dy = p.y - mMouseDownAt.y;
-        mMouseDownAt = p;
-        mRotX += dy*PIXEL_TO_RADIANS;
-        mRotY += dx*PIXEL_TO_RADIANS;
-        updateTransform();
+    	if (mMouseMode == MOUSE_MODE_PIVOT)
+    	{
+	        int dx = p.x - mMouseDownAt.x;
+	        int dy = p.y - mMouseDownAt.y;
+	        mMouseDownAt = p;
+	        mRotX += dy*PIXEL_TO_RADIANS;
+	        mRotY += dx*PIXEL_TO_RADIANS;
+	        updateTransform();
+    	}
+    	else if (mMouseMode == MOUSE_MODE_SELECT)
+    	{
+        	RenderPoly tile = getTileAt(p.x, p.y);
+        	if (tile != null)
+        		extendSelection(tile);
+    	}
     }
     
-    private void doMouseUp(Point p)
+    private void doMouseUp(Point p, int modifiers)
     {
-        doMouseMove(p);
-        mMouseDownAt = null;
+    	if (mMouseMode == MOUSE_MODE_PIVOT)
+    	{
+    		doMouseMove(p, modifiers);
+    		mMouseDownAt = null;
+    	}
+    	else if (mMouseMode == MOUSE_MODE_PIVOT)
+    	{
+    		doMouseMove(p, modifiers);
+    	}
+        mMouseMode = MOUSE_MODE_NULL;
     }
 
     private void doMouseWheel(int roll)
@@ -197,6 +176,38 @@ public class RenderPanel extends JPanel
                 mScale *= ROLL_SCALE;
         }
         updateTransform();
+    }
+    
+    private void extendSelection(RenderPoly tile)
+    {
+    	Point3i lowest = new Point3i();
+    	Point3i highest = new Point3i();
+    	RenderPolyLogic.getBounds(tile, lowest, highest);
+    	Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
+    	if (lower == null)
+    	{
+    		lower = lowest;
+    		StarMadeLogic.getInstance().setSelectedLower(lower);
+    	}
+    	else
+    	{
+    		lower.x = Math.min(lower.x, lowest.x);
+    		lower.y = Math.min(lower.y, lowest.y);
+    		lower.z = Math.min(lower.z, lowest.z);
+    	}
+    	Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
+    	if (upper == null)
+    	{
+    		upper = highest;
+    		StarMadeLogic.getInstance().setSelectedUpper(upper);
+    	}
+    	else
+    	{
+    		upper.x = Math.min(upper.x, highest.x);
+    		upper.y = Math.min(upper.y, highest.y);
+    		upper.z = Math.min(upper.z, highest.z);
+    	}
+    	updateTiles();
     }
     
     public void paint(Graphics g)
@@ -233,7 +244,7 @@ public class RenderPanel extends JPanel
         updateTiles();
     }
     
-    private void updateTiles()
+    void updateTiles()
     {
         if ((mFilter == null) || (mFilter.size() == 0))
             mFilteredGrid = mGrid;
@@ -249,10 +260,81 @@ public class RenderPanel extends JPanel
             }
         }
         RenderPolyLogic.fillPolys(mFilteredGrid, mTiles);
+        Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
+        Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
+        if ((lower != null) && (upper != null))
+        {
+        	addSelectFace(upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
+        			RenderPoly.XP, BlockTypes.SPECIAL_SELECT_XP);
+        	addSelectFace(lower.x, lower.y, lower.z, lower.x, upper.y, upper.z,
+        			RenderPoly.XM, BlockTypes.SPECIAL_SELECT_XM);
+        	addSelectFace(lower.x, upper.y, lower.z, upper.x, upper.y, upper.z,
+        			RenderPoly.YP, BlockTypes.SPECIAL_SELECT_YP);
+        	addSelectFace(lower.x, lower.y, lower.z, upper.x, lower.y, upper.z,
+        			RenderPoly.YM, BlockTypes.SPECIAL_SELECT_YM);
+        	addSelectFace(lower.x, lower.y, upper.z, upper.x, upper.y, upper.z,
+        			RenderPoly.ZP, BlockTypes.SPECIAL_SELECT_ZP);
+        	addSelectFace(lower.x, lower.y, lower.z, upper.x, upper.y, lower.z,
+        			RenderPoly.ZM, BlockTypes.SPECIAL_SELECT_ZM);
+    	}
         updateTransform();
     }
     
-    public Block getBlockAt(double x, double y)
+    private void addSelectFace(int x1, int y1, int z1, int x2, int y2, int z2,
+			int face, short type)
+	{
+    	if (x1 == x2)
+    	{
+    		for (int y = y1; y < y2; y++)
+    			for (int z = z1; z < z2; z++)
+    				addSelectTile(x1, y, z, x2, y+1, z+1, face, type);
+    	}
+    	else if (y1 == y2)
+    	{
+    		for (int x = x1; x < x2; x++)
+    			for (int z = z1; z < z2; z++)
+    				addSelectTile(x, y1, z, x+1, y2, z+1, face, type);
+    	}
+    	else if (z1 == z2)
+    	{
+    		for (int x = x1; x < x2; x++)
+        		for (int y = y1; y < y2; y++)
+    				addSelectTile(x, y, z1, x+1, y+1, z2, face, type);
+    	}
+	}
+    
+    private void addSelectTile(int x1, int y1, int z1, int x2, int y2, int z2,
+			int face, short type)
+	{
+    	RenderPoly tile = new RenderPoly();
+    	if (x1 == x2)
+	    	tile.setModelPoints(new Point3i[]{
+	    			new Point3i(x1, y1, z1),
+	    			new Point3i(x1, y1, z2),
+	    			new Point3i(x1, y2, z2),
+	    			new Point3i(x1, y2, z1),
+	    	});
+    	else if (y1 == y2)
+	    	tile.setModelPoints(new Point3i[]{
+	    			new Point3i(x1, y1, z1),
+	    			new Point3i(x1, y1, z2),
+	    			new Point3i(x2, y1, z2),
+	    			new Point3i(x2, y1, z1),
+	    	});
+    	else if (z1 == z2)
+	    	tile.setModelPoints(new Point3i[]{
+	    			new Point3i(x1, y1, z1),
+	    			new Point3i(x1, y2, z1),
+	    			new Point3i(x2, y2, z1),
+	    			new Point3i(x2, y1, z1),
+	    	});
+    	tile.setNormal(face);
+    	tile.setType(RenderPoly.SQUARE);
+    	tile.setBlock(new Block(type));
+    	mTiles.getAllPolys().add(tile);
+	}
+
+	public RenderPoly getTileAt(double x, double y)
     {
         for (int i = mTiles.getVisiblePolys().size() - 1; i >= 0; i--)
         {
@@ -265,8 +347,16 @@ public class RenderPanel extends JPanel
             p.lineTo(corners[3].x, corners[3].y);
             p.lineTo(corners[0].x, corners[0].y);
             if (p.contains(x, y))
-                return tile.getBlock();
+                return tile;
         }
+        return null;
+    }
+    
+    public Block getBlockAt(double x, double y)
+    {
+    	RenderPoly tile = getTileAt(x, y);
+    	if (tile != null)
+    		return tile.getBlock();
         return null;
     }
 

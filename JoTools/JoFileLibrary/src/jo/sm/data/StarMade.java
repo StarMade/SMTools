@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Properties;
 
 import jo.sm.mods.IBlocksPlugin;
+import jo.vecmath.Point3i;
 
 public class StarMade
 {
@@ -17,6 +18,8 @@ public class StarMade
     private List<IBlocksPlugin> mBlocksPlugins;
     private Properties      mProps;
     private short           mSelectedBlockType;
+    private Point3i			mSelectedUpper;
+    private Point3i			mSelectedLower;
     
     public StarMade()
     {
@@ -92,4 +95,24 @@ public class StarMade
     {
         mSelectedBlockType = selectedBlockType;
     }
+
+	public Point3i getSelectedUpper()
+	{
+		return mSelectedUpper;
+	}
+
+	public void setSelectedUpper(Point3i selectedUpper)
+	{
+		mSelectedUpper = selectedUpper;
+	}
+
+	public Point3i getSelectedLower()
+	{
+		return mSelectedLower;
+	}
+
+	public void setSelectedLower(Point3i selectedLower)
+	{
+		mSelectedLower = selectedLower;
+	}
 }

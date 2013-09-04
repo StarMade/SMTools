@@ -11,4 +11,30 @@ public class Point3iLogic
 		int dz = p1.z - p2.z;
 		return (int)Math.sqrt(dx*dx + dy*dy + dz*dz);
 	}
+
+	public static Point3i min(Point3i p, Point3i lower, Point3i upper)
+	{
+		p.x = Math.min(lower.x, upper.x);
+		p.y = Math.min(lower.y, upper.y);
+		p.z = Math.min(lower.z, upper.z);
+		return p;
+	}
+
+	public static Point3i max(Point3i p, Point3i lower, Point3i upper)
+	{
+		p.x = Math.max(lower.x, upper.x);
+		p.y = Math.max(lower.y, upper.y);
+		p.z = Math.max(lower.z, upper.z);
+		return p;
+	}
+
+	public static Point3i min(Point3i lower, Point3i upper)
+	{
+		return min(new Point3i(), lower, upper);
+	}
+
+	public static Point3i max(Point3i lower, Point3i upper)
+	{
+		return max(new Point3i(), lower, upper);
+	}
 }

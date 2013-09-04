@@ -792,6 +792,8 @@ public class BlockTypeColors
 
     public static ImageIcon getBlockImage(short blockID)
     {
+    	if (blockID >= BlockTypes.SPECIAL)
+    		return getSpecialBlockImage(blockID);
         if (!BLOCK_ICON.containsKey(blockID))
             return null;
         if (!mBlockIconsLoaded)
@@ -827,6 +829,43 @@ public class BlockTypeColors
         if (mBlockIcons == null)
             return null;
         return mBlockIcons[BLOCK_ICON.get(blockID)];
+    }
+
+    private static Map<Short,ImageIcon> SPECIAL_ICONS = new HashMap<Short, ImageIcon>();
+    
+    private static ImageIcon getSpecialBlockImage(short blockID)
+    {
+    	if (SPECIAL_ICONS.containsKey(blockID))
+    		return SPECIAL_ICONS.get(blockID);
+    	int color = 0;
+    	switch (blockID)
+    	{
+    		case BlockTypes.SPECIAL_SELECT_XP:
+    			color = 0x80FF0000;
+    			break;
+    		case BlockTypes.SPECIAL_SELECT_XM:
+    			color = 0x80800000;
+    			break;
+    		case BlockTypes.SPECIAL_SELECT_YP:
+    			color = 0x8000FF00;
+    			break;
+    		case BlockTypes.SPECIAL_SELECT_YM:
+    			color = 0x80008000;
+    			break;
+    		case BlockTypes.SPECIAL_SELECT_ZP:
+    			color = 0x800000FF;
+    			break;
+    		case BlockTypes.SPECIAL_SELECT_ZM:
+    			color = 0x80000080;
+    			break;
+    	}
+        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_4BYTE_ABGR);
+        for (int x = 0; x < 64; x++)
+            for (int y = 0; y < 64; y++)
+                img.setRGB(x, y, color);
+        ImageIcon icon = new ImageIcon(img);
+        SPECIAL_ICONS.put(blockID, icon);
+        return icon;
     }
     
     public static ImageIcon getWedgeImage(short blockID)

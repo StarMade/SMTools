@@ -5,6 +5,14 @@ import java.util.Map;
 
 public class BlockTypes
 {
+	public static final short SPECIAL = 8350;
+	public static final short SPECIAL_SELECT_XP = SPECIAL+1;
+	public static final short SPECIAL_SELECT_XM = SPECIAL+2;
+	public static final short SPECIAL_SELECT_YP = SPECIAL+3;
+	public static final short SPECIAL_SELECT_YM = SPECIAL+4;
+	public static final short SPECIAL_SELECT_ZP = SPECIAL+5;
+	public static final short SPECIAL_SELECT_ZM = SPECIAL+6;
+
     public static final short WEAPON_CONTROLLER_ID=6;
     public static final short WEAPON_ID=16;
     public static final short CORE_ID=1;
