@@ -2,14 +2,13 @@ package jo.sm.plugins.ship.imp;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
+import jo.sm.plugins.ship.move.MovePlugin;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
@@ -57,18 +56,30 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        ImportBinvoxParameters params = (ImportBinvoxParameters)p;        
+        ImportBinvoxParameters params = (ImportBinvoxParameters)p;
+        short color = sm.getSelectedBlockType();
+        if (color <= 0)
+            color = BlockTypes.HULL_COLOR_GREY_ID;
         try
         {
             FileInputStream fis = new FileInputStream(params.getFile());
-            cb.setStatus("Reading "+params.getFile());
-            BinvoxData hull = BinvoxLogic.read(fis);
-            fis.close();
+            BinvoxData hull = BinvoxLogic.readHeader(fis);
             if (hull == null)
                 return null;
-            cb.setStatus("Dimensions:"+hull.getWidth()+","+hull.getHeight()+","+hull.getDepth());
+            cb.setStatus("Dimensions:"+hull.getYSpan()+","+hull.getXSpan()+","+hull.getZSpan());
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            mapHull(modified, hull, cb);
+            mapHull(modified, hull, cb, color);
+            cb.setStatus("Centering hull");
+            Point3i lower = new Point3i();
+            Point3i upper = new Point3i();
+            modified.getBounds(lower, upper);
+            int dx = (upper.x - lower.x)/2 + 8; 
+            int dy = (upper.y - lower.y)/2 + 8; 
+            int dz = (upper.z - lower.z)/2 + 8;
+            modified = MovePlugin.shift(modified, dx, dy, dz);
+            // setting core
+            Point3i core = MovePlugin.findCore(original);
+            System.out.println("  Core at "+core);
             modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
             return modified;
         }
@@ -79,36 +90,36 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
         }
     }
 
-    private void mapHull(SparseMatrix<Block> modified, BinvoxData hull, IPluginCallback cb)
+    private void mapHull(SparseMatrix<Block> modified, BinvoxData hull, IPluginCallback cb, short color) throws IOException
     {
-        Point3i lower = new Point3i();
-        Point3i upper = new Point3i();
-        BinvoxLogic.getBounds(hull, lower, upper);
-        Point3i center = new Point3i();
-        center.x = (lower.x + upper.x)/2;
-        center.y = (lower.y + upper.y)/2;
-        center.z = (lower.z + upper.z)/2;
-        cb.startTask((upper.x - lower.x + 1)*(upper.y - lower.y + 1)*(upper.z - lower.z + 1));
+        cb.startTask(hull.getZSpan());
         
-        for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+        for (int x = 0; x < hull.getXSpan(); x++)
         {
             cb.workTask(1);
-            Point3i p = i.next();
-            int o = getIndex(p.x, p.y, p.z, hull);
-            if (hull.getVoxels()[o++] == 0)
-            	continue;
-            Block b = new Block();
-            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
-            modified.set(p.x - center.x + 8, p.y - center.y + 8, p.z - center.z + 8, b);
+            for (int z = 0; z < hull.getZSpan(); z++)
+                for (int y = 0; y < hull.getYSpan(); y++)
+                {
+                    if (BinvoxLogic.getVoxel(hull, x, y, z) == false)
+                        continue;
+                    // if surrounded, skip
+                    if (BinvoxLogic.getVoxel(hull, x - 1, y, z)
+                            && BinvoxLogic.getVoxel(hull, x + 1, y, z)
+                            && BinvoxLogic.getVoxel(hull, x, y - 1, z)
+                            && BinvoxLogic.getVoxel(hull, x, y + 1, z)
+                            && BinvoxLogic.getVoxel(hull, x, y, z - 1)
+                            && BinvoxLogic.getVoxel(hull, x, y, z + 1)) 
+                        continue;
+                    Block b = new Block();
+                    b.setBlockID(color);
+                    modified.set(x, y, z, b);
+                }
+            //System.out.println(modified.size()+" blocks  "+Runtime.getRuntime().freeMemory());
             if (cb.isPleaseCancel())
                 break;
+            if (x >= 2)
+                hull.getVoxels()[x - 2] = null; // free up memory
         }
         cb.endTask();
-    }
-
-    private int getIndex(int x, int y, int z, BinvoxData hull) 
-    { 
-        int index = x * hull.getWidth() * hull.getHeight() + z * hull.getWidth() + y;
-        return index;
     }
 }

@@ -28,9 +28,9 @@ public class BinvoxLogic
         int version = Integer.parseInt(version_string);
         System.out.println("reading binvox version " + version);
 
-        data.setDepth(0);
-        data.setHeight(0);
-        data.setWidth(0);
+        data.setZSpan(0);
+        data.setXSPan(0);
+        data.setYSpan(0);
         boolean done = false;
 
         while (!done)
@@ -45,9 +45,9 @@ public class BinvoxLogic
                 if (line.startsWith("dim"))
                 {
                     String[] dimensions = line.split(" ");
-                    data.setDepth(Integer.parseInt(dimensions[1]));
-                    data.setHeight(Integer.parseInt(dimensions[2]));
-                    data.setWidth(Integer.parseInt(dimensions[3]));
+                    data.setZSpan(Integer.parseInt(dimensions[1]));
+                    data.setXSPan(Integer.parseInt(dimensions[2]));
+                    data.setYSpan(Integer.parseInt(dimensions[3]));
                 }
                 else
                 {
@@ -80,14 +80,14 @@ public class BinvoxLogic
             System.out.println("  error reading header");
             return null;
         }
-        if (data.getDepth() == 0)
+        if (data.getZSpan() == 0)
         {
             System.out.println("  missing dimensions in header");
             return null;
         }
 
-        data.setSize(data.getWidth() * data.getHeight() * data.getDepth());
-        data.setVoxels(new byte[data.getSize()]);
+        data.setSize(data.getYSpan() * data.getXSpan() * data.getZSpan());
+        data.setVoxels(new boolean[data.getZSpan()][data.getYSpan()][data.getXSpan()]);
 
         //
         // read voxel data
@@ -114,12 +114,16 @@ public class BinvoxLogic
             if (end_index > data.getSize())
                 return null;
             for (int i = index; i < end_index; i++)
-                data.getVoxels()[i] = value;
+                if (value != 0)
+                {
+                    Point3i p = getCoords(i, data);
+                    data.getVoxels()[p.z][p.y][p.x] = true;
+                }
 
             if (value > 0)
                 nr_voxels += count;
             index = end_index;
-
+            System.out.println(index+"/"+data.getSize()+"   "+Runtime.getRuntime().freeMemory());
         } // while
 
         System.out.println("  read " + nr_voxels + " voxels");
@@ -144,17 +148,136 @@ public class BinvoxLogic
         return sb.toString();
     }
 
+    public static BinvoxData readHeader(InputStream is) throws IOException
+    {
+        BinvoxData data = new BinvoxData();
+        data.setInput(new DataInputStream(is));
+
+        //
+        // read header
+        //
+        String line = readLine(data.getInput()); // deprecated function though
+        if (!line.startsWith("#binvox"))
+        {
+            System.out.println("Error: first line reads [" + line
+                    + "] instead of [#binvox]");
+            return null;
+        }
+
+        String version_string = line.substring(8);
+        int version = Integer.parseInt(version_string);
+        System.out.println("reading binvox version " + version);
+
+        data.setZSpan(0);
+        data.setXSPan(0);
+        data.setYSpan(0);
+        boolean done = false;
+
+        while (!done)
+        {
+
+            line = readLine(data.getInput());
+
+            if (line.startsWith("data"))
+                done = true;
+            else
+            {
+                if (line.startsWith("dim"))
+                {
+                    String[] dimensions = line.split(" ");
+                    data.setZSpan(Integer.parseInt(dimensions[1]));
+                    data.setXSPan(Integer.parseInt(dimensions[2]));
+                    data.setYSpan(Integer.parseInt(dimensions[3]));
+                }
+                else
+                {
+                    if (line.startsWith("translate"))
+                    {
+                        String[] dimensions = line.split(" ");
+                        data.setTX(Double.parseDouble(dimensions[1]));
+                        data.setTY(Double.parseDouble(dimensions[2]));
+                        data.setTZ(Double.parseDouble(dimensions[3]));
+                    }
+                    else
+                    {
+                        if (line.startsWith("scale"))
+                        {
+                            String[] dimensions = line.split(" ");
+                            data.setScale(Double.parseDouble(dimensions[1]));
+                        }
+                        else
+                        {
+                            System.out.println("  unrecognized keyword ["
+                                    + line + "], skipping");
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!done)
+        {
+            System.out.println("  error reading header");
+            return null;
+        }
+        if (data.getZSpan() == 0)
+        {
+            System.out.println("  missing dimensions in header");
+            return null;
+        }
+
+        data.setSize(data.getYSpan() * data.getXSpan() * data.getZSpan());
+        data.setVoxels(new boolean[data.getZSpan()][][]);
+        data.setDone(false);
+        data.setEndIndex(0);
+        return data;
+    }
+
+    public static boolean readNextSlice(BinvoxData data) throws IOException
+    {
+        if (data.isDone())
+            return true;
+        int index = data.getEndIndex();
+        Point3i startPos = getCoords(index, data);
+        while (data.getEndIndex() < data.getSize())
+        {
+            byte value = data.getInput().readByte();
+            // idiotic Java language doesn't have unsigned types, so we have to
+            // use an int for 'count'
+            // and make sure that we don't interpret it as a negative number if
+            // bit 7 (the sign bit) is on
+            int count = data.getInput().readByte() & 0xff;
+            data.setEndIndex(index + count);
+            if (data.getEndIndex() > data.getSize())
+            {
+                data.getInput().close();
+                return true;
+            }
+            for (int i = index; i < data.getEndIndex(); i++)
+            {
+                Point3i p = getCoords(i, data);
+                setVoxel(data, p.x, p.y, p.z, value != 0);
+            }
+
+            index = data.getEndIndex();
+            Point3i endPos = getCoords(index, data);
+            //System.out.println(index+"/"+data.getSize()+"   "+Runtime.getRuntime().freeMemory());
+            if (endPos.x > startPos.x)
+                break;
+        } // while
+        return false;
+    }
+    
     public static void getBounds(BinvoxData hull, Point3i lower, Point3i upper)
     {
         boolean first = true;
-        int o = 0;
-        for (int x = 0; x < hull.getWidth(); x++)
+        for (int z = 0; z < hull.getZSpan(); z++)
         {
-            for (int z = 0; z < hull.getDepth(); z++)
+            for (int x = 0; x < hull.getXSpan(); x++)
             {
-                for (int y = 0; y < hull.getWidth(); y++)
+                for (int y = 0; y < hull.getYSpan(); y++)
                 {
-                    if (hull.getVoxels()[o++] == 0)
+                    if (hull.getVoxels()[z][y][x] == false)
                         continue;
                     if (first)
                     {
@@ -179,5 +302,57 @@ public class BinvoxLogic
             }
         }
     }
+    
+    public static void setVoxel(BinvoxData hull, int x, int y, int z, boolean value)
+    {
+        if (hull.getVoxels() == null)
+            hull.setVoxels(new boolean[hull.getXSpan()][][]);
+        if (hull.getVoxels()[x] == null)
+            hull.getVoxels()[x] = new boolean[hull.getZSpan()][];
+        if (hull.getVoxels()[x][z] == null)
+            hull.getVoxels()[x][z] = new boolean[hull.getYSpan()];
+        hull.getVoxels()[x][z][y] = value;
+    }
+    
+    public static boolean getVoxel(BinvoxData hull, int x, int y, int z) throws IOException
+    {
+        if ((x < 0) || (y < 0) || (z < 0))
+            return false;
+        if ((x >= hull.getXSpan()) || (y >= hull.getYSpan()) || (z >= hull.getZSpan()))
+            return false;
+        while (hull.getVoxels() == null)
+        {
+            if (hull.isDone())
+                return false;
+            readNextSlice(hull);
+        }
+        while (hull.getVoxels()[x] == null)
+        {
+            if (hull.isDone())
+                return false;
+            readNextSlice(hull);
+        }
+        while (hull.getVoxels()[x][z] == null)
+        {
+            if (hull.isDone())
+                return false;
+            readNextSlice(hull);
+        }
+        return hull.getVoxels()[x][z][y];
+    }
 
+    public static int getIndex(int x, int y, int z, BinvoxData hull) 
+    { 
+        int index = x*hull.getYSpan()*hull.getXSpan() + z*hull.getYSpan() + y;
+        return index;
+    }
+
+    public static Point3i getCoords(int o, BinvoxData hull)
+    {
+        Point3i p = new Point3i();
+        p.x = o/(hull.getYSpan()*hull.getXSpan());
+        p.y = o%hull.getYSpan();
+        p.z = (o/hull.getYSpan())%hull.getXSpan();
+        return p;
+    }
 }

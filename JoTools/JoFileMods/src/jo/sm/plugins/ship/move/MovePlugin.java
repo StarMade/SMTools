@@ -60,22 +60,29 @@ public class MovePlugin implements IBlocksPlugin
         //        +", Z="+params.getZRotate());
         Point3i core = findCore(original);
         System.out.println("  Core at "+core);
+        SparseMatrix<Block> modified = shift(original, params.getXMove(), params.getYMove(), params.getZMove());
+        // copy core
+        modified.set(core, original.get(core));
+        return modified;
+    }
+
+    public static SparseMatrix<Block> shift(SparseMatrix<Block> original,
+            int dx, int dy, int dz)
+    {
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i from = i.next();
-            Point3i to = new Point3i(from.x - params.getXMove(), from.y - params.getYMove(), from.z - params.getZMove());
+            Point3i to = new Point3i(from.x - dx, from.y - dy, from.z - dz);
             Block b = original.get(from);
             if (b.getBlockID() == BlockTypes.CORE_ID)
                 continue;
             modified.set(to, b);
         }
-        // copy core
-        modified.set(core, original.get(core));
         return modified;
     }
     
-    private Point3i findCore(SparseMatrix<Block> grid)
+    public static Point3i findCore(SparseMatrix<Block> grid)
     {
         for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
         {

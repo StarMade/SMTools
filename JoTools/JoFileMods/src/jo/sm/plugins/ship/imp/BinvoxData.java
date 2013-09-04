@@ -1,43 +1,44 @@
 package jo.sm.plugins.ship.imp;
 
+import java.io.DataInputStream;
+
+
 public class BinvoxData
 {
-    private byte[] mVoxels;
-    private int    mDepth, mHeight, mWidth;
+    private boolean[][][]  mVoxels;
+    private int    mZSpan;
+    private int    mXSpan; 
+    private int    mYSpan;
     private int    mSize;
     private double mTX, mTY, mTZ;
     private double mScale;
-    public byte[] getVoxels()
+    private DataInputStream mInput;
+    private boolean         mDone;
+    private int             mEndIndex;
+
+    public int getZSpan()
     {
-        return mVoxels;
+        return mZSpan;
     }
-    public void setVoxels(byte[] voxels)
+    public void setZSpan(int depth)
     {
-        mVoxels = voxels;
+        mZSpan = depth;
     }
-    public int getDepth()
+    public int getXSpan()
     {
-        return mDepth;
+        return mXSpan;
     }
-    public void setDepth(int depth)
+    public void setXSPan(int height)
     {
-        mDepth = depth;
+        mXSpan = height;
     }
-    public int getHeight()
+    public int getYSpan()
     {
-        return mHeight;
+        return mYSpan;
     }
-    public void setHeight(int height)
+    public void setYSpan(int width)
     {
-        mHeight = height;
-    }
-    public int getWidth()
-    {
-        return mWidth;
-    }
-    public void setWidth(int width)
-    {
-        mWidth = width;
+        mYSpan = width;
     }
     public int getSize()
     {
@@ -78,6 +79,38 @@ public class BinvoxData
     public void setScale(double scale)
     {
         mScale = scale;
+    }
+    public boolean[][][] getVoxels()
+    {
+        return mVoxels;
+    }
+    public void setVoxels(boolean[][][] voxels)
+    {
+        mVoxels = voxels;
+    }
+    public DataInputStream getInput()
+    {
+        return mInput;
+    }
+    public void setInput(DataInputStream input)
+    {
+        mInput = input;
+    }
+    public boolean isDone()
+    {
+        return mDone;
+    }
+    public void setDone(boolean done)
+    {
+        mDone = done;
+    }
+    public int getEndIndex()
+    {
+        return mEndIndex;
+    }
+    public void setEndIndex(int endIndex)
+    {
+        mEndIndex = endIndex;
     }
 
 }
