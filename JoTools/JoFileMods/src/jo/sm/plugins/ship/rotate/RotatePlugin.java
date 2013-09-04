@@ -10,9 +10,8 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.CornerLogic;
 import jo.sm.ship.logic.WedgeLogic;
-import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
-import jo.vecmath.logic.Transform;
+import jo.vecmath.logic.TransformInteger;
 
 public class RotatePlugin implements IBlocksPlugin
 {
@@ -64,18 +63,19 @@ public class RotatePlugin implements IBlocksPlugin
         //        +", Z="+params.getZRotate());
         Point3i core = findCore(original);
         System.out.println("  Core at "+core);
-        Transform t = new Transform();
+        TransformInteger t = new TransformInteger();
         t.setIdentity();
         t.translate(-core.x, -core.y, -core.z);
         t.rotateEuler(params.getXRotate(), params.getYRotate(), params.getZRotate());
         t.translate(core.x, core.y, core.z);
+        //System.out.print("Matrix: "+t);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
-            Point3f fPoint = new Point3f(xyz.x, xyz.y, xyz.z);
-            t.transform(fPoint);
+            Point3i fPoint = new Point3i();
+            t.transform(xyz, fPoint);
             //System.out.println("  "+xyz+" -> "+fPoint);
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
@@ -95,14 +95,9 @@ public class RotatePlugin implements IBlocksPlugin
                 else
                     System.out.println("Could not rotate corner ori="+b.getOrientation());
             }
-            modified.set(toInt(fPoint.x), toInt(fPoint.y), toInt(fPoint.z), b);
+            modified.set(fPoint, b);
         }
         return modified;
-    }
-    
-    private int toInt(float f)
-    {
-        return (int)(f + .5f);
     }
 
     private Point3i findCore(SparseMatrix<Block> grid)
