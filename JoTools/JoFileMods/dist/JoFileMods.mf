@@ -1,5 +1,12 @@
 Manifest-Version: 1.0
 BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
+ jo.sm.plugins.planet.info.ReportPlugin,
+ jo.sm.plugins.planet.select.SelectCopyPlugin,
+ jo.sm.plugins.planet.select.SelectCutPlugin,
+ jo.sm.plugins.planet.select.SelectDeletePlugin,
+ jo.sm.plugins.planet.select.SelectAllPlugin,
+ jo.sm.plugins.planet.select.SelectNonePlugin,
+ jo.sm.plugins.planet.select.SelectPastePlugin,
  jo.sm.plugins.ship.edit.HardenPlugin,
  jo.sm.plugins.ship.edit.SmoothPlugin,
  jo.sm.plugins.ship.edit.SoftenPlugin,

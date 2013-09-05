@@ -28,7 +28,11 @@ public class BlocksPluginAction extends GenericAction
     {
         mPanel = panel;
         mPlugin = plugin;
-        setName(mPlugin.getName());
+        String name = mPlugin.getName();
+        int o = name.indexOf('/');
+        if (o >= 0)
+            name = name.substring(o + 1);
+        setName(name);
         setToolTipText(mPlugin.getDescription());
     }
 
@@ -44,8 +48,13 @@ public class BlocksPluginAction extends GenericAction
         Thread t = new Thread(mPlugin.getName()) { public void run() {
             SparseMatrix<Block> original = mPanel.getGrid();
             SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), progress);
-            if ((modified != null) || !progress.isPleaseCancel())
-                mPanel.setGrid(modified);
+            if (!progress.isPleaseCancel())
+            {
+                if (modified != null)
+                    mPanel.setGrid(modified);
+                else
+                    mPanel.updateTiles();
+            }
             progress.dispose();
         }
         };

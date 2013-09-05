@@ -25,7 +25,7 @@ public class ShipLogic
             for (CubeIterator i = new CubeIterator(new Point3i(0,0,0), new Point3i(15,15,15)); i.hasNext(); )
             {
                 Point3i xyz = i.next();
-                if (c.getBlocks()[xyz.x][xyz.y][xyz.z].getBlockID() <= 0)
+                if ((c.getBlocks()[xyz.x][xyz.y][xyz.z] == null) || (c.getBlocks()[xyz.x][xyz.y][xyz.z].getBlockID() <= 0))
                     continue;
                 if (first)
                 {
@@ -107,7 +107,7 @@ public class ShipLogic
                 {
                     Point3i xyz = i.next();
                     Block b = c.getBlocks()[xyz.x][xyz.y][xyz.z];
-                    if (b.getBlockID() > 0)
+                    if ((b != null) && (b.getBlockID() > 0))
                         blocks.set(p.x + xyz.x, p.y + xyz.y, p.z + xyz.z, b);
                 }
             }

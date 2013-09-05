@@ -115,6 +115,8 @@ public class DataLogic
                         //            +" "+ByteUtils.toString(inbuf));
                         //if (bitfield != 0)
                         //    blockCount++;
+                        if (blocks[x][y][z].getBlockID() <= 0)
+                            blocks[x][y][z] = null; // clear out unneeded blocks
                     }
             //System.out.println("Block count="+blockCount);
             chunk.setBlocks(blocks);

@@ -244,7 +244,7 @@ public class RenderPanel extends JPanel
         updateTiles();
     }
     
-    void updateTiles()
+    public void updateTiles()
     {
         if ((mFilter == null) || (mFilter.size() == 0))
             mFilteredGrid = mGrid;
@@ -264,6 +264,7 @@ public class RenderPanel extends JPanel
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
         if ((lower != null) && (upper != null))
         {
+            upper = new Point3i(upper.x + 1, upper.y + 1, upper.z + 1); // only place where bounds are at +1
         	addSelectFace(upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
         			RenderPoly.XP, BlockTypes.SPECIAL_SELECT_XP);
         	addSelectFace(lower.x, lower.y, lower.z, lower.x, upper.y, upper.z,

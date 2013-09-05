@@ -3,15 +3,12 @@ package jo.sm.ui;
 import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.List;
 import java.util.Properties;
 
-import javax.swing.Action;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.event.MenuEvent;
@@ -26,7 +23,6 @@ import jo.sm.ui.act.file.QuitAction;
 import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
-import jo.sm.ui.act.plugin.BlocksPluginAction;
 import jo.sm.ui.act.view.FancyAction;
 import jo.sm.ui.act.view.FilterMissileDumbAction;
 import jo.sm.ui.act.view.FilterMissileFafoAction;
@@ -37,6 +33,7 @@ import jo.sm.ui.act.view.FilterRepairAction;
 import jo.sm.ui.act.view.FilterSalvageAction;
 import jo.sm.ui.act.view.FilterThrusterAction;
 import jo.sm.ui.act.view.FilterWeaponsAction;
+import jo.sm.ui.logic.MenuLogic;
 import jo.sm.ui.logic.ShipSpec;
 
 @SuppressWarnings("serial")
@@ -155,52 +152,28 @@ public class RenderFrame extends JFrame implements WindowListener
 
     private void updateModify(JMenu modify)
     {
-        modify.removeAll();
+        MenuLogic.clearPluginMenus(modify);
         if (mSpec == null)
             return;
         int type = mSpec.getClassification();
-        List<IBlocksPlugin> modifyPlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_MODIFY);
-        if (modifyPlugins.size() > 0)
-            for (IBlocksPlugin plugin : modifyPlugins)
-            {
-                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
-                JMenuItem menu = new JMenuItem(action);
-                modify.add(menu);
-            }
-        List<IBlocksPlugin> generatePlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_GENERATE);
-        if (generatePlugins.size() > 0)
+        int modCount = MenuLogic.addPlugins(mClient, modify, type, IBlocksPlugin.SUBTYPE_MODIFY);
+        int lastModIndex = modify.getItemCount();
+        int genCount = MenuLogic.addPlugins(mClient, modify, type, IBlocksPlugin.SUBTYPE_GENERATE);
+        if (modCount > 0 && genCount > 0)
         {
-            if (modifyPlugins.size() > 0)
-                modify.add(new JSeparator());
-            for (IBlocksPlugin plugin : generatePlugins)
-            {
-                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
-                JMenuItem menu = new JMenuItem(action);
-                modify.add(menu);
-            }
+            JSeparator sep = new JSeparator();
+            sep.setToolTipText("plugin");
+            modify.add(sep, lastModIndex);
         }
     }
 
     private void updateEdit(JMenu edit)
     {
-        for (int idx = edit.getItemCount() - 1; idx >= 0; idx--)
-        {
-            JMenuItem it = edit.getItem(idx);
-            Action a = it.getAction();
-            if ((a != null) && (a instanceof BlocksPluginAction))
-                edit.remove(idx);
-        }
+        MenuLogic.clearPluginMenus(edit);
         if (mSpec == null)
             return;
         int type = mSpec.getClassification();
-        List<IBlocksPlugin> modifyPlugins = StarMadeLogic.getBlocksPlugins(type, IBlocksPlugin.SUBTYPE_EDIT);
-        if (modifyPlugins.size() > 0)
-            for (IBlocksPlugin plugin : modifyPlugins)
-            {
-                BlocksPluginAction action = new BlocksPluginAction(mClient, plugin);
-                JMenuItem menu = new JMenuItem(action);
-                edit.add(menu);
-            }
+        MenuLogic.addPlugins(mClient, edit, type, IBlocksPlugin.SUBTYPE_EDIT);
     }
     
     private static void preLoad()
