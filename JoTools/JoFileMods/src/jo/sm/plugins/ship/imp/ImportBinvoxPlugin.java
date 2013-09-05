@@ -66,21 +66,25 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
             BinvoxData hull = BinvoxLogic.readHeader(fis);
             if (hull == null)
                 return null;
-            cb.setStatus("Dimensions:"+hull.getYSpan()+","+hull.getXSpan()+","+hull.getZSpan());
+            cb.setStatus("Converting "+hull.getYSpan()+"x"+hull.getXSpan()+"x"+hull.getZSpan());
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
             mapHull(modified, hull, cb, color);
             cb.setStatus("Centering hull");
             Point3i lower = new Point3i();
             Point3i upper = new Point3i();
             modified.getBounds(lower, upper);
-            int dx = (upper.x - lower.x)/2 + 8; 
-            int dy = (upper.y - lower.y)/2 + 8; 
-            int dz = (upper.z - lower.z)/2 + 8;
-            modified = MovePlugin.shift(modified, dx, dy, dz);
+            //System.out.println("Old bounds="+lower+" -- "+upper);
+            int dx = (upper.x + lower.x)/2 - 8; 
+            int dy = (upper.y + lower.y)/2 - 8; 
+            int dz = (upper.z + lower.z)/2 - 8;
+            //System.out.println("Move "+dx+","+dy+","+dz);
+            modified = MovePlugin.shift(modified, dx, dy, dz, cb);
             // setting core
-            Point3i core = MovePlugin.findCore(original);
-            System.out.println("  Core at "+core);
             modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+            //modified.getBounds(lower, upper);
+            //System.out.println("New bounds="+lower+" -- "+upper);
+            //Point3i core = MovePlugin.findCore(modified);
+            //System.out.println("Core="+core);
             return modified;
         }
         catch (IOException e)

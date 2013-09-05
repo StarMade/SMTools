@@ -20,7 +20,6 @@ import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
-import jo.vecmath.logic.MathUtils;
 
 public class RenderPolyLogic
 {
