@@ -53,6 +53,7 @@ public class MenuLogic
                     if (submenu == null)
                     {
                         submenu = new JMenu(cascadeName);
+                        submenu.setToolTipText("plugin");
                         cascades.put(cascadeName, submenu);
                         menu.add(submenu);
                     }
@@ -110,8 +111,9 @@ public class MenuLogic
         for (int idx = menu.getMenuComponentCount() - 1; idx >= 0; idx--)
         {
             Component comp = menu.getMenuComponent(idx);
-            System.out.println("Comp="+comp.getClass().getName());
             if ((comp instanceof JSeparator) && "plugin".equals(((JSeparator)comp).getToolTipText()))
+                menu.remove(idx);
+            else if ((comp instanceof JMenu) && "plugin".equals(((JMenu)comp).getToolTipText()))
                 menu.remove(idx);
         }   
     }

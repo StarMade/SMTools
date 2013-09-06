@@ -11,6 +11,7 @@ import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.CornerLogic;
 import jo.sm.ship.logic.WedgeLogic;
 import jo.vecmath.Point3i;
+import jo.vecmath.Point4i;
 import jo.vecmath.logic.TransformInteger;
 
 public class RotatePlugin implements IBlocksPlugin
@@ -61,6 +62,8 @@ public class RotatePlugin implements IBlocksPlugin
         //System.out.println("Params: X="+params.getXRotate()
         //        +", Y="+params.getYRotate()
         //        +", Z="+params.getZRotate());
+        Point4i inPoint = new Point4i();
+        Point4i outPoint = new Point4i();
         Point3i core = findCore(original);
         System.out.println("  Core at "+core);
         TransformInteger t = new TransformInteger();
@@ -73,10 +76,10 @@ public class RotatePlugin implements IBlocksPlugin
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
+            inPoint.x = xyz.x; inPoint.y = xyz.y; inPoint.z = xyz.z; inPoint.w = 1;
             Block b = original.get(xyz);
-            Point3i fPoint = new Point3i();
-            t.transform(xyz, fPoint);
-            //System.out.println("  "+xyz+" -> "+fPoint);
+            t.transform(inPoint, outPoint);
+            //System.out.println("  "+inPoint+" -> "+outPoint);
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
                 short ori = b.getOrientation();
@@ -95,7 +98,7 @@ public class RotatePlugin implements IBlocksPlugin
                 else
                     System.out.println("Could not rotate corner ori="+b.getOrientation());
             }
-            modified.set(fPoint, b);
+            modified.set(outPoint.x, outPoint.y, outPoint.z, b);
         }
         return modified;
     }

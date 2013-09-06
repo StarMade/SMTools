@@ -41,7 +41,8 @@ public class RenderPanel extends JPanel
     
     private Point               mMouseDownAt;
     private int					mMouseMode;
-    private boolean				mFancyGraphics;
+    private boolean				mPlainGraphics;
+    private boolean				mAxis;
     
     private ShipSpec            mSpec;
     private SparseMatrix<Block> mGrid;
@@ -66,7 +67,7 @@ public class RenderPanel extends JPanel
         mRotX = 0;
         mRotY = 0;
         mPostTranslate = new Vector3f();
-        mFancyGraphics = true;
+        mPlainGraphics = false;
         MouseAdapter ma =  new MouseAdapter(){
             public void mousePressed(MouseEvent ev)
             {            	
@@ -218,7 +219,7 @@ public class RenderPanel extends JPanel
         g.setColor(Color.black);
         g.fillRect(0, 0, s.width, s.height);
         Graphics2D g2 = (Graphics2D)g;
-        RenderPolyLogic.draw(g2, mTiles, mFancyGraphics);
+        RenderPolyLogic.draw(g2, mTiles, !mPlainGraphics);
     }
 
     public SparseMatrix<Block> getGrid()
@@ -263,22 +264,38 @@ public class RenderPanel extends JPanel
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
         if ((lower != null) && (upper != null))
+        	addBox(lower, upper, new short[] { BlockTypes.SPECIAL_SELECT_XP, BlockTypes.SPECIAL_SELECT_XM,
+        			BlockTypes.SPECIAL_SELECT_YP, BlockTypes.SPECIAL_SELECT_YM,
+        			BlockTypes.SPECIAL_SELECT_ZP, BlockTypes.SPECIAL_SELECT_ZM,});
+        if (mAxis)
         {
-            upper = new Point3i(upper.x + 1, upper.y + 1, upper.z + 1); // only place where bounds are at +1
-        	addSelectFace(upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
-        			RenderPoly.XP, BlockTypes.SPECIAL_SELECT_XP);
-        	addSelectFace(lower.x, lower.y, lower.z, lower.x, upper.y, upper.z,
-        			RenderPoly.XM, BlockTypes.SPECIAL_SELECT_XM);
-        	addSelectFace(lower.x, upper.y, lower.z, upper.x, upper.y, upper.z,
-        			RenderPoly.YP, BlockTypes.SPECIAL_SELECT_YP);
-        	addSelectFace(lower.x, lower.y, lower.z, upper.x, lower.y, upper.z,
-        			RenderPoly.YM, BlockTypes.SPECIAL_SELECT_YM);
-        	addSelectFace(lower.x, lower.y, upper.z, upper.x, upper.y, upper.z,
-        			RenderPoly.ZP, BlockTypes.SPECIAL_SELECT_ZP);
-        	addSelectFace(lower.x, lower.y, lower.z, upper.x, upper.y, lower.z,
-        			RenderPoly.ZM, BlockTypes.SPECIAL_SELECT_ZM);
-    	}
+	        addBox(new Point3i(9,8,8), new Point3i(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
+	        addBox(new Point3i(8-256,8,8), new Point3i(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
+	        addBox(new Point3i(8,9,8), new Point3i(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
+	        addBox(new Point3i(8,8-256,8), new Point3i(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
+	        addBox(new Point3i(8,8,9), new Point3i(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
+	        addBox(new Point3i(8,8,8-256), new Point3i(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+        }
         updateTransform();
+    }
+    
+    private void addBox(Point3i lower, Point3i upper, short[] colors)
+    {
+        if ((lower == null) || (upper == null))
+        	return;
+        upper = new Point3i(upper.x + 1, upper.y + 1, upper.z + 1); // only place where bounds are at +1
+    	addSelectFace(upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
+    			RenderPoly.XP, colors[0%colors.length]);
+    	addSelectFace(lower.x, lower.y, lower.z, lower.x, upper.y, upper.z,
+    			RenderPoly.XM, colors[1%colors.length]);
+    	addSelectFace(lower.x, upper.y, lower.z, upper.x, upper.y, upper.z,
+    			RenderPoly.YP, colors[2%colors.length]);
+    	addSelectFace(lower.x, lower.y, lower.z, upper.x, lower.y, upper.z,
+    			RenderPoly.YM, colors[3%colors.length]);
+    	addSelectFace(lower.x, lower.y, upper.z, upper.x, upper.y, upper.z,
+    			RenderPoly.ZP, colors[4%colors.length]);
+    	addSelectFace(lower.x, lower.y, lower.z, upper.x, upper.y, lower.z,
+    			RenderPoly.ZM, colors[5%colors.length]);
     }
     
     private void addSelectFace(int x1, int y1, int z1, int x2, int y2, int z2,
@@ -382,15 +399,26 @@ public class RenderPanel extends JPanel
         mSpec = spec;
     }
 
-	public boolean isFancyGraphics()
+	public boolean isPlainGraphics()
 	{
-		return mFancyGraphics;
+		return mPlainGraphics;
 	}
 
-	public void setFancyGraphics(boolean fancyGraphics)
+	public void setPlainGraphics(boolean plainGraphics)
 	{
-		mFancyGraphics = fancyGraphics;
+		mPlainGraphics = plainGraphics;
 		repaint();
+	}
+
+	public boolean isAxis()
+	{
+		return mAxis;
+	}
+
+	public void setAxis(boolean axis)
+	{
+		mAxis = axis;
+		updateTiles();
 	}
 
 }

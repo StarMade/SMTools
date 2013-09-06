@@ -55,7 +55,8 @@ public class GenericBeanCustomizer extends JPanel implements Customizer
         createUI();
     }
 
-    private void createUI()
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private void createUI()
     {        
         mEditors = new PropertyEditor[mProps.length];
         mControls = new Component[mProps.length];
