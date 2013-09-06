@@ -136,7 +136,7 @@ public class DataLogic
                     if (off < 0)
                         continue;
 //                    System.out.print(off+" x"+siz+" ");
-                    Chunk chunk = data.getChunks()[off];
+//                    Chunk chunk = data.getChunks()[off];
 //                    System.out.println("idx="+x+","+y+","+z+" -> "+chunk.getPosition());
 //                    System.out.println("     "+ts+" -> "+chunk.getTimestamp());
                 }
