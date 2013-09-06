@@ -26,6 +26,7 @@ public class SmoothAction extends GenericAction
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         if (grid == null)
             return;
+        mFrame.getClient().getUndoer().checkpoint(grid);
         SmoothLogic.smooth(grid);
         mFrame.getClient().setGrid(grid);
     }

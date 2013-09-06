@@ -26,6 +26,7 @@ public class SoftenAction extends GenericAction
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         if (grid == null)
             return;
+        mFrame.getClient().getUndoer().checkpoint(grid);
         HullLogic.unpower(grid);
         mFrame.getClient().setGrid(grid);
     }

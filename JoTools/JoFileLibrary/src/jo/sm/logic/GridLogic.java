@@ -1,6 +1,11 @@
-package jo.sm.plugins.planet.select;
+package jo.sm.logic;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -13,7 +18,7 @@ import jo.sm.logic.XMLUtils;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
-public class SelectLogic
+public class GridLogic
 {
     public static SparseMatrix<Block> extract(SparseMatrix<Block> grid, Point3i lower, Point3i upper)
     {
@@ -82,6 +87,43 @@ public class SelectLogic
             grid.set(p, b);
         }
         return grid;
+    }
+    
+    public static byte[] toBytes(SparseMatrix<Block> grid)
+    {
+        try
+        {
+            ByteArrayInputStream is = new ByteArrayInputStream(toString(grid).getBytes());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            GZIPOutputStream os = new GZIPOutputStream(baos);
+            StreamUtils.copy(is, os);
+            is.close();
+            os.close();
+            return baos.toByteArray();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return new byte[0];
+        }
+    }
+    
+    public static SparseMatrix<Block> fromBytes(byte[] bytes)
+    {
+        try
+        {
+            GZIPInputStream is = new GZIPInputStream(new ByteArrayInputStream(bytes));
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            StreamUtils.copy(is, os);
+            is.close();
+            os.close();
+            return fromString(new String(os.toByteArray()));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static void delete(SparseMatrix<Block> grid, Point3i lower, Point3i upper)

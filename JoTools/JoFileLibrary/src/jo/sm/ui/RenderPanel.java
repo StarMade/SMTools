@@ -19,6 +19,7 @@ import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
 import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.UndoBuffer;
 import jo.sm.logic.RenderPolyLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
@@ -43,6 +44,7 @@ public class RenderPanel extends JPanel
     private int					mMouseMode;
     private boolean				mPlainGraphics;
     private boolean				mAxis;
+    private UndoBuffer          mUndoer;
     
     private ShipSpec            mSpec;
     private SparseMatrix<Block> mGrid;
@@ -59,6 +61,7 @@ public class RenderPanel extends JPanel
     
     public RenderPanel()
     {
+        mUndoer = new UndoBuffer();
     	mTiles = new RenderSet();
         mTransform = new Matrix4f();
         mPreTranslate = new Vector3f();
@@ -420,5 +423,15 @@ public class RenderPanel extends JPanel
 		mAxis = axis;
 		updateTiles();
 	}
+
+    public UndoBuffer getUndoer()
+    {
+        return mUndoer;
+    }
+
+    public void setUndoer(UndoBuffer undoer)
+    {
+        mUndoer = undoer;
+    }
 
 }

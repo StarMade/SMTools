@@ -47,11 +47,14 @@ public class BlocksPluginAction extends GenericAction
         final PluginProgressDlg progress = new PluginProgressDlg(getFrame(), mPlugin.getName());
         Thread t = new Thread(mPlugin.getName()) { public void run() {
             SparseMatrix<Block> original = mPanel.getGrid();
+            mPanel.getUndoer().checkpoint(original);
             SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), progress);
             if (!progress.isPleaseCancel())
             {
                 if (modified != null)
+                {
                     mPanel.setGrid(modified);
+                }
                 else
                     mPanel.updateTiles();
             }

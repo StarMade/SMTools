@@ -6,6 +6,7 @@ import java.awt.datatransfer.Transferable;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.GridLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -70,8 +71,8 @@ public class SelectPastePlugin implements IBlocksPlugin
                 try
                 {
                     String xml = (String)contents.getTransferData(DataFlavor.stringFlavor);
-                    SparseMatrix<Block> insertion = SelectLogic.fromString(xml);
-                    SelectLogic.insert(original, insertion, lower);
+                    SparseMatrix<Block> insertion = GridLogic.fromString(xml);
+                    GridLogic.insert(original, insertion, lower);
                     return original;
                 }
                 catch (Exception ex)

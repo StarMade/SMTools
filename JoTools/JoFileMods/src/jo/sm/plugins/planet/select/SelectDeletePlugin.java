@@ -2,6 +2,7 @@ package jo.sm.plugins.planet.select;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.GridLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -59,7 +60,7 @@ public class SelectDeletePlugin implements IBlocksPlugin
         Point3i upper = sm.getSelectedUpper();
         if ((lower != null) && (upper != null))
         {
-            SelectLogic.delete(original, lower, upper);
+            GridLogic.delete(original, lower, upper);
             return original;
         }
         return null;

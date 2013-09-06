@@ -35,6 +35,7 @@ public class OpenExistingAction extends GenericAction
         {
             mFrame.setSpec(spec);
             mFrame.getClient().setGrid(grid);
+            mFrame.getClient().getUndoer().clear();;
         }
     }
 

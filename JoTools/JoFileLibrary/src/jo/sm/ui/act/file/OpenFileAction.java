@@ -128,6 +128,7 @@ public class OpenFileAction extends GenericAction
            spec.setFile(smb2);
            mFrame.setSpec(spec);
            mFrame.getClient().setGrid(grid);
+           mFrame.getClient().getUndoer().clear();
            if (DebugLogic.DEBUG)
            {
                if (header != null)
