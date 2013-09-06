@@ -75,18 +75,23 @@ public class SMEdit
             {
                 URL remote = new URL(mWebRoot+target[1]);
                 File local = new File(target[0]);
+                if (local.exists())
+                    local.delete();
                 System.out.println(remote+" -> "+local);
                 InputStream is = new BufferedInputStream(remote.openStream());
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(local));
+                int count = 0;
                 for (;;)
                 {
                     int ch = is.read();
                     if (ch == -1)
                         break;
-                    os.write(ch);;
+                    os.write(ch);
+                    count++;
                 }
                 is.close();
                 os.close();
+                System.out.println("  "+count+" bytes");
             }
             catch (Exception e)
             {
@@ -102,6 +107,9 @@ public class SMEdit
         if (mTargets.size() == 0)
             return false;
         long delta = Math.abs(mLocalDate.getTimeInMillis() - mRemoteDate.getTimeInMillis());
+        System.out.println("Local: "+mLocalDate.getTime());
+        System.out.println("Remote: "+mRemoteDate.getTime());
+        System.out.println("Delta: "+delta);
         if (delta < 2*60*1000)
             return false;
         int update = JOptionPane.showConfirmDialog(null, "There is a new version of SMEdit available. Shall we download it?");

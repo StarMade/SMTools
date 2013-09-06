@@ -79,7 +79,7 @@ public class RenderPolyLogic
     
     private static void doCorner(SparseMatrix<Block> blocks, Point3i p, List<RenderPoly> polys)
     {
-    	System.out.println("Corner, ori="+blocks.get(p).getOrientation());
+    	//System.out.println("Corner, ori="+blocks.get(p).getOrientation());
         switch (blocks.get(p).getOrientation())
         {
             case 0: // spire: xp,zm>yp

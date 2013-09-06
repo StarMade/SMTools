@@ -316,4 +316,12 @@ public class MathUtils
         else
             return null;
     }
+
+    public static int stride(int val, int span)
+    {
+        if (val > 0)
+            return val/span;
+        else
+            return -((-val - 1)/span + 1);
+    }
 }

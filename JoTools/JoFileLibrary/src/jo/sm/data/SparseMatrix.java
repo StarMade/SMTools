@@ -1,7 +1,9 @@
 package jo.sm.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import jo.vecmath.Point3i;
@@ -139,7 +141,12 @@ public class SparseMatrix<T>
     
     public Iterator<Point3i> iteratorNonNull()
     {
-        return new NonNullIterator();
+        List<Point3i> points = new ArrayList<Point3i>();
+        for (int x : mMatrix.keySet())
+            for (int y : mMatrix.get(x).keySet())
+                for (int z : mMatrix.get(x).get(y).keySet())
+                    points.add(new Point3i(x, y, z));
+        return points.iterator();
     }
     
     public int size()

@@ -13,6 +13,7 @@ import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;
 import jo.sm.ship.data.Data;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.MathUtils;
 
 public class ShipLogic
 {
@@ -130,8 +131,12 @@ public class ShipLogic
         Point3i lowerUniverse = new Point3i();
         Point3i upperUniverse = new Point3i();
         blocks.getBounds(lowerUniverse, upperUniverse);
-        Point3i lowerData = new Point3i((lowerUniverse.x + 128)/256, (lowerUniverse.y + 128)/256, (lowerUniverse.z + 128)/256);
-        Point3i upperData = new Point3i((upperUniverse.x + 128)/256, (upperUniverse.y + 128)/256, (upperUniverse.z + 128)/256);
+        Point3i lowerData = new Point3i(MathUtils.stride(lowerUniverse.x + 128, 256), 
+                MathUtils.stride(lowerUniverse.y + 128, 256), 
+                MathUtils.stride(lowerUniverse.z + 128, 256));
+        Point3i upperData = new Point3i(MathUtils.stride(upperUniverse.x + 128, 256), 
+                MathUtils.stride(upperUniverse.y + 128, 256),
+                MathUtils.stride(upperUniverse.z + 128, 256));
         for (Iterator<Point3i> i = new CubeIterator(lowerData, upperData); i.hasNext(); )
         {
             Point3i p = i.next();

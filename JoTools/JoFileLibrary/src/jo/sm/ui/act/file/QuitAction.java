@@ -21,5 +21,7 @@ public class QuitAction extends GenericAction
     public void actionPerformed(ActionEvent ev)
     {
         mFrame.dispose();
+        System.out.println("Exit");
+        System.exit(0);
     }
  }

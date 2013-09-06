@@ -1,7 +1,10 @@
 package jo.sm.ui;
 
+import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
+
+import javax.swing.JFrame;
 
 import jo.sm.logic.StarMadeLogic;
 import jo.vecmath.Point3i;
@@ -30,6 +33,8 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent ev)
 	{
+	    if (!isFocused())
+	        return false;
 		if (ev.getID() == KeyEvent.KEY_PRESSED)
 			doKeyDown(ev.getKeyCode(), ev.getModifiersEx());
 		else if (ev.getID() == KeyEvent.KEY_RELEASED)
@@ -119,4 +124,14 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
     	
     }
 
+    private boolean isFocused()
+    {
+        for (Component c = mPanel; c != null; c = c.getParent())
+        {
+            if (c instanceof JFrame)
+                if (((JFrame)c).isActive())
+                    return true;
+        }
+        return false;
+    }
 }
