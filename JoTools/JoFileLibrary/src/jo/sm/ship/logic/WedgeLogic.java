@@ -15,6 +15,19 @@ public class WedgeLogic
         0, -1, 4, 6,        0, 2, 4, -1,
     };
     
+    private static final short[] REFLECT_X = {
+         0,  3,  2,  1,      4,  7,  6,  5, 
+        10,  9,  8, 13,     12, 11, 14, 15, 
+    };
+    private static final short[] REFLECT_Y = {
+         4,  7,  6,  5,      0,  3,  2,  1, 
+         8,  9, 10, 11,     12, 13, 14, 15, 
+    };
+    private static final short[] REFLECT_Z = {
+         2,  1,  0,  3,      6,  5,  4,  7, 
+        13,  8, 11, 10,     12,  8, 14, 15, 
+    };
+    
     public static short rotate(short ori, int rx, int ry, int rz)
     {
         rx = -rx;
@@ -49,7 +62,12 @@ public class WedgeLogic
 	public static short reflect(short ori, boolean xReflect, boolean yReflect,
 			boolean zReflect)
 	{
-		// TODO Auto-generated method stub
+		if (xReflect)
+			ori = REFLECT_X[ori];
+		if (yReflect)
+			ori = REFLECT_Y[ori];
+		if (zReflect)
+			ori = REFLECT_Z[ori];
 		return ori;
 	}
 }
