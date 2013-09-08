@@ -45,4 +45,11 @@ public class CornerLogic
         }
         return ori;
     }
+
+	public static short reflect(short ori, boolean xReflect, boolean yReflect,
+			boolean zReflect)
+	{
+		// TODO Auto-generated method stub
+		return ori;
+	}
 }

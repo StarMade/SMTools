@@ -259,6 +259,21 @@ package jo.vecmath;
     }
 
 
+     /**
+      * Sets the value of this tuple to the scalar multiplication
+      * of the scale factor with this.
+      * @param s the scalar value
+      */
+      public final void scale(int n, int d) {
+       this.x *= n;
+       this.x /= d;
+       this.y *= n;
+       this.y /= d;
+       this.z *= n;
+       this.z /= d;
+     }
+
+
     /**
      * Sets the value of this tuple to the scalar multiplication
      * of tuple t1 plus tuple t2 (this = s*t1 + t2).

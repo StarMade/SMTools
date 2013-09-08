@@ -1,4 +1,4 @@
-package jo.sm.plugins.ship.rotate;
+package jo.sm.plugins.ship.reflect;
 
 import java.util.Iterator;
 
@@ -12,13 +12,11 @@ import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.CornerLogic;
 import jo.sm.ship.logic.WedgeLogic;
 import jo.vecmath.Point3i;
-import jo.vecmath.Point4i;
-import jo.vecmath.logic.TransformInteger;
 
-public class RotatePlugin implements IBlocksPlugin
+public class ReflectPlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Rotate";
-    public static final String DESC = "Rotate ship around the core.";
+    public static final String NAME = "Refelct";
+    public static final String DESC = "Refelct ship around the core.";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
@@ -46,7 +44,7 @@ public class RotatePlugin implements IBlocksPlugin
     @Override
     public Object getParameterBean()
     {
-        return new RotateParameters();
+        return new ReflectParameters();
     }
 
     @Override
@@ -59,13 +57,13 @@ public class RotatePlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        RotateParameters params = (RotateParameters)p;
+        ReflectParameters params = (ReflectParameters)p;
         SparseMatrix<Block> modified;
         if ((sm.getSelectedLower() == null) || (sm.getSelectedUpper() == null))
         {
 	        Point3i core = findCore(original);
 	        //System.out.println("  Core at "+core);
-	        modified = rotateAround(original, params, core);
+	        modified = reflectAround(original, params, core);
         }
         else
         {
@@ -77,35 +75,26 @@ public class RotatePlugin implements IBlocksPlugin
         	modified = new SparseMatrix<Block>(original);
         	SparseMatrix<Block> grid = GridLogic.extract(modified, lower, upper);
         	GridLogic.delete(modified, lower, upper);
-        	grid = rotateAround(grid, params, center);
+        	grid = reflectAround(grid, params, center);
         	GridLogic.insert(modified, grid, lower);
         }
         return modified;
     }
 
-	private SparseMatrix<Block> rotateAround(SparseMatrix<Block> original,
-			RotateParameters params, Point3i around)
+	private SparseMatrix<Block> reflectAround(SparseMatrix<Block> original,
+			ReflectParameters params, Point3i around)
 	{
-		Point4i inPoint = new Point4i();
-        Point4i outPoint = new Point4i();
-        TransformInteger t = new TransformInteger();
-        t.setIdentity();
-        t.translate(-around.x, -around.y, -around.z);
-        t.rotateEuler(params.getXRotate(), params.getYRotate(), params.getZRotate());
-        t.translate(around.x, around.y, around.z);
-        //System.out.print("Matrix: "+t);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
-            Point3i xyz = i.next();
-            inPoint.x = xyz.x; inPoint.y = xyz.y; inPoint.z = xyz.z; inPoint.w = 1;
-            Block b = original.get(xyz);
-            t.transform(inPoint, outPoint);
+            Point3i inPoint = i.next();
+            Point3i outPoint = reflect(inPoint, around, params);
+            Block b = original.get(inPoint);
             //System.out.println("  "+inPoint+" -> "+outPoint);
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
                 short ori = b.getOrientation();
-                ori = WedgeLogic.rotate(ori, params.getXRotate()/90, params.getYRotate()/90, params.getZRotate()/90);
+                ori = WedgeLogic.reflect(ori, params.isXReflect(), params.isYReflect(), params.isZReflect());
                 if (ori >= 0)
                     b.setOrientation(ori);
                 else
@@ -114,15 +103,29 @@ public class RotatePlugin implements IBlocksPlugin
             if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_CORNER_ID))
             {
                 short ori = b.getOrientation();
-                ori = CornerLogic.rotate(ori, params.getXRotate()/90, params.getYRotate()/90, params.getZRotate()/90);
+                ori = CornerLogic.reflect(ori, params.isXReflect(), params.isYReflect(), params.isZReflect());
                 if (ori >= 0)
                     b.setOrientation(ori);
                 else
                     System.out.println("Could not rotate corner ori="+b.getOrientation());
             }
-            modified.set(outPoint.x, outPoint.y, outPoint.z, b);
+            modified.set(outPoint, b);
         }
 		return modified;
+	}
+	
+	private Point3i reflect(Point3i p, Point3i around, ReflectParameters params)
+	{
+		Point3i n = new Point3i(p);
+		n.sub(around);
+		if (params.isXReflect())
+			n.x = -n.x;
+		if (params.isYReflect())
+			n.y = -n.y;
+		if (params.isZReflect())
+			n.z = -n.z;
+		n.add(around);
+		return n;
 	}
 
     private Point3i findCore(SparseMatrix<Block> grid)

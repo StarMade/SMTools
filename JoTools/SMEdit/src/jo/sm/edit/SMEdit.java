@@ -3,8 +3,10 @@ package jo.sm.edit;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +18,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.swing.JOptionPane;
@@ -26,6 +29,8 @@ public class SMEdit
     private Calendar    mLocalDate;
     private Calendar    mRemoteDate;
     private List<String[]> mTargets;
+    private Properties	mProps;
+    private File		mStarMadeDir;
     
     public SMEdit()
     {
@@ -36,11 +41,7 @@ public class SMEdit
     public void run()
     {
         if (!validateCurrentDirectory())
-        {
-            JOptionPane.showMessageDialog(null, "The current directory is not the StarMade directory. Please move SMEdit.jar to the StarMade directory and run again.",
-                    "Wrong Directory", JOptionPane.ERROR_MESSAGE);
             return;
-        }
         readLocalDate();
         if (readRemoteFile())
             if (doWeUpdate())
@@ -48,11 +49,33 @@ public class SMEdit
         runSMEdit();
     }
     
+    private void loadProps()
+    {
+        File home = new File(System.getProperty("user.home"));
+        File props = new File(home, ".josm");
+        if (props.exists())
+        {
+            mProps = new Properties();
+            try
+            {
+                FileInputStream fis = new FileInputStream(props);
+                mProps.load(fis);
+                fis.close();
+            }
+            catch (Exception e)
+            {
+                
+            }
+        }
+        else
+        	mProps = new Properties();
+    }
+    
     private void runSMEdit()
     {
         try
         {
-            File jo_smJar = new File("./jo_sm.jar");
+            File jo_smJar = new File(mStarMadeDir, "jo_sm.jar");
             URL url = jo_smJar.toURI().toURL();
             URLClassLoader smLoader = new URLClassLoader(new URL[]{url}, SMEdit.class.getClassLoader());
             Class<?> rf = smLoader.loadClass("jo.sm.ui.RenderFrame");
@@ -74,7 +97,7 @@ public class SMEdit
             try
             {
                 URL remote = new URL(mWebRoot+target[1]);
-                File local = new File(target[0]);
+                File local = new File(mStarMadeDir, target[0]);
                 if (local.exists())
                     local.delete();
                 System.out.println(remote+" -> "+local);
@@ -134,7 +157,7 @@ public class SMEdit
                 String[] elems = line.split(",");
                 mTargets.add(elems);
             }
-            mTargets.add(new String[] { "./jo_sm.date", "jo_sm.date" });
+            mTargets.add(new String[] { "jo_sm.date", "jo_sm.date" });
             rdr.close();
             return true;
         }
@@ -149,7 +172,7 @@ public class SMEdit
     {
         mLocalDate = Calendar.getInstance();
         mLocalDate.setTimeInMillis(0);
-        File localFile = new File("./jo_sm.date");
+        File localFile = new File(mStarMadeDir, "jo_sm.date");
         if (!localFile.exists())
             return;
         try
@@ -216,13 +239,97 @@ public class SMEdit
     
     private boolean validateCurrentDirectory()
     {
-        File cd = new File(".");
-        File jar = new File(cd, "StarMade.jar");
-        if (!jar.exists())
-            return false;
+    	loadProps();
+        mStarMadeDir = new File(mProps.getProperty("starmade.home", ""));
+        if (isStarMadeDirectory(mStarMadeDir))
+        	return true;
+        mStarMadeDir = new File(".");
+        if (isStarMadeDirectory(mStarMadeDir))
+        {
+        	saveProps();
+        	return true;
+        }
+        System.out.println("Scanning current directory");
+        mStarMadeDir = null;
+        String home = System.getProperty("user.dir");
+        lookForStarMadeDir(new File(home));
+        if (mStarMadeDir != null)
+        {
+        	saveProps();
+        	return true;
+        }
+        System.out.println("Scanning home directory");
+        mStarMadeDir = null;
+        home = System.getProperty("user.home");
+        lookForStarMadeDir(new File(home));
+        if (mStarMadeDir != null)
+        {
+        	saveProps();
+        	return true;
+        }
+        for (;;)
+        {
+	        home = JOptionPane.showInputDialog(null, "Enter in the home directory for StarMade", home);
+	        if (home == null)
+	            return false;
+	        mStarMadeDir = new File(home);
+	        if (isStarMadeDirectory(mStarMadeDir))
+	        	break;
+	    }
+    	saveProps();
         return true;
     }
-
+    
+    private void lookForStarMadeDir(File root)
+    {
+    	if (isStarMadeDirectory(root))
+    	{
+    		mStarMadeDir = root;
+    		return;
+    	}
+    	File[] children = root.listFiles();
+    	if (children == null)
+    		return;
+    	for (File child : children)
+    		if (child.isDirectory())
+    		{
+    			lookForStarMadeDir(child);
+    			if (mStarMadeDir != null)
+    				return;
+    		}
+    }
+    
+    private void saveProps()
+    {
+        if (mProps == null)
+            return;
+        if (mStarMadeDir != null)
+        	mProps.put("starmade.home", mStarMadeDir.toString());
+        File home = new File(System.getProperty("user.home"));
+        File props = new File(home, ".josm");
+        try
+        {
+            FileWriter fos = new FileWriter(props);
+            mProps.store(fos, "StarMade Utils defaults");
+            fos.close();
+        }
+        catch (Exception e)
+        {
+            
+        }
+    }
+    public static boolean isStarMadeDirectory(File d)
+    {
+        if (!d.exists())
+            return false;
+        File smJar = new File(d, "StarMade.jar");
+        if (!smJar.exists())
+        	return false;
+        File crashJar = new File(d, "CrashAndBugReport.jar");
+        if (!crashJar.exists())
+        	return false;
+        return true;
+    }
     public static void main(String[] args)
     {
         SMEdit app = new SMEdit();
