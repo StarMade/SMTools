@@ -12,6 +12,7 @@ import jo.sm.logic.BlueprintLogic;
 import jo.sm.logic.EntityLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Blueprint;
 import jo.sm.ship.data.Data;
@@ -122,13 +123,13 @@ public class ShipTreeLogic
         
     }
 
-    public static SparseMatrix<Block> loadShip(ShipSpec spec)
+    public static SparseMatrix<Block> loadShip(ShipSpec spec, IPluginCallback cb)
     {
         try
         {
             if (spec.getType() == ShipSpec.BLUEPRINT)
             {
-                Blueprint blueprint = BlueprintLogic.readBlueprint(spec.getName());
+                Blueprint blueprint = BlueprintLogic.readBlueprint(spec.getName(), cb);
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(blueprint.getData());
                 //System.out.println("Original:");
                 //HeaderLogic.dump(blueprint.getHeader());
@@ -140,7 +141,7 @@ public class ShipTreeLogic
             }
             else if (spec.getType() == ShipSpec.DEFAULT_BLUEPRINT)
             {
-                Blueprint blueprint = BlueprintLogic.readDefaultBlueprint(spec.getName());
+                Blueprint blueprint = BlueprintLogic.readDefaultBlueprint(spec.getName(), cb);
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(blueprint.getData());
                 //System.out.println("Original:");
                 //HeaderLogic.dump(blueprint.getHeader());
@@ -153,7 +154,7 @@ public class ShipTreeLogic
             else if (spec.getType() == ShipSpec.ENTITY)
             {
                 Entity e = spec.getEntity();
-                EntityLogic.readEntityData(e);
+                EntityLogic.readEntityData(e, cb);
                 ShipLogic.dumpChunks(e.getData());
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(e.getData());
                 e.setData(null); // conserve memory

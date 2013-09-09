@@ -10,7 +10,10 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Data;
 import jo.sm.ship.logic.DataLogic;
@@ -53,29 +56,36 @@ public class SaveAsFileAction extends GenericAction
         int returnVal = chooser.showOpenDialog(mFrame);
         if(returnVal != JFileChooser.APPROVE_OPTION)
             return;
-        File smb2 = chooser.getSelectedFile();
+        final File smb2 = chooser.getSelectedFile();
         StarMadeLogic.getProps().setProperty("open.file.dir", smb2.getParent());
         StarMadeLogic.saveProps();
         String name = smb2.getName();
-        ShipSpec spec = new ShipSpec();
+        final ShipSpec spec = new ShipSpec();
         spec.setType(ShipSpec.FILE);
         spec.setName(name);
         spec.setFile(smb2);
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
-        Point3i p = new Point3i();
-        Data d = data.get(p);
+        final Point3i p = new Point3i();
+        final Data d = data.get(p);
         if (d == null)
             throw new IllegalArgumentException("No core element to ship!");
-        try
-        {
-            DataLogic.writeFile(p, d, new FileOutputStream(smb2), true);
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
-        }
-        mFrame.setSpec(spec);
-        mFrame.getClient().setSpec(spec);
+        IRunnableWithProgress t = new IRunnableWithProgress() {
+			@Override
+			public void run(IPluginCallback cb)
+			{
+		        try
+		        {
+		            DataLogic.writeFile(p, d, new FileOutputStream(smb2), true, cb);
+		        }
+		        catch (IOException e)
+		        {
+		            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
+		        }
+		        mFrame.setSpec(spec);
+		        mFrame.getClient().setSpec(spec);
+			}
+        };
+        RunnableLogic.run(mFrame, name, t);
     }
 }

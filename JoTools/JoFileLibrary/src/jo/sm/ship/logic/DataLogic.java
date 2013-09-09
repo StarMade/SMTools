@@ -20,6 +20,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 import jo.sm.logic.IOLogic;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;
 import jo.sm.ship.data.Data;
@@ -27,18 +28,27 @@ import jo.vecmath.Point3i;
 
 public class DataLogic 
 {
-    public static Map<Point3i, Data> readFiles(File dataDir, String prefix) throws IOException
+    public static Map<Point3i, Data> readFiles(File dataDir, String prefix, IPluginCallback cb) throws IOException
     {
+    	cb.setStatus("Reading "+prefix);
         Map<Point3i, Data> data = new HashMap<Point3i, Data>();
+        List<File> files = new ArrayList<File>();
         for (File dataFile : dataDir.listFiles())
             if (dataFile.getName().endsWith(".smd2") && 
                     dataFile.getName().startsWith(prefix))
-                readDataFromEntityFile(dataFile, data);
-        if (data.size() == 0)
+                files.add(dataFile);
+        if (files.size() == 0)
             for (File dataFile : dataDir.listFiles())
                 if (dataFile.getName().endsWith(".smd2") && 
                         dataFile.getName().startsWith("ENTITY_SHIP_"))
-                    readDataFromEntityFile(dataFile, data);
+                	files.add(dataFile);
+        cb.startTask(files.size());
+        for (File dataFile : files)
+        {
+            readDataFromEntityFile(dataFile, data);
+            cb.workTask(1);
+        }
+        cb.endTask();
         return data;
     }
 
@@ -144,12 +154,13 @@ public class DataLogic
 		return data;
 	}
     
-    public static void writeFile(Point3i superChunkIndex, Data data, OutputStream os, boolean close) throws IOException
+    public static void writeFile(Point3i superChunkIndex, Data data, OutputStream os, boolean close, IPluginCallback cb) throws IOException
     {
     	Point3i superChunkOrigin = new Point3i(superChunkIndex);
     	superChunkOrigin.scale(256);
     	superChunkOrigin.sub(new Point3i(128, 128, 128));
-        System.out.println("Writing...");
+        if (cb != null)
+        	cb.setStatus("Writing "+superChunkOrigin);
         DataOutputStream dos;
         if (os instanceof DataOutputStream)
             dos = (DataOutputStream)os;
@@ -168,7 +179,6 @@ public class DataLogic
         for (int i = 0; i < data.getChunks().length; i++)
         {
             Chunk chunk = data.getChunks()[i];
-            if (chunk.getPosition().z < -256) System.out.println("Chunk "+chunk.getPosition());
             ByteArrayOutputStream baos3 = new ByteArrayOutputStream();
             DataOutputStream dos3 = new DataOutputStream(new DeflaterOutputStream(baos3));
             //int blockCount = 0;
@@ -255,7 +265,7 @@ public class DataLogic
     }
 
     public static void writeFiles(Map<Point3i, Data> data, File baseDir,
-            String baseName) throws IOException
+            String baseName, IPluginCallback cb) throws IOException
     {
     	// clean up first
     	File[] oldFiles = baseDir.listFiles();
@@ -263,6 +273,11 @@ public class DataLogic
 	    	for (File f : oldFiles)
 	    		if (f.getName().startsWith(baseName))
 	    			f.delete();
+    	if (cb != null)
+    	{
+    		cb.setStatus("Writing "+baseName);
+    		cb.startTask(data.size());
+    	}
         for (Point3i p : data.keySet())
         {
             File dataFile = new File(baseDir, baseName+"."+p.x+"."+p.y+"."+p.z+".smd2");
@@ -308,7 +323,11 @@ public class DataLogic
                     dest.delete();
                 dataFile.renameTo(dest);
             }
-            writeFile(p, data.get(p), new FileOutputStream(dataFile), true);
+            writeFile(p, data.get(p), new FileOutputStream(dataFile), true, cb);
+        	if (cb != null)
+        		cb.workTask(1);
         }        
+    	if (cb != null)
+    		cb.endTask();;
     }
 }

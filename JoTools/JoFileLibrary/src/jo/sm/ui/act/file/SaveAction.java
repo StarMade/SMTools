@@ -8,6 +8,9 @@ import java.util.Map;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.BlueprintLogic;
+import jo.sm.logic.RunnableLogic;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Data;
 import jo.sm.ship.logic.DataLogic;
@@ -46,45 +49,64 @@ public class SaveAction extends GenericAction
     
     private void doSaveFile()
     {
-        File dataFile = mFrame.getSpec().getFile();
+        final File dataFile = mFrame.getSpec().getFile();
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
-        Point3i p = new Point3i();
-        Data d = data.get(p);
+        final Point3i p = new Point3i();
+        final Data d = data.get(p);
         if (d == null)
             throw new IllegalArgumentException("No core element to ship!");
-        try
-        {
-            DataLogic.writeFile(p, d, new FileOutputStream(dataFile), true);
-        }
-        catch (IOException e)
-        {
-            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
-        }
+        IRunnableWithProgress t = new IRunnableWithProgress() {
+			@Override
+			public void run(IPluginCallback cb)
+			{
+		        try
+		        {
+		            DataLogic.writeFile(p, d, new FileOutputStream(dataFile), true, cb);
+		        }
+		        catch (IOException e)
+		        {
+		            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
+		        }
+			}
+        };
+        RunnableLogic.run(mFrame, mFrame.getSpec().getName(), t);
     }
     
-    private void doSaveBlueprint(boolean def)
+    private void doSaveBlueprint(final boolean def)
     {
-        BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), mFrame.getSpec(), def);        
+        IRunnableWithProgress t = new IRunnableWithProgress() {
+			@Override
+			public void run(IPluginCallback cb)
+			{
+				BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), mFrame.getSpec(), def, cb);        
+	        };
+        };
+        RunnableLogic.run(mFrame, mFrame.getSpec().getName(), t);
     }
     
     private void doSaveEntity()
     {
-        System.out.println("Saving "+mFrame.getSpec().getName());
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
-        Map<Point3i, Data> data = ShipLogic.getData(grid);
-        File baseDir = new File(mFrame.getSpec().getEntity().getFile().getParentFile(), "DATA");
-        String baseName = mFrame.getSpec().getEntity().getFile().getName();
-        System.out.println("Saving "+mFrame.getSpec().getEntity().getFile().toString());
-        baseName = baseName.substring(0, baseName.length() - 4); // remove .ent
-        try
-        {
-            DataLogic.writeFiles(data, baseDir, baseName);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }        
+        final Map<Point3i, Data> data = ShipLogic.getData(grid);
+        final File baseDir = new File(mFrame.getSpec().getEntity().getFile().getParentFile(), "DATA");
+        String fName = mFrame.getSpec().getEntity().getFile().getName();
+        final String baseName = fName.substring(0, fName.length() - 4); // remove .ent
+        IRunnableWithProgress t = new IRunnableWithProgress() {
+			@Override
+			public void run(IPluginCallback cb)
+			{
+		        try
+		        {
+		            DataLogic.writeFiles(data, baseDir, baseName, cb);
+		        }
+		        catch (IOException e)
+		        {
+		            e.printStackTrace();
+		        }        
+			}
+        };
+        RunnableLogic.run(mFrame, baseName, t);
     }
 
 }

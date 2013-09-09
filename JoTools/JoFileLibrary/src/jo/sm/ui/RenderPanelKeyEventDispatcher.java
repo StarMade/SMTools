@@ -108,6 +108,7 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
 
 	private void doNudgeSelection(int keyCode, Point3i lower, Point3i upper)
 	{
+		mPanel.getUndoer().checkpoint(mPanel.getGrid());
         SparseMatrix<Block> clip = GridLogic.extract(mPanel.getGrid(), lower, upper);
         GridLogic.delete(mPanel.getGrid(), lower, upper);
 		keyToDelta(keyCode, lower);		

@@ -11,6 +11,7 @@ import java.util.Map;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Blueprint;
 import jo.sm.ship.data.Data;
@@ -66,19 +67,19 @@ public class BlueprintLogic
         return header.exists();
     }
 
-    public static Blueprint readBlueprint(String name) throws IOException
+    public static Blueprint readBlueprint(String name, IPluginCallback cb) throws IOException
     {
         File blueprintsDir = new File(StarMadeLogic.getInstance().getBaseDir(), "blueprints");
         File blueprintDir = new File(blueprintsDir, name);
-        return readBlueprint(blueprintDir);
+        return readBlueprint(blueprintDir, cb);
     }
-    public static Blueprint readDefaultBlueprint(String name) throws IOException
+    public static Blueprint readDefaultBlueprint(String name, IPluginCallback cb) throws IOException
     {
         File blueprintsDir = new File(StarMadeLogic.getInstance().getBaseDir(), "blueprints-default");
         File blueprintDir = new File(blueprintsDir, name);
-        return readBlueprint(blueprintDir);
+        return readBlueprint(blueprintDir, cb);
     }
-    public static Blueprint readBlueprint(File dir) throws IOException
+    public static Blueprint readBlueprint(File dir, IPluginCallback cb) throws IOException
     {
         Blueprint bp = new Blueprint();
         bp.setName(dir.getName());
@@ -92,11 +93,11 @@ public class BlueprintLogic
         InputStream metaIS = new FileInputStream(meta);
         bp.setMeta(MetaLogic.readFile(metaIS, true));
         File dataDir = new File(dir, "DATA");
-        bp.setData(DataLogic.readFiles(dataDir, bp.getName()));
+        bp.setData(DataLogic.readFiles(dataDir, bp.getName(), cb));
         return bp;
     }
     
-    public static void saveBlueprint(SparseMatrix<Block> grid, ShipSpec spec, boolean def)
+    public static void saveBlueprint(SparseMatrix<Block> grid, ShipSpec spec, boolean def, IPluginCallback cb)
     {
         try
         {
@@ -124,11 +125,10 @@ public class BlueprintLogic
             File dataDir = new File(baseDir, "DATA");
             if (!dataDir.exists())
                 dataDir.mkdir();
-            DataLogic.writeFiles(data, dataDir, spec.getName());
+            DataLogic.writeFiles(data, dataDir, spec.getName(), cb);
         }
         catch (IOException e1)
         {
-            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
     }

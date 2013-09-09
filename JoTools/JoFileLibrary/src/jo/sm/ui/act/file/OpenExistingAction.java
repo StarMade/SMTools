@@ -3,6 +3,9 @@ package jo.sm.ui.act.file;
 import java.awt.event.ActionEvent;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.RunnableLogic;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderFrame;
 import jo.sm.ui.ShipChooser;
@@ -27,16 +30,23 @@ public class OpenExistingAction extends GenericAction
     {
         ShipChooser chooser = new ShipChooser(mFrame);
         chooser.setVisible(true);
-        ShipSpec spec = chooser.getSelected();
+        final ShipSpec spec = chooser.getSelected();
         if (spec == null)
             return;
-        SparseMatrix<Block> grid = ShipTreeLogic.loadShip(spec);
-        if (grid != null)
-        {
-            mFrame.setSpec(spec);
-            mFrame.getClient().setGrid(grid);
-            mFrame.getClient().getUndoer().clear();;
-        }
+        IRunnableWithProgress t = new IRunnableWithProgress() {			
+			@Override
+			public void run(IPluginCallback cb)
+			{
+		        SparseMatrix<Block> grid = ShipTreeLogic.loadShip(spec, cb);
+		        if (grid != null)
+		        {
+		            mFrame.setSpec(spec);
+		            mFrame.getClient().setGrid(grid);
+		            mFrame.getClient().getUndoer().clear();;
+		        }
+			}
+		};
+		RunnableLogic.run(mFrame, "Open "+spec.getName(), t);
     }
 
 }

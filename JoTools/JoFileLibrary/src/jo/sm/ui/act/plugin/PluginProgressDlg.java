@@ -28,7 +28,7 @@ public class PluginProgressDlg extends JDialog implements IPluginCallback
     public PluginProgressDlg(JFrame base, String title)
     {
         super(base, title, Dialog.ModalityType.DOCUMENT_MODAL);
-        mMessage = new JLabel("Hmm");
+        mMessage = new JLabel("");
         mProgress = new JProgressBar(0, 100);
         mProgress.setStringPainted(true);
         mProgress.setVisible(false);

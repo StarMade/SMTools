@@ -14,8 +14,11 @@ import javax.swing.JSeparator;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ui.act.edit.RedoAction;
 import jo.sm.ui.act.edit.UndoAction;
 import jo.sm.ui.act.file.ExportImagesAction;
@@ -205,13 +208,20 @@ public class RenderFrame extends JFrame implements WindowListener
     public static void main(String[] args)
     {
         preLoad();
-        RenderFrame f = new RenderFrame();
+        final RenderFrame f = new RenderFrame();
         f.setVisible(true);
-        ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
+        final ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
         if (spec != null)
         {
-        	f.setSpec(spec);
-        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec));
+        	IRunnableWithProgress t = new IRunnableWithProgress() {				
+				@Override
+				public void run(IPluginCallback cb)
+				{
+		        	f.setSpec(spec);
+		        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec, cb));
+				}
+			};
+			RunnableLogic.run(f, "Loading...", t);
         }
     }
 

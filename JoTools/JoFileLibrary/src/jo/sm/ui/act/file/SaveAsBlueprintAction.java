@@ -6,8 +6,11 @@ import java.io.File;
 import javax.swing.JOptionPane;
 
 import jo.sm.logic.BlueprintLogic;
+import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.logic.StringUtils;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ui.RenderFrame;
 import jo.sm.ui.act.GenericAction;
 import jo.sm.ui.logic.ShipSpec;
@@ -48,12 +51,19 @@ public class SaveAsBlueprintAction extends GenericAction
         else
             prints = new File(StarMadeLogic.getInstance().getBaseDir(), "blueprints");
         File dir = new File(prints, name);
-        ShipSpec spec = new ShipSpec();
+        final ShipSpec spec = new ShipSpec();
         spec.setType(mDef ? ShipSpec.DEFAULT_BLUEPRINT : ShipSpec.BLUEPRINT);
         spec.setName(name);
         spec.setFile(dir);
-        BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), spec, mDef);
-        mFrame.setSpec(spec);
-        mFrame.getClient().setSpec(spec);
+        IRunnableWithProgress t = new IRunnableWithProgress() {
+			@Override
+			public void run(IPluginCallback cb)
+			{
+		        BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), spec, mDef, cb);
+		        mFrame.setSpec(spec);
+		        mFrame.getClient().setSpec(spec);
+			}
+		};
+		RunnableLogic.run(mFrame, name, t);
     }
 }

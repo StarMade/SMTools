@@ -12,8 +12,11 @@ import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.ConvertLogic;
+import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
+import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderPanel;
 import jo.sm.ui.act.GenericAction;
@@ -44,42 +47,25 @@ public class BlocksPluginAction extends GenericAction
         if (!getParams(params))
             return;
         saveProps(params);
-        final PluginProgressDlg progress = new PluginProgressDlg(getFrame(), mPlugin.getName());
-        Thread t = new Thread(mPlugin.getName()) { public void run() {
-            SparseMatrix<Block> original = mPanel.getGrid();
-            mPanel.getUndoer().checkpoint(original);
-            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), progress);
-            if (!progress.isPleaseCancel())
-            {
-                if (modified != null)
-                {
-                    mPanel.setGrid(modified);
-                }
-                else
-                    mPanel.updateTiles();
-            }
-            progress.dispose();
-        }
-        };
-        t.start();
-        try
-        {
-            Thread.sleep(1000);
-        }
-        catch (InterruptedException e)
-        {
-        }
-        if (t.isAlive())
-        {
-            progress.setVisible(true);
-            try
-            {
-                t.join();
-            }
-            catch (InterruptedException e)
-            {
-            }
-        }
+        IRunnableWithProgress t = new IRunnableWithProgress() {			
+			@Override
+			public void run(IPluginCallback cb)
+			{
+	            SparseMatrix<Block> original = mPanel.getGrid();
+	            mPanel.getUndoer().checkpoint(original);
+	            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), cb);
+	            if (!cb.isPleaseCancel())
+	            {
+	                if (modified != null)
+	                {
+	                    mPanel.setGrid(modified);
+	                }
+	                else
+	                    mPanel.updateTiles();
+	            }
+			}
+		};
+		RunnableLogic.run(getFrame(), mPlugin.getName(), t);
     }
 
     private void saveProps(Object params)

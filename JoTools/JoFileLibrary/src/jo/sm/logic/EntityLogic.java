@@ -10,6 +10,7 @@ import jo.sm.data.Entity;
 import jo.sm.data.StarMade;
 import jo.sm.ent.data.Tag;
 import jo.sm.ent.logic.TagLogic;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.logic.DataLogic;
 import jo.vecmath.Point3i;
 
@@ -42,12 +43,12 @@ public class EntityLogic
         return entity;
     }
     
-    public static void readEntityData(Entity entity) throws IOException
+    public static void readEntityData(Entity entity, IPluginCallback cb) throws IOException
     {
         File dataDir = new File(entity.getFile().getParent(), "DATA");
         String name = entity.getFile().getName();
         name = name.substring(0, name.length() - 4); // strip .ent
-        entity.setData(DataLogic.readFiles(dataDir, name));
+        entity.setData(DataLogic.readFiles(dataDir, name, cb));
     }
 
     private static void parseName(File entFile, Entity entity)
