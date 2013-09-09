@@ -13,7 +13,9 @@ public class HullParameters
 	public static final int IRREGULAR = 7;
 	
 	private int	mType;
-	private int	mVolume;
+	private int	mSizeX;
+	private int	mSizeY;
+	private int	mSizeZ;
 	private int	mCenterX;
 	private int	mCenterY;
 	private int	mCenterZ;
@@ -21,7 +23,9 @@ public class HullParameters
     public HullParameters()
     {
     	mType = SPHERE;
-    	mVolume = 2000;
+    	mSizeX = 20;
+    	mSizeY = 10;
+    	mSizeZ = 40;
     	mCenterX = 8;
     	mCenterY = 8;
     	mCenterZ = 8;
@@ -35,16 +39,6 @@ public class HullParameters
 	public void setType(int type)
 	{
 		mType = type;
-	}
-
-	public int getVolume()
-	{
-		return mVolume;
-	}
-
-	public void setVolume(int volume)
-	{
-		mVolume = volume;
 	}
 
 	public int getCenterX()
@@ -75,5 +69,35 @@ public class HullParameters
 	public void setCenterZ(int centerZ)
 	{
 		mCenterZ = centerZ;
+	}
+
+	public int getSizeX()
+	{
+		return mSizeX;
+	}
+
+	public void setSizeX(int sizeX)
+	{
+		mSizeX = sizeX;
+	}
+
+	public int getSizeY()
+	{
+		return mSizeY;
+	}
+
+	public void setSizeY(int sizeY)
+	{
+		mSizeY = sizeY;
+	}
+
+	public int getSizeZ()
+	{
+		return mSizeZ;
+	}
+
+	public void setSizeZ(int sizeZ)
+	{
+		mSizeZ = sizeZ;
 	}
 }

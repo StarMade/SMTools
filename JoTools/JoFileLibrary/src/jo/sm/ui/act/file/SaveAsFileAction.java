@@ -63,12 +63,13 @@ public class SaveAsFileAction extends GenericAction
         spec.setFile(smb2);
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
-        Data d = data.get(new Point3i());
+        Point3i p = new Point3i();
+        Data d = data.get(p);
         if (d == null)
             throw new IllegalArgumentException("No core element to ship!");
         try
         {
-            DataLogic.writeFile(d, new FileOutputStream(smb2), true);
+            DataLogic.writeFile(p, d, new FileOutputStream(smb2), true);
         }
         catch (IOException e)
         {

@@ -76,8 +76,9 @@ public class OpenFileAction extends GenericAction
            InputStream is = new FileInputStream(smb2);;
            if (smb2.getName().endsWith(".smd2"))
            {
+        	   Point3i p = new Point3i();
                Data datum = DataLogic.readFile(is, true);
-               data.put(new Point3i(), datum);
+               data.put(p, datum);
                name = name.substring(0, name.length() - 5);
            }
            else if (smb2.getName().endsWith(".sment"))
@@ -99,11 +100,11 @@ public class OpenFileAction extends GenericAction
                    if (name != null)
                        if (ename.startsWith(name+"/DATA/") && ename.endsWith(".smd2"))
                        {
-                           Data datum = DataLogic.readFile(zis, false);
                            String[] parts = entry.getName().split("\\.");
                            Point3i position = new Point3i(Integer.parseInt(parts[1]),
                                    Integer.parseInt(parts[2]),
                                    Integer.parseInt(parts[3]));
+                           Data datum = DataLogic.readFile(zis, false);
                            data.put(position, datum);
                        }
                        else if (ename.equals(name+"/header.smbph"))

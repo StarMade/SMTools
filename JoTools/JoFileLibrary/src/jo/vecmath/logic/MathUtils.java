@@ -324,4 +324,13 @@ public class MathUtils
         else
             return -((-val - 1)/span + 1);
     }
+
+	public static int positiveMod(int val, int modulus)
+	{
+		int m = val%modulus;
+		if (m >= 0)
+			return m;
+		else
+			return modulus + m;
+	}
 }

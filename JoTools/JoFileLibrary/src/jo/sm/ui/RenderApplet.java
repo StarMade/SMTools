@@ -48,10 +48,10 @@ public class RenderApplet extends JApplet
         	{
         		URL u = new URL(url);
         		InputStream is = u.openStream();
+                Point3i position = new Point3i(i, i, i);
         		Data datum = DataLogic.readFile(is, true);
         		if (datum != null)
         		{
-                    Point3i position = new Point3i(i, i, i);
                     mShip.put(position, datum);
         		}
         	}

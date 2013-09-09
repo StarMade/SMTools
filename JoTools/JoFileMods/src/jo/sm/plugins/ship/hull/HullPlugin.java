@@ -66,32 +66,35 @@ public class HullPlugin implements IBlocksPlugin
             Object p, StarMade sm, IPluginCallback cb)
     {
         HullParameters params = (HullParameters)p;        
+        Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
+        Point3i lower = new Point3i(center.x - params.getSizeX()/2, center.y - params.getSizeY()/2, center.z - params.getSizeZ()/2);
+        Point3i upper = new Point3i(center.x + params.getSizeX()/2, center.y + params.getSizeY()/2, center.z + params.getSizeZ()/2);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         switch (params.getType())
         {
         	case HullParameters.OPEN_FRAME:
-        		generateOpenFrame(modified, params);
+        		generateOpenFrame(modified, center, lower, upper);
         		break;
         	case HullParameters.NEEDLE:
-        		generateNeedle(modified, params);
+        		generateNeedle(modified, center, lower, upper);
         		break;
         	case HullParameters.CONE:
-        		generateCone(modified, params);
+        		generateCone(modified, center, lower, upper);
         		break;
         	case HullParameters.CYLINDER:
-        		generateCylinder(modified, params);
+        		generateCylinder(modified, center, lower, upper);
         		break;
         	case HullParameters.BOX:
-        		generateBox(modified, params);
+        		generateBox(modified, center, lower, upper);
         		break;
         	case HullParameters.SPHERE:
-        		generateSphere(modified, params);
+        		generateSphere(modified, center, lower, upper);
         		break;
         	case HullParameters.DISC:
-        		generateDisc(modified, params);
+        		generateDisc(modified, center, lower, upper);
         		break;
         	case HullParameters.IRREGULAR:
-        		generateIrregular(modified, params);
+        		generateIrregular(modified, center, lower, upper);
         		break;
         }
         if (ShipLogic.findCore(modified) == null)
@@ -99,17 +102,8 @@ public class HullPlugin implements IBlocksPlugin
         return modified;
     }
     
-    private void generateBox(SparseMatrix<Block> grid, HullParameters params)
+    private void generateBox(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()/6, .33333))/2;
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r*2;
-    	upper.x = params.getCenterX() + r*2;
-    	lower.y = params.getCenterY() - r;
-    	upper.y = params.getCenterY() + r;
-    	lower.z = params.getCenterZ() - r*3;
-    	upper.z = params.getCenterZ() + r*3;
     	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
     	{
     		Point3i p = i.next();
@@ -117,18 +111,11 @@ public class HullPlugin implements IBlocksPlugin
     	}
     }
     
-    private void generateSphere(SparseMatrix<Block> grid, HullParameters params)
+    private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()*3/4, .33333));
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r;
-    	upper.x = params.getCenterX() + r;
-    	lower.y = params.getCenterY() - r;
-    	upper.y = params.getCenterY() + r;
-    	lower.z = params.getCenterZ() - r;
-    	upper.z = params.getCenterZ() + r;
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
+    	int r = (int)Math.ceil(Math.sqrt((lower.x - upper.x)*(lower.x - upper.x)
+    			+ (lower.y - upper.y)*(lower.y - upper.y)
+    			+ (lower.z - upper.z)*(lower.z - upper.z)));
     	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
     	{
     		Point3i p = i.next();
@@ -138,103 +125,87 @@ public class HullPlugin implements IBlocksPlugin
     	}
     }
     
-    private void generateCone(SparseMatrix<Block> grid, HullParameters params)
+    private void generateCone(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()/Math.PI, .33333));
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r;
-    	upper.x = params.getCenterX() + r;
-    	lower.y = params.getCenterY() - r;
-    	upper.y = params.getCenterY() + r;
-    	lower.z = params.getCenterZ() - r*3/2;
-    	upper.z = params.getCenterZ() + r*3/2;
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
-    	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+    	for (int z = lower.z; z <= upper.z; z++)
     	{
-    		Point3i p = i.next();
-    		double hR = MathUtils.interpolate(p.z, lower.z, upper.z, r, 0);
-    		double pR = Math.sqrt((p.x - center.x)*(p.x - center.x) + (p.y - center.y)*(p.y - center.y));
-    		if (pR > hR)
-    			continue;
-    		addHull(grid, p);
+    		int xRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.x - lower.x)/2, 0);
+    		int yRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.y - lower.y)/2, 0);
+        	int r2 = xRad*xRad + yRad*yRad;
+    		for (int x = -xRad; x <= xRad; x++)
+    			for (int y = -yRad; y <= yRad; y++)
+    			{
+    				if (x*x + y*y <= r2)
+    					addHull(grid, center.x + x, center.y + y, z);
+    			}
     	}
     }
     
-    private void generateNeedle(SparseMatrix<Block> grid, HullParameters params)
+    private void generateNeedle(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()*3/8/2/Math.PI, .33333));
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r;
-    	upper.x = params.getCenterX() + r;
-    	lower.y = params.getCenterY() - r;
-    	upper.y = params.getCenterY() + r;
-    	lower.z = params.getCenterZ() - r*8;
-    	upper.z = params.getCenterZ() + r*8;
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
-    	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+    	int xRad;
+    	int yRad;
+    	for (int z = lower.z; z <= upper.z; z++)
     	{
-    		Point3i p = i.next();
-    		double hR = MathUtils.interpolate(Math.abs(p.z - center.z), 0, r*8, r, 0);
-    		double pR = Math.sqrt((p.x - center.x)*(p.x - center.x) + (p.y - center.y)*(p.y - center.y));
-    		if (pR > hR)
-    			continue;
-    		addHull(grid, p);
+    		if (z < center.z)
+    		{
+    			xRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, center.x - lower.x);
+    			yRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, center.y - lower.y);
+    		}
+    		else
+    		{
+    			xRad = (int)MathUtils.interpolate(z, center.z, upper.z, upper.x - center.x, 0);
+    			yRad = (int)MathUtils.interpolate(z, center.z, upper.z, upper.x - center.x, 0);
+    		}
+        	int r2 = xRad*xRad + yRad*yRad;
+    		for (int x = -xRad; x <= xRad; x++)
+    			for (int y = -yRad; y <= yRad; y++)
+    			{
+    				if (x*x + y*y <= r2)
+    					addHull(grid, center.x + x, center.y + y, z);
+    			}
     	}
     }
     
-    private void generateCylinder(SparseMatrix<Block> grid, HullParameters params)
+    private void generateCylinder(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()/Math.PI/6, .33333));
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r;
-    	upper.x = params.getCenterX() + r;
-    	lower.y = params.getCenterY() - r;
-    	upper.y = params.getCenterY() + r;
-    	lower.z = params.getCenterZ() - r*3;
-    	upper.z = params.getCenterZ() + r*3;
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
-    	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+		int xRad = (upper.x - lower.x)/2;
+		int yRad = (upper.y - lower.y)/2;
+    	int r2 = xRad*xRad + yRad*yRad;
+    	for (int z = lower.z; z <= upper.z; z++)
     	{
-    		Point3i p = i.next();
-    		double pR = Math.sqrt((p.x - center.x)*(p.x - center.x) + (p.y - center.y)*(p.y - center.y));
-    		if (pR > r)
-    			continue;
-    		addHull(grid, p);
+    		for (int x = -xRad; x <= xRad; x++)
+    			for (int y = -yRad; y <= yRad; y++)
+    			{
+    				if (x*x + y*y <= r2)
+    					addHull(grid, center.x + x, center.y + y, z);
+    			}
     	}
     }
     
-    private void generateDisc(SparseMatrix<Block> grid, HullParameters params)
+    private void generateDisc(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.pow(params.getVolume()/Math.PI*3, .33333));
-    	Point3i lower = new Point3i();
-    	Point3i upper = new Point3i();
-    	lower.x = params.getCenterX() - r;
-    	upper.x = params.getCenterX() + r;
-    	lower.y = params.getCenterY() - r/3;
-    	upper.y = params.getCenterY() + r/3;
-    	lower.z = params.getCenterZ() - r;
-    	upper.z = params.getCenterZ() + r;
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
-    	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+		int xRad = (upper.x - lower.x)/2;
+		int zRad = (upper.z - lower.z)/2;
+    	int r2 = xRad*xRad + zRad*zRad;
+    	for (int y = lower.y; y <= upper.y; y++)
     	{
-    		Point3i p = i.next();
-    		double pR = Math.sqrt((p.z - center.z)*(p.z - center.z) + (p.x - center.x)*(p.x - center.x));
-    		if (pR > r)
-    			continue;
-    		addHull(grid, p);
+    		for (int x = -xRad; x <= xRad; x++)
+    			for (int z = -zRad; z <= zRad; z++)
+    			{
+    				if (x*x + z*z <= r2)
+    					addHull(grid, center.x + x, y, center.z + z);
+    			}
     	}
     }
     
-    private void generateIrregular(SparseMatrix<Block> grid, HullParameters params)
+    private void generateIrregular(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
     	Set<Point3i> done = new HashSet<Point3i>();
     	List<Point3i> todo = new ArrayList<Point3i>();
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
     	todo.add(center);
-    	for (int i = 0; i < params.getVolume(); i++)
+    	int volume = (upper.x - lower.x)*(upper.y - lower.y)*(upper.z - lower.z);
+    	for (int i = 0; i < volume; i++)
     	{
     		int idx = mRND.nextInt(todo.size());
     		Point3i p = todo.get(idx);
@@ -260,13 +231,13 @@ public class HullPlugin implements IBlocksPlugin
 			todo.add(next);
 	}
     
-    private void generateOpenFrame(SparseMatrix<Block> grid, HullParameters params)
+    private void generateOpenFrame(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
     	Set<Point3i> done = new HashSet<Point3i>();
     	List<Point3i> todo = new ArrayList<Point3i>();
-    	Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
     	todo.add(new Point3i(0,0,0));
-    	for (int i = params.getVolume()/(8*8*8); i > 0; i--)
+    	int volume = (upper.x - lower.x)*(upper.y - lower.y)*(upper.z - lower.z);
+    	for (int i = volume/(8*8*8); i > 0; i--)
     	{
     		int idx = mRND.nextInt(todo.size());
     		Point3i p = todo.get(idx);

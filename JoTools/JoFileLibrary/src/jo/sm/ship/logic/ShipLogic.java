@@ -101,9 +101,9 @@ public class ShipLogic
             for (Chunk c : datum.getChunks())
             {
                 Point3i p = c.getPosition();
-                p.x += dataOrigin.x*256;
-                p.y += dataOrigin.y*256;
-                p.z += dataOrigin.z*256;
+                //p.x += dataOrigin.x*256;
+                //p.y += dataOrigin.y*256;
+                //p.z += dataOrigin.z*256;
                 for (CubeIterator i = new CubeIterator(new Point3i(0,0,0), new Point3i(15,15,15)); i.hasNext(); )
                 {
                     Point3i xyz = i.next();
@@ -139,18 +139,18 @@ public class ShipLogic
                 MathUtils.stride(upperUniverse.z + 128, 256));
         for (Iterator<Point3i> i = new CubeIterator(lowerData, upperData); i.hasNext(); )
         {
-            Point3i p = i.next();
+            Point3i superChunkIndex = i.next();
             Data datum = new Data();
-            Point3i origin = new Point3i(p.x*256, p.y*256, p.z*256);
-            Point3i lowerChunk = new Point3i(origin.x - 128, origin.y - 128, origin.z - 128);
-            Point3i upperChunk = new Point3i(origin.x + 127, origin.y + 127, origin.z + 127);
+            Point3i superChunkOrigin = new Point3i(superChunkIndex.x*256, superChunkIndex.y*256, superChunkIndex.z*256);
+            Point3i lowerSuperChunk = new Point3i(superChunkOrigin.x - 128, superChunkOrigin.y - 128, superChunkOrigin.z - 128);
+            Point3i upperSuperChunk = new Point3i(superChunkOrigin.x + 127, superChunkOrigin.y + 127, superChunkOrigin.z + 127);
             List<Chunk> chunks = new ArrayList<Chunk>();
-            System.out.println("Splitting "+p+" -> "+lowerChunk+" / "+upperChunk);
-            for (Iterator<Point3i> j = new CubeIterator(lowerChunk, upperChunk, new Point3i(16, 16, 16)); j.hasNext(); )
+            System.out.println("Splitting "+superChunkIndex+" -> "+lowerSuperChunk+" / "+upperSuperChunk);
+            for (Iterator<Point3i> j = new CubeIterator(lowerSuperChunk, upperSuperChunk, new Point3i(16, 16, 16)); j.hasNext(); )
             {
-                Point3i q = j.next();
-                Point3i chunkPos = new Point3i(q);
-                chunkPos.sub(origin);
+                Point3i chunkOrigin = j.next();
+                Point3i chunkPos = new Point3i(chunkOrigin);
+                //chunkPos.sub(origin);
                 Chunk chunk = new Chunk();
                 chunk.setPosition(chunkPos);
                 chunk.setBlocks(new Block[16][16][16]);
@@ -159,23 +159,20 @@ public class ShipLogic
                 boolean doneAny = false;
                 for (Iterator<Point3i> k = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); k.hasNext(); )
                 {
-                    Point3i r = k.next();
-                    Block b = blocks.get(q.x + r.x, q.y + r.y, q.z + r.z);
+                    Point3i chunkOffset = k.next();
+                    Block b = blocks.get(chunkOrigin.x + chunkOffset.x, chunkOrigin.y + chunkOffset.y, chunkOrigin.z + chunkOffset.z);
                     if (b == null)
                         continue;
-                    chunk.getBlocks()[r.x][r.y][r.z] = b;
+                    chunk.getBlocks()[chunkOffset.x][chunkOffset.y][chunkOffset.z] = b;
                     doneAny = true;
                 }
                 if (doneAny)
-                {
                     chunks.add(chunk);
-                    if (chunk.getPosition().z < -256) System.out.println("  Chunk "+q+" -> "+chunkPos);
-                }
             }
             if (chunks.size() == 0)
                 continue;
             datum.setChunks(chunks.toArray(new Chunk[0]));
-            data.put(p,  datum);
+            data.put(superChunkIndex,  datum);
         }
         return data;
     }

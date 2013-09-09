@@ -2,6 +2,7 @@ package jo.sm.ui.logic;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -13,7 +14,9 @@ import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Blueprint;
+import jo.sm.ship.data.Data;
 import jo.sm.ship.logic.ShipLogic;
+import jo.vecmath.Point3i;
 
 public class ShipTreeLogic
 {
@@ -148,6 +151,8 @@ public class ShipTreeLogic
                 ShipLogic.dumpChunks(e.getData());
                 SparseMatrix<Block> grid = ShipLogic.getBlocks(e.getData());
                 e.setData(null); // conserve memory
+                Map<Point3i, Data> data = ShipLogic.getData(grid);
+                ShipLogic.dumpChunks(data);
                 return grid;
             }
             else

@@ -49,12 +49,13 @@ public class SaveAction extends GenericAction
         File dataFile = mFrame.getSpec().getFile();
         SparseMatrix<Block> grid = mFrame.getClient().getGrid();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
-        Data d = data.get(new Point3i());
+        Point3i p = new Point3i();
+        Data d = data.get(p);
         if (d == null)
             throw new IllegalArgumentException("No core element to ship!");
         try
         {
-            DataLogic.writeFile(d, new FileOutputStream(dataFile), true);
+            DataLogic.writeFile(p, d, new FileOutputStream(dataFile), true);
         }
         catch (IOException e)
         {
