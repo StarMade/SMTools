@@ -131,6 +131,22 @@ public class SparseMatrix<T>
         }
     }
     
+    public Point3i find(T val)
+    {
+        for (Integer x : mMatrix.keySet())
+        {
+            Map<Integer,Map<Integer,T>> xrow = mMatrix.get(x);
+            for (Integer y : xrow.keySet())
+            {
+                Map<Integer,T> yrow = xrow.get(y);
+                for (Integer z : yrow.keySet())
+                	if (yrow.get(z) == val)
+                		return new Point3i(x, y, z);
+            }
+        }
+        return null;
+    }
+
     public Iterator<Point3i> iterator()
     {
         Point3i lower = new Point3i();

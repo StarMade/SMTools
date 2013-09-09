@@ -35,6 +35,7 @@ public class RenderPoly
     private int             mType;
     private int             mNormal;
     private Block           mBlock;
+    private Point3i			mPosition;
     private Point3i[]       mModelPoints;
 
     public Block getBlock()
@@ -76,4 +77,14 @@ public class RenderPoly
     {
         mNormal = normal;
     }
+
+	public Point3i getPosition()
+	{
+		return mPosition;
+	}
+
+	public void setPosition(Point3i position)
+	{
+		mPosition = position;
+	}
 }

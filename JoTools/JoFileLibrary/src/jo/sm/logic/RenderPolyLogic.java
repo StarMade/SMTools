@@ -280,6 +280,7 @@ public class RenderPolyLogic
             List<RenderPoly> polys, int facing, int type)
     {
         RenderPoly rp = new RenderPoly();
+        rp.setPosition(p);
         rp.setBlock(blocks.get(p));
         rp.setNormal(facing);
         switch (facing)
@@ -351,6 +352,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x, p.y, p.z - 1))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.ZM);
             rp.setModelPoints(new Point3i[] {
@@ -370,6 +372,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x, p.y, p.z + 1))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.ZP);
             rp.setModelPoints(new Point3i[] {
@@ -389,6 +392,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x, p.y - 1, p.z))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.YM);
             rp.setModelPoints(new Point3i[] {
@@ -408,6 +412,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x, p.y + 1, p.z))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.YP);
             rp.setModelPoints(new Point3i[] {
@@ -427,6 +432,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x - 1, p.y, p.z))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.XM);
             rp.setModelPoints(new Point3i[] {
@@ -446,6 +452,7 @@ public class RenderPolyLogic
         if (!opaque(blocks, p.x + 1, p.y, p.z))
         {
             RenderPoly rp = new RenderPoly();
+            rp.setPosition(p);
             rp.setBlock(blocks.get(p));
             rp.setNormal(RenderPoly.XP);
             rp.setModelPoints(new Point3i[] {
