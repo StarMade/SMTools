@@ -509,7 +509,7 @@ public class RenderPolyLogic
             public int compare(RenderPoly tile1, RenderPoly tile2)
             {
             	float delta = getMidZ(tile2, set) - getMidZ(tile1, set);
-            	if (Math.abs(delta) < .01)
+            	if (Math.abs(delta) < .001)
             		return (int)Math.signum(tile1.getBlock().getBlockID() - tile2.getBlock().getBlockID());
                 return (int)Math.signum(delta);
             }            

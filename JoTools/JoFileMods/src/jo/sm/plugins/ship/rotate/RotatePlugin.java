@@ -83,7 +83,7 @@ public class RotatePlugin implements IBlocksPlugin
         return modified;
     }
 
-	private SparseMatrix<Block> rotateAround(SparseMatrix<Block> original,
+	public static SparseMatrix<Block> rotateAround(SparseMatrix<Block> original,
 			RotateParameters params, Point3i around)
 	{
 		Point4i inPoint = new Point4i();

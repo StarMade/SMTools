@@ -16,6 +16,8 @@ import javax.swing.event.MenuListener;
 
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.ui.act.edit.RedoAction;
+import jo.sm.ui.act.edit.UndoAction;
 import jo.sm.ui.act.file.ExportImagesAction;
 import jo.sm.ui.act.file.OpenExistingAction;
 import jo.sm.ui.act.file.OpenFileAction;
@@ -24,7 +26,6 @@ import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
 import jo.sm.ui.act.view.AxisAction;
-import jo.sm.ui.act.view.PlainAction;
 import jo.sm.ui.act.view.FilterMissileDumbAction;
 import jo.sm.ui.act.view.FilterMissileFafoAction;
 import jo.sm.ui.act.view.FilterMissileHeatAction;
@@ -34,8 +35,10 @@ import jo.sm.ui.act.view.FilterRepairAction;
 import jo.sm.ui.act.view.FilterSalvageAction;
 import jo.sm.ui.act.view.FilterThrusterAction;
 import jo.sm.ui.act.view.FilterWeaponsAction;
+import jo.sm.ui.act.view.PlainAction;
 import jo.sm.ui.logic.MenuLogic;
 import jo.sm.ui.logic.ShipSpec;
+import jo.sm.ui.logic.ShipTreeLogic;
 
 @SuppressWarnings("serial")
 public class RenderFrame extends JFrame implements WindowListener
@@ -68,6 +71,8 @@ public class RenderFrame extends JFrame implements WindowListener
         menuFile.add(new ExportImagesAction(this));
         menuFile.add(new QuitAction(this));
         menuBar.add(menuEdit);
+        menuEdit.add(new UndoAction(this));
+        menuEdit.add(new RedoAction(this));
         menuBar.add(menuView);
         menuView.add(new JCheckBoxMenuItem(new PlainAction(this)));
         menuView.add(new JCheckBoxMenuItem(new AxisAction(this)));
@@ -202,6 +207,12 @@ public class RenderFrame extends JFrame implements WindowListener
         preLoad();
         RenderFrame f = new RenderFrame();
         f.setVisible(true);
+        ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
+        if (spec != null)
+        {
+        	f.setSpec(spec);
+        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec));
+        }
     }
 
     public ShipSpec getSpec()

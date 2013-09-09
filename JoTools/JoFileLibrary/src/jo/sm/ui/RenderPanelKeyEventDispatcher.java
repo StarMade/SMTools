@@ -6,7 +6,10 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
 
+import jo.sm.data.SparseMatrix;
+import jo.sm.logic.GridLogic;
 import jo.sm.logic.StarMadeLogic;
+import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.Point3iLogic;
 
@@ -22,6 +25,7 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
     private static final int SELECTION_MOVE = 0;
     private static final int SELECTION_MOVE_UPPER = 0x40;
     private static final int SELECTION_MOVE_LOWER = 0x80;
+    private static final int SELECTION_NUDGE = 0x200;
     
 	private RenderPanel mPanel;
 	
@@ -49,13 +53,15 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
         if ((lower != null) && (upper != null))
         {
+        	normalize(lower, upper);
         	if (keyMod == SELECTION_MOVE_UPPER)
         		doMoveUpperSelection(keyCode, upper);
         	else if (keyMod == SELECTION_MOVE_LOWER)
         		doMoveLowerSelection(keyCode, lower);
         	else if (keyMod == SELECTION_MOVE)
         		doMoveSelection(keyCode, lower, upper);
-        	normalize(lower, upper);
+        	else if (keyMod == SELECTION_NUDGE)
+        		doNudgeSelection(keyCode, lower, upper);
         	mPanel.updateTiles();
         }
         else
@@ -98,6 +104,15 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
 	{
 		keyToDelta(keyCode, lower);		
 		keyToDelta(keyCode, upper);		
+	}
+
+	private void doNudgeSelection(int keyCode, Point3i lower, Point3i upper)
+	{
+        SparseMatrix<Block> clip = GridLogic.extract(mPanel.getGrid(), lower, upper);
+        GridLogic.delete(mPanel.getGrid(), lower, upper);
+		keyToDelta(keyCode, lower);		
+		keyToDelta(keyCode, upper);		
+        GridLogic.insert(mPanel.getGrid(), clip, lower);
 	}
 
 	private Point3i keyToDelta(int keyCode, Point3i delta)

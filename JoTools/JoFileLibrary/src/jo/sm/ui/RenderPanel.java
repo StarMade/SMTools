@@ -67,7 +67,7 @@ public class RenderPanel extends JPanel
         mPreTranslate = new Vector3f();
         mPOVTranslate = new Vector3f();
         mScale = 1f;
-        mRotX = 0;
+        mRotX = (float)Math.PI;
         mRotY = 0;
         mPostTranslate = new Vector3f();
         mPlainGraphics = false;
@@ -99,7 +99,7 @@ public class RenderPanel extends JPanel
         addMouseWheelListener(ma);
     }
     
-    void updateTransform()
+    synchronized void updateTransform()
     {
         Dimension s = getSize();
         mPostTranslate.x = s.width/2;
@@ -433,5 +433,19 @@ public class RenderPanel extends JPanel
     {
         mUndoer = undoer;
     }
+
+	public void undo()
+	{
+		SparseMatrix<Block> grid = mUndoer.undo();
+		if (grid != null)
+			setGrid(grid);
+	}
+
+	public void redo()
+	{
+		SparseMatrix<Block> grid = mUndoer.redo();
+		if (grid != null)
+			setGrid(grid);
+	}
 
 }

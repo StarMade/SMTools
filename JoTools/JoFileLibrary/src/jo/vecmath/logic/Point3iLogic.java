@@ -37,4 +37,14 @@ public class Point3iLogic
 	{
 		return max(new Point3i(), lower, upper);
 	}
+
+	public static Point3i interpolate(Point3i lower, Point3i upper, float f)
+	{
+		Point3i p = new Point3i(
+				(int)(MathUtils.interpolate(f, 0, 1, lower.x, upper.x) + .5f),
+				(int)(MathUtils.interpolate(f, 0, 1, lower.y, upper.y) + .5f),
+				(int)(MathUtils.interpolate(f, 0, 1, lower.z, upper.z) + .5f)
+				);
+		return p;
+	}
 }

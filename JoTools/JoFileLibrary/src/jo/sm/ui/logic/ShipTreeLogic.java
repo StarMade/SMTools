@@ -48,19 +48,25 @@ public class ShipTreeLogic
             return;
         for (String name : options)
         {
-            ShipSpec spec = new ShipSpec();
-            spec.setType(def ? ShipSpec.DEFAULT_BLUEPRINT : ShipSpec.BLUEPRINT);
-            spec.setClassification(IBlocksPlugin.TYPE_SHIP);
-            spec.setName(name);
-            spec.setClassification(IBlocksPlugin.TYPE_SHIP);
-            File bpDir = new File(StarMadeLogic.getInstance().getBaseDir(), def ? "blueprints-default" : "blueprints");
-            File baseDir = new File(bpDir, name);
-            spec.setFile(baseDir);
+            ShipSpec spec = getBlueprintSpec(name, def);
             DefaultMutableTreeNode option = new DefaultMutableTreeNode(spec);
             group.add(option);            
         }
         root.add(group);
     }
+
+	public static ShipSpec getBlueprintSpec(String name, boolean def)
+	{
+		ShipSpec spec = new ShipSpec();
+		spec.setType(def ? ShipSpec.DEFAULT_BLUEPRINT : ShipSpec.BLUEPRINT);
+		spec.setClassification(IBlocksPlugin.TYPE_SHIP);
+		spec.setName(name);
+		spec.setClassification(IBlocksPlugin.TYPE_SHIP);
+		File bpDir = new File(StarMadeLogic.getInstance().getBaseDir(), def ? "blueprints-default" : "blueprints");
+		File baseDir = new File(bpDir, name);
+		spec.setFile(baseDir);
+		return spec;
+	}
 
     private static void addEntity(DefaultMutableTreeNode root,
             String title, String typeFilter, String nameFilter)

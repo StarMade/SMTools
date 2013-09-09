@@ -13,6 +13,8 @@ import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
+import jo.sm.plugins.ship.rotate.RotateParameters;
+import jo.sm.plugins.ship.rotate.RotatePlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
@@ -66,10 +68,24 @@ public class HullPlugin implements IBlocksPlugin
             Object p, StarMade sm, IPluginCallback cb)
     {
         HullParameters params = (HullParameters)p;        
-        Point3i center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
-        Point3i lower = new Point3i(center.x - params.getSizeX()/2, center.y - params.getSizeY()/2, center.z - params.getSizeZ()/2);
-        Point3i upper = new Point3i(center.x + params.getSizeX()/2, center.y + params.getSizeY()/2, center.z + params.getSizeZ()/2);
-        SparseMatrix<Block> modified = new SparseMatrix<Block>();
+        Point3i center;
+        Point3i lower;
+        Point3i upper;
+        SparseMatrix<Block> modified;
+        if ((sm.getSelectedLower() == null) || (sm.getSelectedUpper() == null))
+        {
+	        center = new Point3i(params.getCenterX(), params.getCenterY(), params.getCenterZ());
+	        lower = new Point3i(center.x - params.getSizeX()/2, center.y - params.getSizeY()/2, center.z - params.getSizeZ()/2);
+	        upper = new Point3i(center.x + params.getSizeX()/2, center.y + params.getSizeY()/2, center.z + params.getSizeZ()/2);
+	        modified = new SparseMatrix<Block>();
+        }
+        else
+        {
+        	lower = sm.getSelectedLower();
+        	upper = sm.getSelectedUpper();
+        	center = Point3iLogic.interpolate(lower, upper, .5f);
+        	modified = new SparseMatrix<Block>(original);
+        }
         switch (params.getType())
         {
         	case HullParameters.OPEN_FRAME:
@@ -113,15 +129,23 @@ public class HullPlugin implements IBlocksPlugin
     
     private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
-    	int r = (int)Math.ceil(Math.sqrt((lower.x - upper.x)*(lower.x - upper.x)
-    			+ (lower.y - upper.y)*(lower.y - upper.y)
-    			+ (lower.z - upper.z)*(lower.z - upper.z)));
-    	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
+    	int xMidRad = center.x - lower.x;
+    	int yMidRad = center.y - lower.y;
+    	int xRad;
+    	int yRad;
+    	for (int z = lower.z; z <= upper.z; z++)
     	{
-    		Point3i p = i.next();
-    		if (Point3iLogic.distance(center, p) > r)
-    			continue;
-    		addHull(grid, p);
+    		if (z < center.z)
+    		{
+    			xRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, xMidRad);
+    			yRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, yMidRad);
+    		}
+    		else
+    		{
+    			xRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, xMidRad);
+    			yRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, yMidRad);
+    		}
+    		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     	}
     }
     
@@ -131,39 +155,29 @@ public class HullPlugin implements IBlocksPlugin
     	{
     		int xRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.x - lower.x)/2, 0);
     		int yRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.y - lower.y)/2, 0);
-        	int r2 = xRad*xRad + yRad*yRad;
-    		for (int x = -xRad; x <= xRad; x++)
-    			for (int y = -yRad; y <= yRad; y++)
-    			{
-    				if (x*x + y*y <= r2)
-    					addHull(grid, center.x + x, center.y + y, z);
-    			}
+    		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     	}
     }
     
     private void generateNeedle(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
+    	int xMidRad = center.x - lower.x;
+    	int yMidRad = center.y - lower.y;
     	int xRad;
     	int yRad;
     	for (int z = lower.z; z <= upper.z; z++)
     	{
     		if (z < center.z)
     		{
-    			xRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, center.x - lower.x);
-    			yRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, center.y - lower.y);
+    			xRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, xMidRad);
+    			yRad = (int)MathUtils.interpolate(z, lower.z, center.z, 0, yMidRad);
     		}
     		else
     		{
-    			xRad = (int)MathUtils.interpolate(z, center.z, upper.z, upper.x - center.x, 0);
-    			yRad = (int)MathUtils.interpolate(z, center.z, upper.z, upper.x - center.x, 0);
+    			xRad = (int)MathUtils.interpolate(z, center.z, upper.z, xMidRad, 0);
+    			yRad = (int)MathUtils.interpolate(z, center.z, upper.z, yMidRad, 0);
     		}
-        	int r2 = xRad*xRad + yRad*yRad;
-    		for (int x = -xRad; x <= xRad; x++)
-    			for (int y = -yRad; y <= yRad; y++)
-    			{
-    				if (x*x + y*y <= r2)
-    					addHull(grid, center.x + x, center.y + y, z);
-    			}
+    		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     	}
     }
     
@@ -171,32 +185,20 @@ public class HullPlugin implements IBlocksPlugin
     {
 		int xRad = (upper.x - lower.x)/2;
 		int yRad = (upper.y - lower.y)/2;
-    	int r2 = xRad*xRad + yRad*yRad;
     	for (int z = lower.z; z <= upper.z; z++)
-    	{
-    		for (int x = -xRad; x <= xRad; x++)
-    			for (int y = -yRad; y <= yRad; y++)
-    			{
-    				if (x*x + y*y <= r2)
-    					addHull(grid, center.x + x, center.y + y, z);
-    			}
-    	}
+    		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     }
     
     private void generateDisc(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
     {
 		int xRad = (upper.x - lower.x)/2;
 		int zRad = (upper.z - lower.z)/2;
-    	int r2 = xRad*xRad + zRad*zRad;
     	for (int y = lower.y; y <= upper.y; y++)
-    	{
-    		for (int x = -xRad; x <= xRad; x++)
-    			for (int z = -zRad; z <= zRad; z++)
-    			{
-    				if (x*x + z*z <= r2)
-    					addHull(grid, center.x + x, y, center.z + z);
-    			}
-    	}
+    		drawElipse(grid, center.x, center.z, y, xRad, zRad);
+    	RotateParameters params = new RotateParameters();
+    	params.setXRotate(90);
+    	SparseMatrix<Block> modified = RotatePlugin.rotateAround(grid, params, center);
+    	grid.set(modified);
     }
     
     private void generateIrregular(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
@@ -325,6 +327,72 @@ public class HullPlugin implements IBlocksPlugin
 			addHull(grid, o.x+7, o.y+7, o.z+i);
 			addHull(grid, o.x  , o.y+7, o.z+i);
 		}
+	}
+	
+	private void drawElipse(SparseMatrix<Block> grid, int xc, int yc, int zc, int xRad, int yRad)
+	{
+		if (xRad == 0)
+			if (yRad == 0)
+			{
+				addHull(grid,  xc, yc, zc);
+				return;
+			}
+			else
+			{
+				for (int y = -yRad; y <= yRad; y++)
+					addHull(grid, xc, yc + y, zc);
+				return;
+			}
+		else
+			if (yRad == 0)
+			{
+				for (int x = -xRad; x <= xRad; x++)
+					addHull(grid, xc + x, yc, zc);
+				return;
+			}
+		int a2 = xRad*xRad;
+		int b2 = yRad*yRad;
+		int fa2 = 4*a2;
+		int x, y, sigma;
+		for (x = 0, y = yRad, sigma = 2*b2 + a2*(1 - 2*yRad); b2*x <= a2*y; x++)
+		{
+			drawXLine(grid, xc - x, yc + y, zc, xc + x);
+			drawXLine(grid, xc - x, yc - y, zc, xc + x);
+			drawYLine(grid, xc - x, yc - y, zc, yc + y);
+			drawYLine(grid, xc + x, yc - y, zc, yc + y);
+			if (sigma >= 0)
+			{
+				sigma += fa2*(1 - y);
+				y--;
+			}
+			sigma += b2*(4*x + 6);
+		}
+		int fb2 = 4*b2;
+		for (x = xRad, y = 0, sigma = 2*a2 + b2*(1 - 2*xRad); a2*y <= b2*x; y++)
+		{
+			drawXLine(grid, xc - x, yc + y, zc, xc + x);
+			drawXLine(grid, xc - x, yc - y, zc, xc + x);
+			drawYLine(grid, xc - x, yc - y, zc, yc + y);
+			drawYLine(grid, xc + x, yc - y, zc, yc + y);
+			if (sigma >= 0)
+			{
+				sigma += fb2 * (1 - x);
+				x--;
+			}
+			sigma += a2 * (4 * y + 6);
+		}
+	}
+	
+	private void drawXLine(SparseMatrix<Block> grid, int x1, int y, int z, int x2)
+	{
+		for (int x = x1; x <= x2; x++)
+			addHull(grid, x, y, z);
+	}
+	
+	private void drawYLine(SparseMatrix<Block> grid, int x, int y1, int z, int y2)
+	{
+		for (int y = y1; y <= y2; y++)
+			addHull(grid, x, y, z);
 	}
 	
 	private void addHull(SparseMatrix<Block> grid, Point3i p)
