@@ -1,10 +1,13 @@
 package jo.sm.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.IOException;
 import java.util.Properties;
 
+import javax.imageio.ImageIO;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -127,6 +130,15 @@ public class RenderFrame extends JFrame implements WindowListener
 
         this.addWindowListener(this);
         setSize(1024, 768);
+        Image icon;
+		try
+		{
+			icon = ImageIO.read(getClass().getResourceAsStream("icon64.png"));
+	        setIconImage(icon);
+		} catch (IOException e1)
+		{
+			e1.printStackTrace();
+		}
     }
 
     public void windowClosing(WindowEvent evt)
