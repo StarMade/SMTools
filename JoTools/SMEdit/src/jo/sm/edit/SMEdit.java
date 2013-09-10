@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 
 public class SMEdit
 {
+    private String[]    mArgs;        
     private String      mWebRoot;
     private Calendar    mLocalDate;
     private Calendar    mRemoteDate;
@@ -32,8 +33,9 @@ public class SMEdit
     private Properties	mProps;
     private File		mStarMadeDir;
     
-    public SMEdit()
+    public SMEdit(String[] args)
     {
+        mArgs = args;
         mWebRoot = "http://www.ocean-of-storms.com/vote4joe/";
         mTargets = new ArrayList<String[]>();
     }
@@ -76,12 +78,13 @@ public class SMEdit
         try
         {
             File jo_smJar = new File(mStarMadeDir, "jo_sm.jar");
-            URL url = jo_smJar.toURI().toURL();
-            URLClassLoader smLoader = new URLClassLoader(new URL[]{url}, SMEdit.class.getClassLoader());
+            URL josmURL = jo_smJar.toURI().toURL();
+            File smJar = new File(mStarMadeDir, "StarMade.jar");
+            URL smURL = smJar.toURI().toURL();
+            URLClassLoader smLoader = new URLClassLoader(new URL[]{josmURL,smURL}, SMEdit.class.getClassLoader());            
             Class<?> rf = smLoader.loadClass("jo.sm.ui.RenderFrame");
             Method main = rf.getMethod("main", String[].class);
-            String[] args = new String[0];
-            main.invoke(null, (Object)args);
+            main.invoke(null, (Object)mArgs);
         }
         catch (Exception e)
         {
@@ -332,7 +335,7 @@ public class SMEdit
     }
     public static void main(String[] args)
     {
-        SMEdit app = new SMEdit();
+        SMEdit app = new SMEdit(args);
         app.run();
     }
 

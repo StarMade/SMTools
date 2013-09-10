@@ -2,6 +2,7 @@ package jo.sm.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
@@ -49,12 +50,14 @@ import jo.sm.ui.logic.ShipTreeLogic;
 @SuppressWarnings("serial")
 public class RenderFrame extends JFrame implements WindowListener
 {
+    private String[]    mArgs;
     private ShipSpec    mSpec;
     private RenderPanel mClient;
 
-    public RenderFrame()
+    public RenderFrame(String[] args)
     {
-        super("StarMade Ship Preview");
+        super("SMEdit");
+        mArgs = args;
         // instantiate
         JMenuBar menuBar = new JMenuBar();
         JMenu menuFile = new JMenu("File");
@@ -62,7 +65,10 @@ public class RenderFrame extends JFrame implements WindowListener
         JMenu menuView = new JMenu("View");
         JMenu menuModify = new JMenu("Modify");
         JMenu menuViewMissiles = new JMenu("Missiles");
-        mClient = new RenderPanel();
+        if ((mArgs.length > 0) && (mArgs[0].equals("-opengl")))
+            mClient = new LWJGLRenderPanel();
+        else
+            mClient = new AWTRenderPanel();
         // layout
         setJMenuBar(menuBar);
         menuBar.add(menuFile);
@@ -126,9 +132,14 @@ public class RenderFrame extends JFrame implements WindowListener
             public void menuCanceled(MenuEvent e)
             {
             }
-        });
+        });        
 
         this.addWindowListener(this);
+        this.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowGainedFocus(WindowEvent e)
+            { mClient.requestFocusInWindow(); }
+         });
         setSize(1024, 768);
         Image icon;
 		try
@@ -138,6 +149,11 @@ public class RenderFrame extends JFrame implements WindowListener
 		} catch (IOException e1)
 		{
 			e1.printStackTrace();
+		}
+		if (mClient instanceof Runnable)
+		{
+		    Thread t = new Thread((Runnable)mClient);
+		    t.start();
 		}
     }
 
@@ -220,7 +236,7 @@ public class RenderFrame extends JFrame implements WindowListener
     public static void main(String[] args)
     {
         preLoad();
-        final RenderFrame f = new RenderFrame();
+        final RenderFrame f = new RenderFrame(args);
         f.setVisible(true);
         final ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
         if (spec != null)

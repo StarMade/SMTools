@@ -27,9 +27,9 @@ public class RenderPanelKeyEventDispatcher implements KeyEventDispatcher
     private static final int SELECTION_MOVE_LOWER = 0x80;
     private static final int SELECTION_NUDGE = 0x200;
     
-	private RenderPanel mPanel;
+	private AWTRenderPanel mPanel;
 	
-	public RenderPanelKeyEventDispatcher(RenderPanel panel)
+	public RenderPanelKeyEventDispatcher(AWTRenderPanel panel)
 	{
 		mPanel = panel;
 	}

@@ -27,7 +27,7 @@ public class RenderApplet extends JApplet
     {
     	setNativeLookAndFeel();
         // instantiate
-        mClient = new RenderPanel();
+        mClient = new AWTRenderPanel();
         // layout
         getContentPane().add(BorderLayout.CENTER, mClient);
         getContentPane().add(BorderLayout.SOUTH, new BegPanel());
