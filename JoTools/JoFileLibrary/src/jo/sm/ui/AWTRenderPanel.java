@@ -48,7 +48,7 @@ public class AWTRenderPanel extends RenderPanel
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private Set<Short>          mFilter;
-    private RenderSet			mTiles;
+    private RenderSet			mTiles;;
     private Matrix4f            mTransform;
     private Vector3f            mPreTranslate;
     private float               mScale;
