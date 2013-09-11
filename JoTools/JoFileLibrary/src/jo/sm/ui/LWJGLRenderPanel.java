@@ -32,7 +32,7 @@ public class LWJGLRenderPanel extends RenderPanel implements Runnable
     private boolean mCloseRequested = false;
     private AtomicReference<Dimension> mNewCanvasSize = new AtomicReference<Dimension>();
 
-    private JGLCanvas              mCanvas;
+    private Canvas              mCanvas;
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private Set<Short>          mFilter;

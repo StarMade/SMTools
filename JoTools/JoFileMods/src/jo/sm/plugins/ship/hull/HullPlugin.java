@@ -131,7 +131,18 @@ public class HullPlugin implements IBlocksPlugin
     {
     	int xMidRad = center.x - lower.x;
     	int yMidRad = center.y - lower.y;
-    	int xRad;
+    	int zMidRad = center.z - lower.z;
+    	if ((xMidRad == yMidRad) && (yMidRad == zMidRad))
+    	{	// perfect sphere
+    		int r2 = xMidRad*xMidRad;
+    		for (int x = -xMidRad; x <= xMidRad; x++)
+        		for (int y = -yMidRad; y <= yMidRad; y++)
+            		for (int z = -zMidRad; z <= zMidRad; z++)
+            			if (x*x + y*y + z*z <= r2)
+            				addHull(grid, center.x + x, center.y + y, center.z + z);
+    		return;
+    	}
+        int xRad;
     	int yRad;
     	for (int z = lower.z; z <= upper.z; z++)
     	{
