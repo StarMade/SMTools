@@ -21,6 +21,13 @@ public class BlockTypeColors
     public static final Map<Short,Color> BLOCK_FILL = new HashMap<Short, Color>();
     static
     {
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_XP, Color.RED);
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_XM, Color.RED.darker().darker());
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_YP, Color.GREEN);
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_YM, Color.GREEN.darker().darker());
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_ZP, Color.BLUE);
+        BLOCK_FILL.put(BlockTypes.SPECIAL_SELECT_ZM, Color.BLUE .darker().darker());
+        
         BLOCK_FILL.put(BlockTypes.HULL_COLOR_GREY_ID, new Color(79, 73, 54));
         BLOCK_FILL.put(BlockTypes.HULL_COLOR_WEDGE_GREY_ID, new Color(79, 73, 54));
         BLOCK_FILL.put(BlockTypes.HULL_COLOR_CORNER_GREY_ID, new Color(79, 73, 54));

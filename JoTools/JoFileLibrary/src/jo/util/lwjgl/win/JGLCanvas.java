@@ -157,7 +157,6 @@ public class JGLCanvas extends Canvas
 
     private void doRenderLoop()
     {
-    	System.out.println("doRenderLoop");
         try {
         	while (!isDisplayable())
         		Thread.sleep(100);

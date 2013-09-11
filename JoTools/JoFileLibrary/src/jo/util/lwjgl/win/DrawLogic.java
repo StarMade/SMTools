@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jo.vecmath.Color4f;
-
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLLight;
 import jo.util.jgl.obj.JGLNode;
@@ -16,6 +15,7 @@ import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.jgl.obj.txt.JGLTextGroup;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 
 public class DrawLogic
@@ -72,6 +72,11 @@ public class DrawLogic
             GL11.glCullFace(GL11.GL_FRONT); 
             GL11.glEnable(GL11.GL_CULL_FACE);
             GL11.glFrontFace(GL11.GL_CCW);
+            
+            GL11.glMatrixMode(GL11.GL_PROJECTION);
+            GL11.glLoadIdentity();
+            float aspect = (float)x/(float)y;
+            GLU.gluPerspective(scene.getFieldOfView(), aspect, scene.getMinZ(), scene.getMaxZ());
     
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glLoadIdentity();

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import jo.sm.logic.BufferLogic;
 import jo.sm.logic.IntegerUtils;
 
 import org.lwjgl.opengl.GL11;
@@ -33,6 +34,13 @@ public class JGLTextureCache
         spec.setFileName(fileName);
         register(id, spec);
     }
+
+    public static void register(int id, BufferedImage img)
+    {
+        JGLTextureSpec spec = new JGLTextureSpec();
+        spec.setImage(img);
+        register(id, spec);
+    }
     
     public static void register(int id, String fileName, int left, int top, int width, int height)
     {
@@ -43,6 +51,11 @@ public class JGLTextureCache
         spec.setWidth(width);;
         spec.setHeight(height);;
         register(id, spec);
+    }
+    
+    public static boolean isRegistered(int id)
+    {
+        return mSpecCache.containsKey(id);
     }
 
     public static void markTextures()
@@ -116,7 +129,7 @@ public class JGLTextureCache
     
     private static int genTexture() 
     {
-        IntBuffer tmp = IntBuffer.allocate(1);
+        IntBuffer tmp = BufferLogic.createIntBuffer(1);
         GL11.glGenTextures(tmp);
         return tmp.get(0);
     }
@@ -138,9 +151,12 @@ public class JGLTextureCache
         try
         {
             JGLTextureSpec spec = mSpecCache.get(textureID);
+            if (spec.getImage() != null)
+                return spec.getImage();
             BufferedImage img = ImageIO.read(new File(spec.getFileName()));
             if (spec.getLeft() >= 0)
                 img = img.getSubimage(spec.getLeft(), spec.getTop(), spec.getWidth(), spec.getHeight());
+            spec.setImage(img);
             return img;
         }
         catch (IOException e)
@@ -221,6 +237,7 @@ public class JGLTextureCache
         private int     mTop;
         private int     mWidth;
         private int     mHeight;
+        private BufferedImage   mImage;
         
         public String getFileName()
         {
@@ -261,6 +278,14 @@ public class JGLTextureCache
         public void setHeight(int height)
         {
             mHeight = height;
+        }
+        public BufferedImage getImage()
+        {
+            return mImage;
+        }
+        public void setImage(BufferedImage image)
+        {
+            mImage = image;
         }
     }
 

@@ -269,14 +269,16 @@ public class JGLObj extends JGLNode
         setSolidColor(r, g, b, 1);
     }
     public void setSolidColor(float r, float g, float b, float a)
-    {
-        float colors[] = {
-                r, g, b, a,
+    {        
+        float colors[] = new float[mVertices*4];
+        for (int i = 0; i < colors.length; i += 4)
+        {
+                colors[i+0] = r;
+                colors[i+1] = g;
+                colors[i+2] = b;
+                colors[i+3] = a;
         };
-        mColorBuffer.position(0);
-        for (int i = 0; i < mColors; i++)
-            mColorBuffer.put(colors);
-        mColorBuffer.position(0);
+        setColors(colors);
     }
 
     public void setFadeColor(Color4f c1, Color4f c2)

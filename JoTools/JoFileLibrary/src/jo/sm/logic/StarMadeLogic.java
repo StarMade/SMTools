@@ -3,6 +3,7 @@ package jo.sm.logic;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -35,6 +36,36 @@ public class StarMadeLogic
         if (!bd.exists())
             throw new IllegalArgumentException("Base directory '"+baseDir+"' does not exist");
         getInstance().setBaseDir(bd);
+        
+        File ntive = new File(bd, "native");
+        File libs = null;
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.indexOf("windows") >= 0)
+            libs = new File(ntive, "windows");
+        else if (os.indexOf("mac") >= 0)
+            libs = new File(ntive, "macosx");
+        else if (os.indexOf("linux") >= 0)
+            libs = new File(ntive, "linux");
+        else if (os.indexOf("solaris") >= 0)
+            libs = new File(ntive, "solaris");
+        if (libs != null)
+        {
+            String path = System.getProperty("java.library.path");
+            path += File.pathSeparator + libs.toString();
+            System.setProperty("java.library.path", path);
+            // trick from http://blog.cedarsoft.com/2010/11/setting-java-library-path-programmatically/
+            try
+            {
+                Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+                fieldSysPath.setAccessible( true );
+                fieldSysPath.set( null, null );
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        
         List<String> blocksPlugins = new ArrayList<String>();
         discoverPlugins(baseDir, blocksPlugins);
         loadPlugins(blocksPlugins);

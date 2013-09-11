@@ -119,7 +119,15 @@ import jo.vecmath.Tuple3f;
     }
 
 
- /**
+     public Point3f(Point3i p)
+    {
+        x = p.x;
+        y = p.y;
+        z = p.z;
+    }
+
+
+/**
    * Computes the square of the distance between this point and 
    * point p1.
    * @param p1 the other point
