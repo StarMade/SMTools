@@ -1,5 +1,8 @@
 package jo.vecmath.logic;
 
+import java.nio.FloatBuffer;
+
+import jo.sm.logic.BufferLogic;
 import jo.vecmath.Tuple3f;
 
 public class Tuple3fLogic extends MathUtils
@@ -16,6 +19,10 @@ public class Tuple3fLogic extends MathUtils
     public static float[] toFloatArray(Tuple3f v)
     {
         return new float[] { v.x, v.y, v.z };
+    }
+    public static FloatBuffer toFloatBuffer(Tuple3f v)
+    {
+        return BufferLogic.create(toFloatArray(v));
     }
     public static String toIntString(Tuple3f v)
     {

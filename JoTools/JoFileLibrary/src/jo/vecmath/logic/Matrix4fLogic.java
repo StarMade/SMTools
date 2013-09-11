@@ -1,5 +1,8 @@
 package jo.vecmath.logic;
 
+import java.nio.FloatBuffer;
+
+import jo.sm.logic.BufferLogic;
 import jo.vecmath.AxisAngle4f;
 import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
@@ -325,6 +328,11 @@ public class Matrix4fLogic extends MathUtils
         v[15] = m.m33;
         
         return v;
+    }
+    
+    public static FloatBuffer toFloatBuffer(Matrix4f m)
+    {
+    	return BufferLogic.create(toFloatArray(m));
     }
 
     public static void lookAt(Matrix4f transform, Point3f standHere, Point3f lookAtThis)
