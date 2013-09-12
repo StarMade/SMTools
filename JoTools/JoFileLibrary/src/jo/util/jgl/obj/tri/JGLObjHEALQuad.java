@@ -14,6 +14,7 @@ public class JGLObjHEALQuad extends JGLObj
      * Serialization only. Do not use.
      */
     public JGLObjHEALQuad(){
+        setMode(QUADS);
     }
 
     /**
@@ -24,6 +25,7 @@ public class JGLObjHEALQuad extends JGLObj
      * @param height The Y extent or width
      */
     public JGLObjHEALQuad(Point3f top, Point3f right, Point3f bottom, Point3f left){
+        this();
         updateGeometry(top, right, bottom, left);
     }
 
@@ -37,6 +39,7 @@ public class JGLObjHEALQuad extends JGLObj
      * along the Y axis.
      */
     public JGLObjHEALQuad(Point3f top, Point3f right, Point3f bottom, Point3f left, boolean flipCoords){
+        this();
         updateGeometry(top, right, bottom, left, flipCoords);
     }
 
