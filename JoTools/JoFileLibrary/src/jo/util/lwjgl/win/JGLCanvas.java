@@ -4,7 +4,14 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import jo.util.jgl.enm.JGLColorMaterialFace;
@@ -15,6 +22,7 @@ import jo.vecmath.logic.Color4fLogic;
 import jo.vecmath.logic.Matrix4fLogic;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
@@ -31,6 +39,11 @@ public class JGLCanvas extends Canvas
     
     private boolean mCloseRequested = false;
     private AtomicReference<Dimension> mNewCanvasSize = new AtomicReference<Dimension>();
+    
+    private boolean[] mMouseState;
+    private List<MouseListener>	mMouseListeners = new ArrayList<MouseListener>();
+    private List<MouseMotionListener>	mMouseMotionListeners = new ArrayList<MouseMotionListener>();
+    private List<MouseWheelListener>	mMouseWheelListeners = new ArrayList<MouseWheelListener>();
 
     public JGLCanvas()
     {
@@ -163,6 +176,9 @@ public class JGLCanvas extends Canvas
             Display.setParent(this);
             Display.setVSyncEnabled(true);
             Display.create();
+            mMouseState = new boolean[Mouse.getButtonCount()];
+            for (int i = 0; i < mMouseState.length; i++)
+            	mMouseState[i] = Mouse.isButtonDown(i);
 
             //GL11.glsetSwapInterval(1);
             GL11.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -192,6 +208,7 @@ public class JGLCanvas extends Canvas
                   syncViewportSize();
                }
                doRender();
+               doMouse();
                Display.update();
             }
 
@@ -200,8 +217,70 @@ public class JGLCanvas extends Canvas
             e.printStackTrace();
          }        
     }
+    
+    private void doMouse()
+    {
+    	while (Mouse.next())
+    	{
+    		int		button = Mouse.getEventButton();
+    		boolean	buttonState = Mouse.getEventButtonState();
+    		int		dWheel = Mouse.getDWheel();
+    		int		dX = Mouse.getEventDX();
+    		int		dY = Mouse.getEventDY();
+    		long	nanoseconds = Mouse.getEventNanoseconds();
+    		int		x = Mouse.getEventX();
+    		int		y = Mouse.getEventY();
+    		int modifiers = 0;
+    		if (button >= 0)
+    		{
+    			int jButton = (button == 0) ? MouseEvent.BUTTON1 : (button == 1) ? MouseEvent.BUTTON2 : MouseEvent.BUTTON3;
+    			if (mMouseState[button] != buttonState)
+    			{
+    	    		System.out.println("Button="+button+", state="+buttonState+", x="+x+", y="+y);
+	    			if (buttonState)
+	    			{
+	    				MouseEvent event = new MouseEvent(this, MouseEvent.MOUSE_PRESSED, nanoseconds, modifiers, x, y, 1, false, jButton);
+	    				fireMouseEvent(event);
+	    			}
+	    			else
+	    			{
+	    				MouseEvent event = new MouseEvent(this, MouseEvent.MOUSE_RELEASED, nanoseconds, modifiers, x, y, 1, false, jButton);
+	    				fireMouseEvent(event);
+	    			}
+	    			mMouseState[button] = buttonState;
+    			}
+    		}
+			if ((dX > 0) || (dY > 0))
+			{
+    			int jButton = 0;
+    			if (mMouseState[0])
+    				jButton |= MouseEvent.BUTTON1;
+    			if (mMouseState[1])
+    				jButton |= MouseEvent.BUTTON2;
+    			if (mMouseState[2])
+    				jButton |= MouseEvent.BUTTON3;
+    			if (jButton != 0)
+    			{
+    				MouseEvent event = new MouseEvent(this, MouseEvent.MOUSE_DRAGGED, nanoseconds, modifiers, x, y, 1, false, jButton);
+    				fireMouseMoveEvent(event);
+    			}
+    			else
+    			{
+    				MouseEvent event = new MouseEvent(this, MouseEvent.MOUSE_MOVED, nanoseconds, modifiers, x, y, 1, false, jButton);
+    				fireMouseMoveEvent(event);
+    			}
+			}
+			if (dWheel != 0)
+			{
+				System.out.println("Wheel="+dWheel);
+				MouseWheelEvent event = new MouseWheelEvent(this, MouseEvent.MOUSE_WHEEL, nanoseconds, modifiers, 
+						x, y, 1, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, dWheel, dWheel/120);
+				fireMouseWheelEvent(event);
+			}
+		}
+    }
 
-    protected void doRender()
+    private void doRender()
     {
         for (Runnable r : mScene.getBetweenRenderers())
             r.run();
@@ -230,5 +309,66 @@ public class JGLCanvas extends Canvas
     public void setCloseRequested(boolean closeRequested)
     {
         mCloseRequested = closeRequested;
+    }
+    
+    @Override
+    public synchronized void addMouseListener(MouseListener l)
+    {
+    	mMouseListeners.add(l);
+    }
+    
+    @Override
+    public synchronized void addMouseMotionListener(MouseMotionListener l)
+    {
+    	mMouseMotionListeners.add(l);
+    }
+    
+    @Override
+    public synchronized void addMouseWheelListener(MouseWheelListener l)
+    {
+    	mMouseWheelListeners.add(l);
+    }
+    
+    @Override
+    public synchronized void removeMouseListener(MouseListener l)
+    {
+    	mMouseListeners.remove(l);
+    }
+    
+    @Override
+    public synchronized void removeMouseMotionListener(MouseMotionListener l)
+    {
+    	mMouseMotionListeners.remove(l);
+    }
+    
+    @Override
+    public synchronized void removeMouseWheelListener(MouseWheelListener l)
+    {
+    	mMouseWheelListeners.remove(l);
+    }
+    
+    private void fireMouseEvent(MouseEvent e)
+    {
+    	for (MouseListener l : mMouseListeners)
+    		if (e.getID() == MouseEvent.MOUSE_PRESSED)
+    			l.mousePressed(e);
+    		else if (e.getID() == MouseEvent.MOUSE_RELEASED)
+    			l.mouseReleased(e);
+    }
+    
+    private void fireMouseMoveEvent(MouseEvent e)
+    {
+    	for (MouseMotionListener l : mMouseMotionListeners)
+    		if (e.getID() == MouseEvent.MOUSE_MOVED)
+    			l.mouseMoved(e);
+    		else if (e.getID() == MouseEvent.MOUSE_DRAGGED)
+    			l.mouseDragged(e);
+    }
+
+    private void fireMouseWheelEvent(MouseWheelEvent e)
+    {
+    	for (MouseWheelListener l : mMouseWheelListeners)
+    		if (e.getID() == MouseEvent.MOUSE_WHEEL)
+    			l.mouseWheelMoved(e);
     }
 }

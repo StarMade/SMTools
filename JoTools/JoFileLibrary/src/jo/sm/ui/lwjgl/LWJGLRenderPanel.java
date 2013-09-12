@@ -1,13 +1,12 @@
-package jo.sm.ui;
+package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -20,21 +19,18 @@ import jo.sm.data.UndoBuffer;
 import jo.sm.logic.RenderPolyLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
+import jo.sm.ui.RenderPanel;
 import jo.sm.ui.logic.ShipSpec;
 import jo.util.jgl.logic.SceneLogic;
 import jo.util.jgl.obj.JGLCamera;
 import jo.util.jgl.obj.JGLGroup;
-import jo.util.jgl.obj.JGLNode;
 import jo.util.jgl.obj.JGLScene;
 import jo.util.jgl.obj.tri.JGLObj;
-import jo.util.jgl.obj.tri.JGLObjCube;
-import jo.util.jgl.obj.tri.JGLObjHEALQuad;
 import jo.util.lwjgl.win.JGLCanvas;
 import jo.vecmath.Color4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
-import jo.vecmath.logic.MathUtils;
 import jo.vecmath.logic.Matrix4fLogic;
 
 @SuppressWarnings("serial")
@@ -99,16 +95,19 @@ public class LWJGLRenderPanel extends RenderPanel
         MouseAdapter ma =  new MouseAdapter(){
             public void mousePressed(MouseEvent ev)
             {               
+            	System.out.println("Pressed "+ev.getButton());
                 if (ev.getButton() == MouseEvent.BUTTON1)
                     doMouseDown(ev.getPoint(), ev.getModifiers());
             }
             public void mouseReleased(MouseEvent ev)
             {
+            	System.out.println("Released "+ev.getButton());
                 if (ev.getButton() == MouseEvent.BUTTON1)
                     doMouseUp(ev.getPoint(), ev.getModifiers());
             }
             public void mouseDragged(MouseEvent ev)
             {
+            	System.out.println("Dragged "+ev.getButton());
                 if (mMouseDownAt != null)
                     doMouseMove(ev.getPoint(), ev.getModifiers());
             }
@@ -120,6 +119,8 @@ public class LWJGLRenderPanel extends RenderPanel
         mCanvas.addMouseListener(ma);
         mCanvas.addMouseMotionListener(ma);
         mCanvas.addMouseWheelListener(ma);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
+        		new LWJGLKeyEventDispatcher(this));
     }
     
     private void doMouseDown(Point p, int modifiers)
@@ -435,4 +436,11 @@ public class LWJGLRenderPanel extends RenderPanel
     {
         mCanvas.setCloseRequested(pleaseClose);
     }
+
+	public void moveCamera(Point3i delta)
+	{
+		mUniverse.getCamera().moveRight(delta.x);
+		mUniverse.getCamera().moveUp(delta.y);
+		mUniverse.getCamera().moveForward(delta.z);
+	}
 }

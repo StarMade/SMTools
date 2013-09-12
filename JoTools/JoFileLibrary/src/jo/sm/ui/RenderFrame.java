@@ -46,6 +46,7 @@ import jo.sm.ui.act.view.PlainAction;
 import jo.sm.ui.logic.MenuLogic;
 import jo.sm.ui.logic.ShipSpec;
 import jo.sm.ui.logic.ShipTreeLogic;
+import jo.sm.ui.lwjgl.LWJGLRenderPanel;
 
 @SuppressWarnings("serial")
 public class RenderFrame extends JFrame implements WindowListener

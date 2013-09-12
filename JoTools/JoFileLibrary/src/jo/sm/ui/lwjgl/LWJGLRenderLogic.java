@@ -1,4 +1,4 @@
-package jo.sm.ui;
+package jo.sm.ui.lwjgl;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -13,6 +13,7 @@ import org.hsqldb.lib.ArrayListIdentity;
 import jo.sm.data.RenderPoly;
 import jo.sm.data.SparseMatrix;
 import jo.sm.ship.data.Block;
+import jo.sm.ui.BlockTypeColors;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.jgl.obj.tri.JGLObjHEALQuad;
