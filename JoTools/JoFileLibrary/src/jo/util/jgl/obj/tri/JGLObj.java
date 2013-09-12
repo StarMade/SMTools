@@ -248,7 +248,10 @@ public class JGLObj extends JGLNode
             for (int i = 0; i < indices.length; i++)
                 mIndexBuffer.put(indices[i]);
             mIndexBuffer.position(0);
-            mIndices = indices.length/3;
+            if (mMode == TRIANGLES)
+                mIndices = indices.length/3;
+            else
+                mIndices = indices.length/4;
         }
     }
     public void setIndices(Collection<?> normals)

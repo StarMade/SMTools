@@ -314,19 +314,28 @@ public class JGLCanvas extends Canvas
     @Override
     public synchronized void addMouseListener(MouseListener l)
     {
-    	mMouseListeners.add(l);
+        if (System.getProperty("os.name").indexOf("Mac") >= 0)
+            super.addMouseListener(l);
+        else
+    	    mMouseListeners.add(l);
     }
     
     @Override
     public synchronized void addMouseMotionListener(MouseMotionListener l)
     {
-    	mMouseMotionListeners.add(l);
+        if (System.getProperty("os.name").indexOf("Mac") >= 0)
+            super.addMouseMotionListener(l);
+        else
+            mMouseMotionListeners.add(l);
     }
     
     @Override
     public synchronized void addMouseWheelListener(MouseWheelListener l)
     {
-    	mMouseWheelListeners.add(l);
+        if (System.getProperty("os.name").indexOf("Mac") >= 0)
+            super.addMouseWheelListener(l);
+        else
+            mMouseWheelListeners.add(l);
     }
     
     @Override

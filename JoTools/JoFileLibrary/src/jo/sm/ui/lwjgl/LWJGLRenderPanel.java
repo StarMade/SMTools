@@ -95,19 +95,16 @@ public class LWJGLRenderPanel extends RenderPanel
         MouseAdapter ma =  new MouseAdapter(){
             public void mousePressed(MouseEvent ev)
             {               
-            	System.out.println("Pressed "+ev.getButton());
                 if (ev.getButton() == MouseEvent.BUTTON1)
                     doMouseDown(ev.getPoint(), ev.getModifiers());
             }
             public void mouseReleased(MouseEvent ev)
             {
-            	System.out.println("Released "+ev.getButton());
                 if (ev.getButton() == MouseEvent.BUTTON1)
                     doMouseUp(ev.getPoint(), ev.getModifiers());
             }
             public void mouseDragged(MouseEvent ev)
             {
-            	System.out.println("Dragged "+ev.getButton());
                 if (mMouseDownAt != null)
                     doMouseMove(ev.getPoint(), ev.getModifiers());
             }
@@ -283,6 +280,7 @@ public class LWJGLRenderPanel extends RenderPanel
                     mFilteredGrid.set(p, b);
             }
         }
+        /*
         mSelection.getChildren().clear();
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
@@ -297,6 +295,7 @@ public class LWJGLRenderPanel extends RenderPanel
         LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
         LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
         LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+        */
         mBlocks.getChildren().clear();
         LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid);
         System.out.println("Quads:"+mBlocks.getChildren().size());

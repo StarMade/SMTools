@@ -160,29 +160,25 @@ public class SmoothLogic
         }
         if (type1 > type2)
             type1 = type2; 
-        switch (type1)
-        {
-            case BlockTypes.HULL_COLOR_GREY_ID: return BlockTypes.HULL_COLOR_WEDGE_GREY_ID; 
-            case BlockTypes.HULL_COLOR_PURPLE_ID: return BlockTypes.HULL_COLOR_WEDGE_PURPLE_ID; 
-            case BlockTypes.HULL_COLOR_BROWN_ID: return BlockTypes.HULL_COLOR_WEDGE_BROWN_ID; 
-            case BlockTypes.HULL_COLOR_BLACK_ID: return BlockTypes.HULL_COLOR_WEDGE_BLACK_ID; 
-            case BlockTypes.HULL_COLOR_RED_ID: return BlockTypes.HULL_COLOR_WEDGE_RED_ID; 
-            case BlockTypes.HULL_COLOR_BLUE_ID: return BlockTypes.HULL_COLOR_WEDGE_BLUE_ID; 
-            case BlockTypes.HULL_COLOR_GREEN_ID: return BlockTypes.HULL_COLOR_WEDGE_GREEN_ID; 
-            case BlockTypes.HULL_COLOR_YELLOW_ID: return BlockTypes.HULL_COLOR_WEDGE_YELLOW_ID; 
-            case BlockTypes.HULL_COLOR_WHITE_ID: return BlockTypes.HULL_COLOR_WEDGE_WHITE_ID; 
-            case BlockTypes.GLASS_ID: return BlockTypes.GLASS_WEDGE_ID; 
-            case BlockTypes.POWERHULL_COLOR_GREY: return BlockTypes.POWERHULL_COLOR_WEDGE_GREY; 
-            case BlockTypes.POWERHULL_COLOR_PURPLE: return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
-            case BlockTypes.POWERHULL_COLOR_BROWN: return BlockTypes.POWERHULL_COLOR_WEDGE_BROWN; 
-            case BlockTypes.POWERHULL_COLOR_BLACK: return BlockTypes.POWERHULL_COLOR_WEDGE_BLACK; 
-            case BlockTypes.POWERHULL_COLOR_RED: return BlockTypes.POWERHULL_COLOR_WEDGE_RED; 
-            case BlockTypes.POWERHULL_COLOR_BLUE: return BlockTypes.POWERHULL_COLOR_WEDGE_BLUE; 
-            case BlockTypes.POWERHULL_COLOR_GREEN: return BlockTypes.POWERHULL_COLOR_WEDGE_GREEN; 
-            case BlockTypes.POWERHULL_COLOR_GOLD: return BlockTypes.POWERHULL_COLOR_WEDGE_GOLD; 
-            case BlockTypes.POWERHULL_COLOR_WHITE: return BlockTypes.POWERHULL_COLOR_WEDGE_WHITE; 
-
-        }
+        if (type1 == BlockTypes.HULL_COLOR_GREY_ID) return BlockTypes.HULL_COLOR_WEDGE_GREY_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_PURPLE_ID) return BlockTypes.HULL_COLOR_WEDGE_PURPLE_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BROWN_ID) return BlockTypes.HULL_COLOR_WEDGE_BROWN_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BLACK_ID) return BlockTypes.HULL_COLOR_WEDGE_BLACK_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_RED_ID) return BlockTypes.HULL_COLOR_WEDGE_RED_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BLUE_ID) return BlockTypes.HULL_COLOR_WEDGE_BLUE_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_GREEN_ID) return BlockTypes.HULL_COLOR_WEDGE_GREEN_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_YELLOW_ID) return BlockTypes.HULL_COLOR_WEDGE_YELLOW_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_WHITE_ID) return BlockTypes.HULL_COLOR_WEDGE_WHITE_ID; 
+        if (type1 == BlockTypes.GLASS_ID) return BlockTypes.GLASS_WEDGE_ID; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GREY) return BlockTypes.POWERHULL_COLOR_WEDGE_GREY; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_PURPLE) return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BROWN) return BlockTypes.POWERHULL_COLOR_WEDGE_BROWN; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BLACK) return BlockTypes.POWERHULL_COLOR_WEDGE_BLACK; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_RED) return BlockTypes.POWERHULL_COLOR_WEDGE_RED; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BLUE) return BlockTypes.POWERHULL_COLOR_WEDGE_BLUE; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GREEN) return BlockTypes.POWERHULL_COLOR_WEDGE_GREEN; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GOLD) return BlockTypes.POWERHULL_COLOR_WEDGE_GOLD; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_WHITE) return BlockTypes.POWERHULL_COLOR_WEDGE_WHITE; 
         return type1;
     }
     
@@ -216,29 +212,25 @@ public class SmoothLogic
                 type1 = type2;
             else if (type1 != type3)
                 type1 = (short)Math.min(type1, Math.min(type2, type3));
-        switch (type1)
-        {
-            case BlockTypes.HULL_COLOR_GREY_ID: return BlockTypes.HULL_COLOR_CORNER_GREY_ID; 
-            case BlockTypes.HULL_COLOR_PURPLE_ID: return BlockTypes.HULL_COLOR_CORNER_PURPLE_ID; 
-            case BlockTypes.HULL_COLOR_BROWN_ID: return BlockTypes.HULL_COLOR_CORNER_BROWN_ID; 
-            case BlockTypes.HULL_COLOR_BLACK_ID: return BlockTypes.HULL_COLOR_CORNER_BLACK_ID; 
-            case BlockTypes.HULL_COLOR_RED_ID: return BlockTypes.HULL_COLOR_CORNER_RED_ID; 
-            case BlockTypes.HULL_COLOR_BLUE_ID: return BlockTypes.HULL_COLOR_CORNER_BLUE_ID; 
-            case BlockTypes.HULL_COLOR_GREEN_ID: return BlockTypes.HULL_COLOR_CORNER_GREEN_ID; 
-            case BlockTypes.HULL_COLOR_YELLOW_ID: return BlockTypes.HULL_COLOR_CORNER_YELLOW_ID; 
-            case BlockTypes.HULL_COLOR_WHITE_ID: return BlockTypes.HULL_COLOR_CORNER_WHITE_ID; 
-            case BlockTypes.GLASS_ID: return BlockTypes.GLASS_CORNER_ID; 
-            case BlockTypes.POWERHULL_COLOR_GREY: return BlockTypes.POWERHULL_COLOR_CORNER_GREY; 
-            case BlockTypes.POWERHULL_COLOR_PURPLE: return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
-            case BlockTypes.POWERHULL_COLOR_BROWN: return BlockTypes.POWERHULL_COLOR_CORNER_BROWN; 
-            case BlockTypes.POWERHULL_COLOR_BLACK: return BlockTypes.POWERHULL_COLOR_CORNER_BLACK; 
-            case BlockTypes.POWERHULL_COLOR_RED: return BlockTypes.POWERHULL_COLOR_CORNER_RED; 
-            case BlockTypes.POWERHULL_COLOR_BLUE: return BlockTypes.POWERHULL_COLOR_CORNER_BLUE; 
-            case BlockTypes.POWERHULL_COLOR_GREEN: return BlockTypes.POWERHULL_COLOR_CORNER_GREEN; 
-            case BlockTypes.POWERHULL_COLOR_GOLD: return BlockTypes.POWERHULL_COLOR_CORNER_GOLD; 
-            case BlockTypes.POWERHULL_COLOR_WHITE: return BlockTypes.POWERHULL_COLOR_CORNER_WHITE; 
-
-        }
+        if (type1 == BlockTypes.HULL_COLOR_GREY_ID) return BlockTypes.HULL_COLOR_CORNER_GREY_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_PURPLE_ID) return BlockTypes.HULL_COLOR_CORNER_PURPLE_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BROWN_ID) return BlockTypes.HULL_COLOR_CORNER_BROWN_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BLACK_ID) return BlockTypes.HULL_COLOR_CORNER_BLACK_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_RED_ID) return BlockTypes.HULL_COLOR_CORNER_RED_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_BLUE_ID) return BlockTypes.HULL_COLOR_CORNER_BLUE_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_GREEN_ID) return BlockTypes.HULL_COLOR_CORNER_GREEN_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_YELLOW_ID) return BlockTypes.HULL_COLOR_CORNER_YELLOW_ID; 
+        if (type1 == BlockTypes.HULL_COLOR_WHITE_ID) return BlockTypes.HULL_COLOR_CORNER_WHITE_ID; 
+        if (type1 == BlockTypes.GLASS_ID) return BlockTypes.GLASS_CORNER_ID; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GREY) return BlockTypes.POWERHULL_COLOR_CORNER_GREY; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_PURPLE) return BlockTypes.POWERHULL_COLOR_WEDGE_PURPLE; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BROWN) return BlockTypes.POWERHULL_COLOR_CORNER_BROWN; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BLACK) return BlockTypes.POWERHULL_COLOR_CORNER_BLACK; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_RED) return BlockTypes.POWERHULL_COLOR_CORNER_RED; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_BLUE) return BlockTypes.POWERHULL_COLOR_CORNER_BLUE; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GREEN) return BlockTypes.POWERHULL_COLOR_CORNER_GREEN; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_GOLD) return BlockTypes.POWERHULL_COLOR_CORNER_GOLD; 
+        if (type1 == BlockTypes.POWERHULL_COLOR_WHITE) return BlockTypes.POWERHULL_COLOR_CORNER_WHITE; 
         return type1;
     }
 

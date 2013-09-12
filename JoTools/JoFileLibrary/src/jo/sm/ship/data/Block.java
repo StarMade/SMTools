@@ -1,6 +1,6 @@
 package jo.sm.ship.data;
 
-import jo.sm.data.BlockTypes;
+import jo.sm.ui.BlockTypeColors;
 
 public class Block
 {
@@ -37,8 +37,8 @@ public class Block
     public void setBlockID(short blockID)
     {
         mBlockID = blockID;
-        if (BlockTypes.isPowerHull(mBlockID) || BlockTypes.isPowerWedge(mBlockID) || BlockTypes.isPowerCorner(mBlockID))
-            mHitPoints = 200;
+        if (BlockTypeColors.BLOCK_HITPOINTS.containsKey(mBlockID))
+            mHitPoints = BlockTypeColors.BLOCK_HITPOINTS.get(mBlockID);
         else
             mHitPoints = 100;
     }

@@ -23,36 +23,24 @@ public class ColorPropertyEditor extends PropertyEditorSupport
         if (c == null)
             c = BlockTypes.HULL_COLOR_GREY_ID;
         String txt = "Grey";
-        switch (c)
-        {
-            case BlockTypes.HULL_COLOR_GREY_ID:
-                txt = "Grey";
-                break;
-            case BlockTypes.HULL_COLOR_PURPLE_ID:
-                txt = "Purple";
-                break;
-            case BlockTypes.HULL_COLOR_BROWN_ID:
-                txt = "Brown";
-                break;
-            case BlockTypes.HULL_COLOR_BLACK_ID:
-                txt = "Black";
-                break;
-            case BlockTypes.HULL_COLOR_RED_ID:
-                txt = "Red";
-                break;
-            case BlockTypes.HULL_COLOR_BLUE_ID:
-                txt = "Blue";
-                break;
-            case BlockTypes.HULL_COLOR_GREEN_ID:
-                txt = "Green";
-                break;
-            case BlockTypes.HULL_COLOR_YELLOW_ID:
-                txt = "Yellow";
-                break;
-            case BlockTypes.HULL_COLOR_WHITE_ID:
-                txt = "White";
-                break;
-        }
+        if (c == BlockTypes.HULL_COLOR_GREY_ID)
+            return "Grey";
+        if (c == BlockTypes.HULL_COLOR_PURPLE_ID)
+            return "Purple";
+        if (c == BlockTypes.HULL_COLOR_BROWN_ID)
+            return "Brown";
+        if (c == BlockTypes.HULL_COLOR_BLACK_ID)
+            return "Black";
+        if (c == BlockTypes.HULL_COLOR_BLUE_ID)
+            return "Blue";
+        if (c == BlockTypes.HULL_COLOR_RED_ID)
+            return "Red";
+        if (c == BlockTypes.HULL_COLOR_GREEN_ID)
+            return "Green";
+        if (c == BlockTypes.HULL_COLOR_YELLOW_ID)
+            return "Yellow";
+        if (c == BlockTypes.HULL_COLOR_WHITE_ID)
+            return "White";
         //System.out.println("Getting "+getValue()+" -> "+txt);
         return txt;
     }
