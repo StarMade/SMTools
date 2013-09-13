@@ -20,4 +20,5 @@ BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.ship.reflect.ReflectPlugin,
  jo.sm.plugins.ship.rotate.RotatePlugin,
  jo.sm.plugins.ship.scale.ScalePlugin,
- jo.sm.plugins.ship.stripes.StripesPlugin
+ jo.sm.plugins.ship.stripes.StripesPlugin,
+ jo.sm.plugins.ship.text.TextPlugin
