@@ -624,7 +624,6 @@ public class BlockTypeColors
 		{
 			BufferedImage texture = getTextureImage(i);
 			Rectangle r = getAllTextureLocation(i);
-			System.out.println(i+" -> "+r.x+","+r.y+" x "+r.width+","+r.height);
 			g.drawImage(texture, r.x, r.y, r.x + r.width, r.y + r.height, 0, 0, texture.getWidth(), texture.getHeight(), null);
 		}
 	}
@@ -633,8 +632,7 @@ public class BlockTypeColors
 	{
         int j = textureID % mAllTexturesImagesPerSide;
         int k = textureID / mAllTexturesImagesPerSide;
-        int max = mAllTexturesImagesPerSide*mAllTexturesPixelsPerImage;
-        return new Rectangle(j*mAllTexturesPixelsPerImage, max - k*mAllTexturesPixelsPerImage - mAllTexturesPixelsPerImage, 
+        return new Rectangle(j*mAllTexturesPixelsPerImage, 1024 - k*mAllTexturesPixelsPerImage - mAllTexturesPixelsPerImage, 
         		mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage);
 	}
 

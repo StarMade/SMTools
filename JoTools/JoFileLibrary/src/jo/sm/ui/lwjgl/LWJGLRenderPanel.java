@@ -162,7 +162,10 @@ public class LWJGLRenderPanel extends RenderPanel
                         mUniverse.getCamera().pitch(-dy*PIXEL_TO_RADIANS);
                 }
                 else
+                {
+                    System.out.println("Pivot around "+mMousePivotAround);
                     mUniverse.getCamera().rotateAround(mMousePivotAround, new Point3f(dx*PIXEL_TO_RADIANS, dy*PIXEL_TO_RADIANS, 0));
+                }
                 updateTransform();
             }
         }

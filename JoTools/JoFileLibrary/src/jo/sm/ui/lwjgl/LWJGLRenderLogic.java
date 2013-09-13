@@ -174,9 +174,9 @@ public class LWJGLRenderLogic
         info.verts.add(right);
         info.verts.add(bottom);
         info.indexes.add((short)(info.verts.size() - 4));
-        info.indexes.add((short)(info.verts.size() - 3));
-        info.indexes.add((short)(info.verts.size() - 2));
         info.indexes.add((short)(info.verts.size() - 1));
+        info.indexes.add((short)(info.verts.size() - 2));
+        info.indexes.add((short)(info.verts.size() - 3));
         if (info.colors != null)
         {
 	        Color c = BlockTypeColors.getFillColor(type);
