@@ -633,14 +633,19 @@ public class BlockTypeColors
 	{
         int j = textureID % mAllTexturesImagesPerSide;
         int k = textureID / mAllTexturesImagesPerSide;
-        return new Rectangle(j*mAllTexturesPixelsPerImage, k*mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage);
+        int max = mAllTexturesImagesPerSide*mAllTexturesPixelsPerImage;
+        return new Rectangle(j*mAllTexturesPixelsPerImage, max - k*mAllTexturesPixelsPerImage - mAllTexturesPixelsPerImage, 
+        		mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage);
 	}
 
 	public static Rectangle2D.Float getAllTextureLocation(short blockID)
 	{
 		int textureID = BLOCK_TEXTURE_IDS.get(blockID);
-		Rectangle px = getAllTextureLocation(textureID);
-		Rectangle2D.Float abs = new Rectangle2D.Float(px.x/1024f, px.y/1024f, px.width/1024f, px.height/1024f);
+        int j = textureID % mAllTexturesImagesPerSide;
+        int k = textureID / mAllTexturesImagesPerSide;
+        float effectiveWidth = mAllTexturesImagesPerSide*mAllTexturesPixelsPerImage/1024f;
+        float chunk = effectiveWidth/mAllTexturesImagesPerSide;
+		Rectangle2D.Float abs = new Rectangle2D.Float(j*chunk, k*chunk, chunk, chunk);
         return abs;
 	}
     

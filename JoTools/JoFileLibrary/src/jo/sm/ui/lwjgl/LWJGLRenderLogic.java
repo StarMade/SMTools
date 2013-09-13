@@ -189,7 +189,6 @@ public class LWJGLRenderLogic
         if (info.uv != null)
         {
         	Rectangle2D.Float rec = BlockTypeColors.getAllTextureLocation(type);
-        	rec.y = 1f - rec.y;
         	info.uv.add(new Point2f(rec.x, rec.y));
         	info.uv.add(new Point2f(rec.x + rec.width, rec.y));
         	info.uv.add(new Point2f(rec.x + rec.width, rec.y + rec.height));
