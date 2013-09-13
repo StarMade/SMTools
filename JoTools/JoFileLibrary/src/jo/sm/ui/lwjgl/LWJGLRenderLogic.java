@@ -1,6 +1,7 @@
 package jo.sm.ui.lwjgl;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import jo.sm.ship.data.Block;
 import jo.sm.ui.BlockTypeColors;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.tri.JGLObj;
+import jo.util.lwjgl.win.JGLTextureCache;
 import jo.vecmath.Color3f;
 import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
@@ -19,19 +21,34 @@ import jo.vecmath.logic.MathUtils;
 
 public class LWJGLRenderLogic
 {
-    public static void addBlocks(JGLGroup group, SparseMatrix<Block> grid)
+	private static int	mTextureID = -1;
+	
+    public static void addBlocks(JGLGroup group, SparseMatrix<Block> grid, boolean plain)
     {
+    	if (mTextureID < 0)
+    	{
+    		BlockTypeColors.loadBlockIcons();
+    		JGLTextureCache.register(1, BlockTypeColors.mAllTextures);
+    		mTextureID = 1;
+    	}
         MeshInfo info = new MeshInfo();
         info.verts = new ArrayList<Point3f>();
         info.indexes = new ArrayList<Short>();
-        info.colors = new ArrayList<Color3f>();
+        if (plain)
+        	info.colors = new ArrayList<Color3f>();
+        else
+        	info.uv = new ArrayList<Point2f>();
         for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
             addBlock(info, grid, i.next());
         JGLObj obj = new JGLObj();
         obj.setMode(JGLObj.QUADS);
         obj.setVertices(info.verts);
         obj.setIndices(info.indexes);
-        obj.setColors(info.colors);
+        if (plain)
+        	obj.setColors(info.colors);
+        else
+        	obj.setTextures(info.uv);
+        obj.setTextureID(mTextureID);
         group.add(obj);
     }
 
@@ -160,12 +177,24 @@ public class LWJGLRenderLogic
         info.indexes.add((short)(info.verts.size() - 3));
         info.indexes.add((short)(info.verts.size() - 2));
         info.indexes.add((short)(info.verts.size() - 1));
-        Color c = BlockTypeColors.getFillColor(type);
-        Color3f color = new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);
-        info.colors.add(color);
-        info.colors.add(color);
-        info.colors.add(color);
-        info.colors.add(color);
+        if (info.colors != null)
+        {
+	        Color c = BlockTypeColors.getFillColor(type);
+	        Color3f color = new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);
+	        info.colors.add(color);
+	        info.colors.add(color);
+	        info.colors.add(color);
+	        info.colors.add(color);
+        }
+        if (info.uv != null)
+        {
+        	Rectangle2D.Float rec = BlockTypeColors.getAllTextureLocation(type);
+        	rec.y = 1f - rec.y;
+        	info.uv.add(new Point2f(rec.x, rec.y));
+        	info.uv.add(new Point2f(rec.x + rec.width, rec.y));
+        	info.uv.add(new Point2f(rec.x + rec.width, rec.y + rec.height));
+        	info.uv.add(new Point2f(rec.x, rec.y + rec.height));
+        }
     }
 }
 
@@ -174,4 +203,5 @@ class MeshInfo
     List<Point3f> verts;
     List<Short> indexes;
     List<Color3f> colors; 
+    List<Point2f> uv; 
 }

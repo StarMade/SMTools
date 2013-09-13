@@ -1,7 +1,10 @@
 package jo.sm.ui;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Paint;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,15 +20,15 @@ import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
 import jo.sm.data.BlockTypes;
 import jo.sm.logic.IntegerUtils;
 import jo.sm.logic.ShortUtils;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.logic.StringUtils;
 import jo.sm.logic.XMLUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class BlockTypeColors
 {
@@ -518,43 +521,44 @@ public class BlockTypeColors
     private static boolean     mBlockIconsLoaded = false;
     private static final Map<Short,ImageIcon> mBlockIcons = new HashMap<Short, ImageIcon>();
     private static final List<BufferedImage> mTextureMaps = new ArrayList<BufferedImage>();
+    public static int	mAllTexturesImagesPerSide;
+    public static int	mAllTexturesPixelsPerImage;
+    public static BufferedImage mAllTextures;
 
     public static ImageIcon getBlockImage(short blockID)
     {
     	if (blockID >= BlockTypes.SPECIAL)
     		return getSpecialBlockImage(blockID);
-        if (!mBlockIconsLoaded)
-            loadBlockIcons();
+        loadBlockIcons();
         if (!mBlockIcons.containsKey(blockID))
         {
             if (!BLOCK_TEXTURE_IDS.containsKey(blockID))
                 return null;
             int textureID = BLOCK_TEXTURE_IDS.get(blockID);
-            int j = textureID % 256 % 16;
-            int k = textureID % 256 / 16;
-            BufferedImage map = mTextureMaps.get(textureID / 256);
-            int hScale = map.getWidth()/16;
-            int vScale = map.getHeight()/16;
-            BufferedImage localBufferedImage = map.getSubimage(j*hScale, k*vScale, hScale, vScale);
+            BufferedImage localBufferedImage = getTextureImage(textureID);
             mBlockIcons.put(blockID, new ImageIcon(localBufferedImage));
         }
         return mBlockIcons.get(blockID);
     }
 
-    private static void loadBlockIcons()
+    public static BufferedImage getTextureImage(int textureID)
     {
+        int j = textureID % 256 % 16;
+        int k = textureID % 256 / 16;
+        BufferedImage map = mTextureMaps.get(textureID / 256);
+        int hScale = map.getWidth()/16;
+        int vScale = map.getHeight()/16;
+        BufferedImage localBufferedImage = map.getSubimage(j*hScale, k*vScale, hScale, vScale);
+        return localBufferedImage;
+    }
+
+    public static void loadBlockIcons()
+    {
+        if (mBlockIconsLoaded)
+        	return;
         try
         {
-            for (int i = 0; i < 256; i++)
-            {
-                File f = new File(
-                    StarMadeLogic.getInstance().getBaseDir(),
-                    "data/textures/block/t"+StringUtils.zeroPrefix(i, 3)+".png");
-                if (!f.exists())
-                    break;
-                BufferedImage img = ImageIO.read(f);
-                mTextureMaps.add(img);
-            }
+            loadTextureMaps();
             Properties blockIDs = new Properties();
             File propsFile = new File(StarMadeLogic.getInstance().getBaseDir(), "data/config/BlockTypes.properties");
             InputStream is = new FileInputStream(propsFile);
@@ -598,6 +602,47 @@ public class BlockTypeColors
         }
         mBlockIconsLoaded = true;
     }
+
+	private static void loadTextureMaps() throws IOException
+	{
+		for (int i = 0; i < 256; i++)
+		{
+		    File f = new File(
+		        StarMadeLogic.getInstance().getBaseDir(),
+		        "data/textures/block/t"+StringUtils.zeroPrefix(i, 3)+".png");
+		    if (!f.exists())
+		        break;
+		    BufferedImage img = ImageIO.read(f);
+		    mTextureMaps.add(img);
+		}
+		int numTextures = 16*16*mTextureMaps.size();
+		mAllTexturesImagesPerSide = (int)Math.ceil(Math.sqrt(numTextures));
+		mAllTexturesPixelsPerImage = 1024/mAllTexturesImagesPerSide;
+		mAllTextures = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics g = mAllTextures.getGraphics();
+		for (int i = 0; i < numTextures; i++)
+		{
+			BufferedImage texture = getTextureImage(i);
+			Rectangle r = getAllTextureLocation(i);
+			System.out.println(i+" -> "+r.x+","+r.y+" x "+r.width+","+r.height);
+			g.drawImage(texture, r.x, r.y, r.x + r.width, r.y + r.height, 0, 0, texture.getWidth(), texture.getHeight(), null);
+		}
+	}
+	
+	private static Rectangle getAllTextureLocation(int textureID)
+	{
+        int j = textureID % mAllTexturesImagesPerSide;
+        int k = textureID / mAllTexturesImagesPerSide;
+        return new Rectangle(j*mAllTexturesPixelsPerImage, k*mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage, mAllTexturesPixelsPerImage);
+	}
+
+	public static Rectangle2D.Float getAllTextureLocation(short blockID)
+	{
+		int textureID = BLOCK_TEXTURE_IDS.get(blockID);
+		Rectangle px = getAllTextureLocation(textureID);
+		Rectangle2D.Float abs = new Rectangle2D.Float(px.x/1024f, px.y/1024f, px.width/1024f, px.height/1024f);
+        return abs;
+	}
     
     private static Map<Short,ImageIcon> SPECIAL_ICONS = new HashMap<Short, ImageIcon>();
     

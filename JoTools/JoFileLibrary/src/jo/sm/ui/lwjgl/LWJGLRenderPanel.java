@@ -297,7 +297,7 @@ public class LWJGLRenderPanel extends RenderPanel
         LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
         */
         mBlocks.getChildren().clear();
-        LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid);
+        LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid, mPlainGraphics);
         System.out.println("Quads:"+mBlocks.getChildren().size());
 
 /*

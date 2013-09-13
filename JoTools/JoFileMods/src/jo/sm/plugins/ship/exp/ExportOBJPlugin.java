@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import javax.imageio.ImageIO;
+
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ui.BlockTypeColors;
 import jo.sm.ui.lwjgl.LWJGLRenderLogic;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLNode;
@@ -69,14 +72,21 @@ public class ExportOBJPlugin implements IBlocksPlugin
         try
         {
         	JGLGroup quads = new JGLGroup();
-        	LWJGLRenderLogic.addBlocks(quads, original);
+        	LWJGLRenderLogic.addBlocks(quads, original, false);
             writeFile(params.getFile(), quads);
+            writeTexture(params.getFile());
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private void writeTexture(String objFile) throws IOException
+    {
+    	String pngFile = objFile.substring(0, objFile.length() - 4) + ".png";
+    	ImageIO.write(BlockTypeColors.mAllTextures, "PNG", new File(pngFile));
     }
     
     private void writeFile(String objFile, JGLGroup quads) throws IOException
