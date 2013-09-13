@@ -8,7 +8,7 @@ import java.util.Properties;
 import jo.sm.mods.IBlocksPlugin;
 import jo.vecmath.Point3i;
 
-public class StarMade
+public class StarMade extends PCSBean
 {
     private File  mBaseDir;
     private List<String>    mBlueprints;
@@ -20,6 +20,7 @@ public class StarMade
     private short           mSelectedBlockType;
     private Point3i			mSelectedUpper;
     private Point3i			mSelectedLower;
+    private String			mStatusMessage;
     
     public StarMade()
     {
@@ -114,5 +115,17 @@ public class StarMade
 	public void setSelectedLower(Point3i selectedLower)
 	{
 		mSelectedLower = selectedLower;
+	}
+
+	public String getStatusMessage()
+	{
+		return mStatusMessage;
+	}
+
+	public void setStatusMessage(String statusMessage)
+	{
+		queuePropertyChange("statusMessage", mStatusMessage, statusMessage);
+		mStatusMessage = statusMessage;
+		firePropertyChange();
 	}
 }

@@ -1,7 +1,8 @@
 package jo.sm.plugins.ship.replace;
 
+import java.util.Iterator;
+
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
@@ -57,20 +58,19 @@ public class ReplacePlugin implements IBlocksPlugin
     {
         ReplaceParameters params = (ReplaceParameters)p;
         //System.out.println("Params: color1="+params.getColor1()+", color2="+params.getColor2());
-        Point3i lower = new Point3i();
-        Point3i upper = new Point3i();
-        original.getBounds(lower, upper);
+        cb.setStatus("Replacing colors");
+        cb.startTask(original.size());
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (CubeIterator i = new CubeIterator(lower, upper); i.hasNext(); )
+        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
-            if (b == null)
-                continue;
             if (BlockTypes.isAnyHull(b.getBlockID()))
                 b = modify(xyz, b, params);
             modified.set(xyz, b);
+            cb.workTask(1);
         }
+        cb.endTask();
         return modified;
     }
 
@@ -81,10 +81,7 @@ public class ReplacePlugin implements IBlocksPlugin
     	{
     		short newColor = BlockTypes.getColoredBlock(b.getBlockID(), params.getColor2());
     		if (newColor >= 0)
-    		{
-    			b = new Block(b);
     			b.setBlockID(newColor);
-    		}
     	}
         return b;
     }

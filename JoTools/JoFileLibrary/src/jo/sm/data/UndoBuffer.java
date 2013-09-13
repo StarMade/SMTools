@@ -38,6 +38,8 @@ public class UndoBuffer
     
     public void checkpoint(SparseMatrix<Block> grid)
     {
+    	if (grid.size() > 10000)
+    		return;
         while (mBuffer.size() > mPointer)
             mBuffer.remove(mPointer);
         mBuffer.add(GridLogic.toBytes(grid));

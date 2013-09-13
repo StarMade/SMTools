@@ -21,8 +21,8 @@ public class BegPanel extends JPanel
     private static final int TICK = 200;
     private static final int CHOP = 120;
 
-    private static final String THE_RAIDERS_LAMENT_AUDIO = "http://podiobooks.com/title/the-raiders-lament";
-    private static final String THE_RAIDERS_LAMENT = "https://www.smashwords.com/books/view/347157";
+    public static final String THE_RAIDERS_LAMENT_AUDIO = "http://podiobooks.com/title/the-raiders-lament";
+    public static final String THE_RAIDERS_LAMENT = "https://www.smashwords.com/books/view/347157";
     
     private int mMessageOffset;
     private int mRepeats;
@@ -116,15 +116,17 @@ public class BegPanel extends JPanel
         }
     }
 
-    private static final String MESSAGE = "This software is made freely available with no charge or limitation. "
+    public static final String MESSAGE = "This software is made freely available with no charge or limitation. "
             + "Even the source is included. "
-            + "It is distributed as \"begware\", and here is the begging. "
-            + "If you like and use this software, please go and download my book \"The Raider's Lament\". "
-            + "It's a light hearted Sci-Fi novel that's a fun waste of time. "
-            + "You don't have to actually read/listen to it. "
-            + "(The recording is not the best.) "
-            + "Clocking up the downloads is appreciated. "
-            + "If you *really* like this software (or the story) you could buy or donate to it. "
-            + "Proceeds will go towards buying my daughter the Minecraft Lego Kit! "
-            + "                                                           ";
+            + "It was originally distributed as \"begware\", promoting my book \"The Raider's Lament\". "
+            + "I wanted enough downloads/sales to earn enough to buy a Minecraft Lego kit for my daughter. "
+            + "The good people of this community helped me reach the target, and a huge shout out to Kahulbane"
+            + " for donating quite a bit of it! "
+            + "So I've now officially considered this software 'paid for' and have removed the begware nagger. "
+            + "If you are interested you can still download my book. I'd appreciate it, even more if you read it "
+            + "and review it. You can still choose to donate by buying. Further proceeds will go towards buying "
+            + "the other Minecraft kids for my daughter! "
+            + "The buttons below will take you to the audiobook page (free) and the"
+            + "eBook page (first 20%, the full book for $.99. "
+            + "Thank you for using and supporting SMEdit. ";
 }

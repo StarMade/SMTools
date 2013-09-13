@@ -1,7 +1,8 @@
 package jo.sm.plugins.ship.stripes;
 
+import java.util.Iterator;
+
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
@@ -60,11 +61,10 @@ public class StripesPlugin implements IBlocksPlugin
         //        +", X="+params.isXAxis()+","+params.getXWidth1()+","+params.getXWidth2()
         //        +", Y="+params.isYAxis()+","+params.getYWidth1()+","+params.getYWidth2()
         //        +", Z="+params.isZAxis()+","+params.getZWidth1()+","+params.getZWidth2());
-        Point3i lower = new Point3i();
-        Point3i upper = new Point3i();
-        original.getBounds(lower, upper);
+        cb.setStatus("Adding stripes");
+        cb.startTask(original.size());
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (CubeIterator i = new CubeIterator(lower, upper); i.hasNext(); )
+        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
@@ -73,7 +73,9 @@ public class StripesPlugin implements IBlocksPlugin
             if (BlockTypes.isAnyHull(b.getBlockID()))
                 b = modify(xyz, b, params);
             modified.set(xyz, b);
+            cb.workTask(1);
         }
+        cb.endTask();
         return modified;
     }
 

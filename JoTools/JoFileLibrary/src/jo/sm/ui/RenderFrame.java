@@ -102,7 +102,7 @@ public class RenderFrame extends JFrame implements WindowListener
         menuBar.add(menuModify);
         getContentPane().add(BorderLayout.WEST, new EditPanel(mClient));
         getContentPane().add(BorderLayout.CENTER, mClient);
-        getContentPane().add(BorderLayout.SOUTH, new BegPanel());
+        getContentPane().add(BorderLayout.SOUTH, new StatusPanel());
         // link
         menuModify.addMenuListener(new MenuListener() {            
             @Override
