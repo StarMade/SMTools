@@ -108,6 +108,18 @@ public class ExportOBJPlugin implements IBlocksPlugin
         			wtr.write("v "+x+" "+y+" "+z);
         			wtr.newLine();
         		}
+        		FloatBuffer texts = obj.getTexturesBuffer();
+        		texts.rewind();
+        		if (texts != null)
+				{
+            		for (int i = 0; i < vertCount; i++)
+            		{
+	        			float u = texts.get();
+	        			float v = texts.get();
+	        			wtr.write("vt "+u+" "+v);
+	        			wtr.newLine();
+            		}
+				}
         		int faceCount = obj.getIndices();
         		int facePoints = (obj.getMode() == JGLObj.TRIANGLES) ? 3 : 4;
         		ShortBuffer indexes = obj.getIndexBuffer();
