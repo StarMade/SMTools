@@ -7,7 +7,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 
-import jo.sm.logic.ConvertLogic;
+import jo.sm.logic.utils.ConvertLogic;
 
 public class GenericPropertyEditor implements PropertyEditor
 {

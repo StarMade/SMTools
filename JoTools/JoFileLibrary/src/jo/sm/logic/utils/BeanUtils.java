@@ -6,7 +6,7 @@
  * To enable and disable the creation of file comments go to
  * Window>Preferences>Java>Code Generation.
  */
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

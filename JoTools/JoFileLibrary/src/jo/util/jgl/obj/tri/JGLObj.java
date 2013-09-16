@@ -7,8 +7,8 @@ import java.nio.ShortBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-import jo.sm.logic.FloatUtils;
-import jo.sm.logic.ShortUtils;
+import jo.sm.logic.utils.FloatUtils;
+import jo.sm.logic.utils.ShortUtils;
 import jo.util.jgl.obj.JGLNode;
 import jo.vecmath.Color3f;
 import jo.vecmath.Color4f;

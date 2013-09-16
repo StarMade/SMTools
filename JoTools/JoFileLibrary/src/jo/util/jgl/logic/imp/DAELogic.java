@@ -9,11 +9,10 @@ import java.util.StringTokenizer;
 
 import jo.vecmath.Point3f;
 import jo.vecmath.Point4f;
-
-import jo.sm.logic.FloatUtils;
-import jo.sm.logic.IntegerUtils;
-import jo.sm.logic.StringUtils;
-import jo.sm.logic.XMLUtils;
+import jo.sm.logic.utils.FloatUtils;
+import jo.sm.logic.utils.IntegerUtils;
+import jo.sm.logic.utils.StringUtils;
+import jo.sm.logic.utils.XMLUtils;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLNode;
 import jo.util.jgl.obj.tri.JGLObj;
@@ -80,7 +79,7 @@ public class DAELogic
                     System.out.println("  no p node");
                     continue;
                 }
-                List<Short> triangles = new ArrayList<Short>();
+                //List<Short> triangles = new ArrayList<Short>();
                 String triTxt = XMLUtils.getText(p);
                 StringTokenizer st = new StringTokenizer(triTxt, " \r\n\t");
                 int count = st.countTokens();                        

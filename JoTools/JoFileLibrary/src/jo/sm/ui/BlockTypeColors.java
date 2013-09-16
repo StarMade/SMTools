@@ -21,11 +21,11 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import jo.sm.data.BlockTypes;
-import jo.sm.logic.IntegerUtils;
-import jo.sm.logic.ShortUtils;
 import jo.sm.logic.StarMadeLogic;
-import jo.sm.logic.StringUtils;
-import jo.sm.logic.XMLUtils;
+import jo.sm.logic.utils.IntegerUtils;
+import jo.sm.logic.utils.ShortUtils;
+import jo.sm.logic.utils.StringUtils;
+import jo.sm.logic.utils.XMLUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -524,6 +524,7 @@ public class BlockTypeColors
     public static int	mAllTexturesImagesPerSide;
     public static int	mAllTexturesPixelsPerImage;
     public static BufferedImage mAllTextures;
+    public static Properties mBlockTypes;
 
     public static ImageIcon getBlockImage(short blockID)
     {
@@ -559,10 +560,10 @@ public class BlockTypeColors
         try
         {
             loadTextureMaps();
-            Properties blockIDs = new Properties();
+            mBlockTypes = new Properties();
             File propsFile = new File(StarMadeLogic.getInstance().getBaseDir(), "data/config/BlockTypes.properties");
             InputStream is = new FileInputStream(propsFile);
-            blockIDs.load(is);
+            mBlockTypes.load(is);
             is.close();
             File xmlFile = new File(StarMadeLogic.getInstance().getBaseDir(), "data/config/BlockConfig.xml");
             Document doc = XMLUtils.readFile(xmlFile);
@@ -570,12 +571,12 @@ public class BlockTypeColors
             {
                 String name = XMLUtils.getAttribute(n, "name");
                 String type = XMLUtils.getAttribute(n, "type");
-                if (!blockIDs.containsKey(type))
+                if (!mBlockTypes.containsKey(type))
                 {
                     System.err.println("No ID found for '"+type+"', - "+name);
                     continue;
                 }
-                short id = ShortUtils.parseShort(blockIDs.get(type));                    
+                short id = ShortUtils.parseShort(mBlockTypes.get(type));                    
                 //int icon = IntegerUtils.parseInt(XMLUtils.getAttribute(n, "icon"));
                 int textureID = IntegerUtils.parseInt(XMLUtils.getAttribute(n, "textureId"));
                 short hitPoints = ShortUtils.parseShort(XMLUtils.getTextTag(n, "Hitpoints"));

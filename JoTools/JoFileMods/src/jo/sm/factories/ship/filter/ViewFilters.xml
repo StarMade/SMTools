@@ -1,0 +1,45 @@
+<filters author="Jo Jaquinta">
+	<filter title="All" description="Show all blocks" priority="10">
+		<block id=""/>
+	</filter>
+	<filter title="Power" description="View power blocks" priority="20">
+		<block type="POWER_COIL_ID"/>
+		<block type="POWER_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Weapons" description="View weapon blocks" priority="21">
+		<block type="WEAPON_CONTROLLER_ID"/>
+		<block type="WEAPON_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Engine" description="View engine blocks" priority="21">
+		<block type="THRUSTER_ID"/>
+		<block type="COIL_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Salvage" description="View salvage blocks" priority="21">
+		<block type="SALVAGE_CONTROLLER_ID"/>
+		<block type="CORE_ID"/>
+		<block type="SALVAGE_ID"/>
+	</filter>
+	<filter title="Repair" description="View repair blocks" priority="21">
+		<block type="REPAIR_CONTROLLER_ID"/>
+		<block type="REPAIR_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Missile/Dumb" description="View dumb missile blocks" priority="21">
+		<block type="MISSILE_DUMB_CONTROLLER_ID"/>
+		<block type="MISSILE_DUMB_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Missile/Heat" description="View heat missile blocks" priority="21">
+		<block type="MISSILE_HEAT_CONTROLLER_ID"/>
+		<block type="MISSILE_HEAT_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+	<filter title="Missile/FAFO" description="View FAFO missile blocks" priority="21">
+		<block type="MISSILE_FAFO_CONTROLLER_ID"/>
+		<block type="MISSILE_FAFO_ID"/>
+		<block type="CORE_ID"/>
+	</filter>
+</filters>

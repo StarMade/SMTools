@@ -14,11 +14,11 @@ public class SelectAllPlugin implements IBlocksPlugin
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
-        { TYPE_SHIP, SUBTYPE_EDIT, 11 },
-        { TYPE_STATION, SUBTYPE_EDIT, 11 },
-        { TYPE_SHOP, SUBTYPE_EDIT, 11 },
-        { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 11 },
-        { TYPE_PLANET, SUBTYPE_EDIT, 11 },
+        { TYPE_SHIP, SUBTYPE_EDIT, 23 },
+        { TYPE_STATION, SUBTYPE_EDIT, 23 },
+        { TYPE_SHOP, SUBTYPE_EDIT, 23 },
+        { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 23 },
+        { TYPE_PLANET, SUBTYPE_EDIT, 23 },
         };
 
     @Override

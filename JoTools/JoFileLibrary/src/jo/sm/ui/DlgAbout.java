@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import jo.sm.logic.ResourceUtils;
+import jo.sm.logic.utils.ResourceUtils;
 
 @SuppressWarnings("serial")
 public class DlgAbout extends JDialog

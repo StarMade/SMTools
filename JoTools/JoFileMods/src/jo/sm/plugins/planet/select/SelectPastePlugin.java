@@ -18,11 +18,11 @@ public class SelectPastePlugin implements IBlocksPlugin
     public static final String  DESC            = "Insert selection from clipboard";
     public static final String  AUTH            = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = {
-            { TYPE_SHIP, SUBTYPE_EDIT, 12 },
-            { TYPE_STATION, SUBTYPE_EDIT, 12 },
-            { TYPE_SHOP, SUBTYPE_EDIT, 12 },
-            { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 12 },
-            { TYPE_PLANET, SUBTYPE_EDIT, 12 }, };
+            { TYPE_SHIP, SUBTYPE_EDIT, 14 },
+            { TYPE_STATION, SUBTYPE_EDIT, 14 },
+            { TYPE_SHOP, SUBTYPE_EDIT, 14 },
+            { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 14 },
+            { TYPE_PLANET, SUBTYPE_EDIT, 14 }, };
 
     @Override
     public String getName()

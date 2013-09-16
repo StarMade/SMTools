@@ -14,8 +14,8 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import jo.sm.data.SparseMatrix;
-import jo.sm.logic.DebugLogic;
 import jo.sm.logic.StarMadeLogic;
+import jo.sm.logic.utils.DebugLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Data;

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import jo.sm.logic.ArrayUtils;
+import jo.sm.logic.utils.ArrayUtils;
 
 public class JGLMeshCache
 {

@@ -31,13 +31,14 @@ public class MenuLogic
         Arrays.sort(priorities);
         Map<String,JMenu> cascades = new HashMap<String, JMenu>();
         int lastPriority = 0;
+        int menuIdx = findStart(menu);
         for (int i = 0; i < priorities.length; i++)
         {
             if ((i > 0) && (priorities[i]/10 > lastPriority/10))
             {
                 JSeparator sep = new JSeparator();
-                sep.setToolTipText("plugin");
-                menu.add(sep);
+                sep.setName("plugin");
+                menu.add(sep, menuIdx++);
             }
             lastPriority = priorities[i];
             List<IBlocksPlugin> pluginsAtPriority = orderMap.get(priorities[i]);
@@ -53,9 +54,9 @@ public class MenuLogic
                     if (submenu == null)
                     {
                         submenu = new JMenu(cascadeName);
-                        submenu.setToolTipText("plugin");
+                        submenu.setName("plugin");
                         cascades.put(cascadeName, submenu);
-                        menu.add(submenu);
+                        menu.add(submenu, menuIdx++);
                     }
                     JMenuItem m = new JMenuItem(action);
                     submenu.add(m);
@@ -63,7 +64,7 @@ public class MenuLogic
                 else
                 {
                     JMenuItem m = new JMenuItem(action);
-                    menu.add(m);
+                    menu.add(m, menuIdx++);
                 }
                 count++;
             }
@@ -71,7 +72,26 @@ public class MenuLogic
         return count;
     }
     
-    private static Map<Integer, List<IBlocksPlugin>> getOrderedMap(
+    private static int findStart(JMenu menu)
+	{
+        for (int idx = 0; idx < menu.getItemCount(); idx++)
+        {
+        	String name = null;
+            JMenuItem it = menu.getItem(idx);
+            if (it == null)
+            {
+            	Component c = menu.getPopupMenu().getComponent(idx);
+            	name = c.getName();
+            }
+            else
+            	name = it.getName();
+			if ("pluginsStartHere".equals(name))
+				return idx + 1;
+        }   
+		return menu.getItemCount();
+	}
+
+	private static Map<Integer, List<IBlocksPlugin>> getOrderedMap(
             List<IBlocksPlugin> plugins, int type, int subtype)
     {
         Map<Integer, List<IBlocksPlugin>> map = new HashMap<Integer, List<IBlocksPlugin>>();
@@ -111,9 +131,9 @@ public class MenuLogic
         for (int idx = menu.getMenuComponentCount() - 1; idx >= 0; idx--)
         {
             Component comp = menu.getMenuComponent(idx);
-            if ((comp instanceof JSeparator) && "plugin".equals(((JSeparator)comp).getToolTipText()))
+            if ((comp instanceof JSeparator) && "plugin".equals(((JSeparator)comp).getName()))
                 menu.remove(idx);
-            else if ((comp instanceof JMenu) && "plugin".equals(((JMenu)comp).getToolTipText()))
+            else if ((comp instanceof JMenu) && "plugin".equals(((JMenu)comp).getName()))
                 menu.remove(idx);
         }   
     }

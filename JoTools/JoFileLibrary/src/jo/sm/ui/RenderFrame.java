@@ -25,7 +25,6 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ui.act.edit.RedoAction;
 import jo.sm.ui.act.edit.UndoAction;
-import jo.sm.ui.act.file.ExportImagesAction;
 import jo.sm.ui.act.file.OpenExistingAction;
 import jo.sm.ui.act.file.OpenFileAction;
 import jo.sm.ui.act.file.QuitAction;
@@ -33,15 +32,6 @@ import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
 import jo.sm.ui.act.view.AxisAction;
-import jo.sm.ui.act.view.FilterMissileDumbAction;
-import jo.sm.ui.act.view.FilterMissileFafoAction;
-import jo.sm.ui.act.view.FilterMissileHeatAction;
-import jo.sm.ui.act.view.FilterNoneAction;
-import jo.sm.ui.act.view.FilterPowerAction;
-import jo.sm.ui.act.view.FilterRepairAction;
-import jo.sm.ui.act.view.FilterSalvageAction;
-import jo.sm.ui.act.view.FilterThrusterAction;
-import jo.sm.ui.act.view.FilterWeaponsAction;
 import jo.sm.ui.act.view.PlainAction;
 import jo.sm.ui.logic.MenuLogic;
 import jo.sm.ui.logic.ShipSpec;
@@ -65,7 +55,6 @@ public class RenderFrame extends JFrame implements WindowListener
         JMenu menuEdit = new JMenu("Edit");
         JMenu menuView = new JMenu("View");
         JMenu menuModify = new JMenu("Modify");
-        JMenu menuViewMissiles = new JMenu("Missiles");
         if ((mArgs.length > 0) && (mArgs[0].equals("-opengl")))
             mClient = new LWJGLRenderPanel();
         else
@@ -75,65 +64,37 @@ public class RenderFrame extends JFrame implements WindowListener
         menuBar.add(menuFile);
         menuFile.add(new OpenExistingAction(this));
         menuFile.add(new OpenFileAction(this));
+        menuFile.add(new JSeparator());
         menuFile.add(new SaveAction(this));
         JMenu saveAs = new JMenu("Save As");
         menuFile.add(saveAs);
         saveAs.add(new SaveAsBlueprintAction(this, false));
         saveAs.add(new SaveAsBlueprintAction(this, true));
         saveAs.add(new SaveAsFileAction(this));
-        menuFile.add(new ExportImagesAction(this));
+        JSeparator menuFileStart = new JSeparator();
+        menuFileStart.setName("pluginsStartHere");
+        menuFile.add(menuFileStart);
+        menuFile.add(new JSeparator());
         menuFile.add(new QuitAction(this));
         menuBar.add(menuEdit);
         menuEdit.add(new UndoAction(this));
         menuEdit.add(new RedoAction(this));
+        menuEdit.add(new JSeparator());
         menuBar.add(menuView);
         menuView.add(new JCheckBoxMenuItem(new PlainAction(this)));
         menuView.add(new JCheckBoxMenuItem(new AxisAction(this)));
-        menuView.add(new FilterNoneAction(this));
-        menuView.add(new FilterPowerAction(this));
-        menuView.add(new FilterThrusterAction(this));
-        menuView.add(new FilterRepairAction(this));
-        menuView.add(new FilterSalvageAction(this));
-        menuView.add(new FilterWeaponsAction(this));
-        menuView.add(menuViewMissiles);
-        menuViewMissiles.add(new FilterMissileDumbAction(this));
-        menuViewMissiles.add(new FilterMissileHeatAction(this));
-        menuViewMissiles.add(new FilterMissileFafoAction(this));
+        JSeparator viewFileStart = new JSeparator();
+        viewFileStart.setName("pluginsStartHere");
+        menuView.add(viewFileStart);
         menuBar.add(menuModify);
         getContentPane().add(BorderLayout.WEST, new EditPanel(mClient));
         getContentPane().add(BorderLayout.CENTER, mClient);
         getContentPane().add(BorderLayout.SOUTH, new StatusPanel());
         // link
-        menuModify.addMenuListener(new MenuListener() {            
-            @Override
-            public void menuSelected(MenuEvent ev)
-            {
-                updateModify((JMenu)ev.getSource());
-            }            
-            @Override
-            public void menuDeselected(MenuEvent e)
-            {
-            }            
-            @Override
-            public void menuCanceled(MenuEvent e)
-            {
-            }
-        });
-        menuEdit.addMenuListener(new MenuListener() {            
-            @Override
-            public void menuSelected(MenuEvent ev)
-            {
-                updateEdit((JMenu)ev.getSource());
-            }            
-            @Override
-            public void menuDeselected(MenuEvent e)
-            {
-            }            
-            @Override
-            public void menuCanceled(MenuEvent e)
-            {
-            }
-        });        
+        menuFile.addMenuListener(new PluginPopupListener(IBlocksPlugin.SUBTYPE_FILE));
+        menuEdit.addMenuListener(new PluginPopupListener(IBlocksPlugin.SUBTYPE_EDIT));
+        menuView.addMenuListener(new PluginPopupListener(IBlocksPlugin.SUBTYPE_VIEW));
+        menuModify.addMenuListener(new PluginPopupListener(IBlocksPlugin.SUBTYPE_MODIFY, IBlocksPlugin.SUBTYPE_GENERATE));
 
         this.addWindowListener(this);
         this.addWindowFocusListener(new WindowAdapter() {
@@ -188,31 +149,28 @@ public class RenderFrame extends JFrame implements WindowListener
     public void windowDeactivated(WindowEvent evt)
     {
     }
-
-    private void updateModify(JMenu modify)
+ 
+    private void updatePopup(JMenu menu, int... subTypes)
     {
-        MenuLogic.clearPluginMenus(modify);
+        MenuLogic.clearPluginMenus(menu);
         if (mSpec == null)
             return;
         int type = mSpec.getClassification();
-        int modCount = MenuLogic.addPlugins(mClient, modify, type, IBlocksPlugin.SUBTYPE_MODIFY);
-        int lastModIndex = modify.getItemCount();
-        int genCount = MenuLogic.addPlugins(mClient, modify, type, IBlocksPlugin.SUBTYPE_GENERATE);
-        if (modCount > 0 && genCount > 0)
+        int lastModIndex = menu.getItemCount();
+        int lastCount = 0;
+        for (int subType : subTypes)
         {
-            JSeparator sep = new JSeparator();
-            sep.setToolTipText("plugin");
-            modify.add(sep, lastModIndex);
+        	int thisCount = MenuLogic.addPlugins(mClient, menu, type, subType);
+        	if ((thisCount > 0) && (lastCount > 0))
+        	{
+                JSeparator sep = new JSeparator();
+                sep.setToolTipText("plugin");
+                menu.add(sep, lastModIndex);
+                lastCount = 0;
+        	}
+        	lastCount += thisCount;
+        	lastModIndex = menu.getItemCount();
         }
-    }
-
-    private void updateEdit(JMenu edit)
-    {
-        MenuLogic.clearPluginMenus(edit);
-        if (mSpec == null)
-            return;
-        int type = mSpec.getClassification();
-        MenuLogic.addPlugins(mClient, edit, type, IBlocksPlugin.SUBTYPE_EDIT);
     }
     
     private static void preLoad()
@@ -273,5 +231,30 @@ public class RenderFrame extends JFrame implements WindowListener
     public void setClient(RenderPanel client)
     {
         mClient = client;
+    }
+    
+    class PluginPopupListener implements MenuListener
+    {
+    	private int[] mTypes;
+    	
+    	public PluginPopupListener(int... types)
+    	{
+    		mTypes = types;
+    	}
+
+		@Override
+		public void menuCanceled(MenuEvent ev)
+		{
+		}
+
+		@Override
+		public void menuDeselected(MenuEvent ev)
+		{
+		}
+		@Override
+		public void menuSelected(MenuEvent ev)
+		{
+            updatePopup((JMenu)ev.getSource(), mTypes);
+		}
     }
 }

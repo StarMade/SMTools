@@ -1,7 +1,5 @@
 package jo.sm.ui;
 
-import java.util.Set;
-
 import javax.swing.JPanel;
 
 import jo.sm.data.RenderPoly;
@@ -19,8 +17,6 @@ public abstract class RenderPanel extends JPanel
     public abstract void updateTiles();
 	public abstract RenderPoly getTileAt(double x, double y);
     public abstract Block getBlockAt(double x, double y);
-    public abstract Set<Short> getFilter();
-    public abstract void setFilter(Set<Short> filter);
     public abstract ShipSpec getSpec();
     public abstract void setSpec(ShipSpec spec);
 	public abstract boolean isPlainGraphics();

@@ -73,7 +73,8 @@ public class SMEdit
         	mProps = new Properties();
     }
     
-    private void runSMEdit()
+    @SuppressWarnings("resource")
+	private void runSMEdit()
     {
         try
         {

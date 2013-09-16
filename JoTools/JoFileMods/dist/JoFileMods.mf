@@ -10,6 +10,7 @@ BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.ship.edit.HardenPlugin,
  jo.sm.plugins.ship.edit.SmoothPlugin,
  jo.sm.plugins.ship.edit.SoftenPlugin,
+ jo.sm.plugins.ship.exp.ExportImagesPlugin,
  jo.sm.plugins.ship.exp.ExportOBJPlugin,
  jo.sm.plugins.ship.fill.FillPlugin,
  jo.sm.plugins.ship.hull.HullPlugin,
@@ -22,3 +23,4 @@ BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.ship.scale.ScalePlugin,
  jo.sm.plugins.ship.stripes.StripesPlugin,
  jo.sm.plugins.ship.text.TextPlugin
+PluginFactories: jo.sm.factories.ship.filter.ViewFilterFactory

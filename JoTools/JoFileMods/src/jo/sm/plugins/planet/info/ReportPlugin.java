@@ -14,7 +14,7 @@ import java.util.Map;
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
-import jo.sm.logic.StringUtils;
+import jo.sm.logic.utils.StringUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;

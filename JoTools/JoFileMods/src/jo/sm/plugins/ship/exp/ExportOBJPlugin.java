@@ -27,11 +27,11 @@ public class ExportOBJPlugin implements IBlocksPlugin
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
-        { TYPE_SHIP, SUBTYPE_MODIFY },
-        { TYPE_STATION, SUBTYPE_MODIFY },
-        { TYPE_SHOP, SUBTYPE_MODIFY },
-        { TYPE_FLOATINGROCK, SUBTYPE_MODIFY },
-        { TYPE_PLANET, SUBTYPE_MODIFY },
+        { TYPE_SHIP, SUBTYPE_FILE, 26 },
+        { TYPE_STATION, SUBTYPE_FILE, 26 },
+        { TYPE_SHOP, SUBTYPE_FILE, 26 },
+        { TYPE_FLOATINGROCK, SUBTYPE_FILE, 26 },
+        { TYPE_PLANET, SUBTYPE_FILE, 26 },
         };
 
     @Override

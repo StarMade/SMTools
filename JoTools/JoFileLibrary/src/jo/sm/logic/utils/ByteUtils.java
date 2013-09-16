@@ -1,4 +1,4 @@
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 public class ByteUtils
 {

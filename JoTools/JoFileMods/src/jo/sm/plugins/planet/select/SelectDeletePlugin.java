@@ -15,11 +15,11 @@ public class SelectDeletePlugin implements IBlocksPlugin
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
-        { TYPE_SHIP, SUBTYPE_EDIT, 15 },
-        { TYPE_STATION, SUBTYPE_EDIT, 15 },
-        { TYPE_SHOP, SUBTYPE_EDIT, 15 },
-        { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 15 },
-        { TYPE_PLANET, SUBTYPE_EDIT, 15 },
+        { TYPE_SHIP, SUBTYPE_EDIT, 22 },
+        { TYPE_STATION, SUBTYPE_EDIT, 22 },
+        { TYPE_SHOP, SUBTYPE_EDIT, 22 },
+        { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 22 },
+        { TYPE_PLANET, SUBTYPE_EDIT, 22 },
         };
 
     @Override

@@ -1,4 +1,4 @@
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;

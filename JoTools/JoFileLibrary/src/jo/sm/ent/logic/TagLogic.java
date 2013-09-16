@@ -16,7 +16,7 @@ import jo.sm.ent.data.ControlElementMap;
 import jo.sm.ent.data.ControlSubElement;
 import jo.sm.ent.data.Tag;
 import jo.sm.ent.data.TagType;
-import jo.sm.logic.DebugLogic;
+import jo.sm.logic.utils.DebugLogic;
 import jo.vecmath.Point3b;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;

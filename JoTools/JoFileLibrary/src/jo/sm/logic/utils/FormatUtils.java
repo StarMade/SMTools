@@ -4,7 +4,7 @@
  * To change the template for this generated file go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.util.Calendar;
 import java.util.Date;

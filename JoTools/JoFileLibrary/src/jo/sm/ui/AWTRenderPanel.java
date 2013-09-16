@@ -10,8 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Path2D;
-import java.util.Iterator;
-import java.util.Set;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
@@ -47,8 +45,7 @@ public class AWTRenderPanel extends RenderPanel
     private ShipSpec            mSpec;
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
-    private Set<Short>          mFilter;
-    private RenderSet			mTiles;;
+    private RenderSet			mTiles;
     private Matrix4f            mTransform;
     private Vector3f            mPreTranslate;
     private float               mScale;
@@ -248,19 +245,10 @@ public class AWTRenderPanel extends RenderPanel
     
     public void updateTiles()
     {
-        if ((mFilter == null) || (mFilter.size() == 0))
+        if (StarMadeLogic.getInstance().getViewFilter() == null)
             mFilteredGrid = mGrid;
         else
-        {
-            mFilteredGrid = new SparseMatrix<Block>();
-            for (Iterator<Point3i> i = mGrid.iterator(); i.hasNext(); )
-            {
-                Point3i p = i.next();
-                Block b = mGrid.get(p);
-                if ((b != null) && mFilter.contains(b.getBlockID()))
-                    mFilteredGrid.set(p, b);
-            }
-        }
+            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
         RenderPolyLogic.fillPolys(mFilteredGrid, mTiles);
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
@@ -377,17 +365,6 @@ public class AWTRenderPanel extends RenderPanel
     	if (tile != null)
     		return tile.getBlock();
         return null;
-    }
-
-    public Set<Short> getFilter()
-    {
-        return mFilter;
-    }
-
-    public void setFilter(Set<Short> filter)
-    {
-        mFilter = filter;
-        updateTiles();
     }
 
     public ShipSpec getSpec()

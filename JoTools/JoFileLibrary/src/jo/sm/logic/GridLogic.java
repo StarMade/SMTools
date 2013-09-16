@@ -12,9 +12,10 @@ import org.w3c.dom.Node;
 
 import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
-import jo.sm.logic.StringUtils;
-import jo.sm.logic.XMLEditUtils;
-import jo.sm.logic.XMLUtils;
+import jo.sm.logic.utils.StreamUtils;
+import jo.sm.logic.utils.StringUtils;
+import jo.sm.logic.utils.XMLEditUtils;
+import jo.sm.logic.utils.XMLUtils;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 

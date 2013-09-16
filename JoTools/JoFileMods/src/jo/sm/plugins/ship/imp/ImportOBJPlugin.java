@@ -31,7 +31,7 @@ public class ImportOBJPlugin implements IBlocksPlugin
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
-        { TYPE_SHIP, SUBTYPE_GENERATE },
+        { TYPE_SHIP, SUBTYPE_FILE, 25 },
         };
 
     @Override

@@ -2,7 +2,7 @@
  * Created on Sep 25, 2005
  *
  */
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

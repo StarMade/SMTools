@@ -11,9 +11,9 @@ import java.util.Properties;
 import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
-import jo.sm.logic.ConvertLogic;
 import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
+import jo.sm.logic.utils.ConvertLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;

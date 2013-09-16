@@ -7,7 +7,7 @@
  */
 package jo.sm.data;
 
-import jo.sm.logic.BeanUtils;
+import jo.sm.logic.utils.BeanUtils;
 
 public abstract class Bean implements Cloneable
 {

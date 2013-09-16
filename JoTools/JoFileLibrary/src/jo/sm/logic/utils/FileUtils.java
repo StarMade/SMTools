@@ -2,7 +2,7 @@
  * Created on Aug 14, 2005
  *
  */
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;

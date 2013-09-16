@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jo.sm.logic.BeanUtils;
+import jo.sm.logic.utils.BeanUtils;
 
 public class PCSBean extends Bean
 {

@@ -1,4 +1,4 @@
-package jo.sm.logic;
+package jo.sm.logic.utils;
 
 import java.io.File;
 import java.util.List;

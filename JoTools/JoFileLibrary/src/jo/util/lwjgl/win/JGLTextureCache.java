@@ -12,8 +12,8 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import jo.sm.logic.BufferLogic;
-import jo.sm.logic.IntegerUtils;
+import jo.sm.logic.utils.BufferLogic;
+import jo.sm.logic.utils.IntegerUtils;
 
 import org.lwjgl.opengl.GL11;
 

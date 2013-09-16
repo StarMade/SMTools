@@ -3,7 +3,7 @@ package jo.util.lwjgl.win;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import jo.sm.logic.BufferLogic;
+import jo.sm.logic.utils.BufferLogic;
 import jo.util.jgl.obj.JGLNode;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;

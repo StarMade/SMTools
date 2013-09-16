@@ -2,7 +2,7 @@ package jo.vecmath.logic;
 
 import java.nio.FloatBuffer;
 
-import jo.sm.logic.BufferLogic;
+import jo.sm.logic.utils.BufferLogic;
 import jo.vecmath.Tuple3f;
 
 public class Tuple3fLogic extends MathUtils

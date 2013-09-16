@@ -7,11 +7,8 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
 import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
@@ -55,7 +52,6 @@ public class LWJGLRenderPanel extends RenderPanel
     
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
-    private Set<Short>          mFilter;
     private boolean             mPlainGraphics;
     private UndoBuffer          mUndoer;
     private ShipSpec            mSpec;
@@ -270,19 +266,10 @@ public class LWJGLRenderPanel extends RenderPanel
     @Override
     public void updateTiles()
     {
-        if ((mFilter == null) || (mFilter.size() == 0))
+        if (StarMadeLogic.getInstance().getViewFilter() == null)
             mFilteredGrid = mGrid;
         else
-        {
-            mFilteredGrid = new SparseMatrix<Block>();
-            for (Iterator<Point3i> i = mGrid.iterator(); i.hasNext(); )
-            {
-                Point3i p = i.next();
-                Block b = mGrid.get(p);
-                if ((b != null) && mFilter.contains(b.getBlockID()))
-                    mFilteredGrid.set(p, b);
-            }
-        }
+            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
         /*
         mSelection.getChildren().clear();
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
@@ -359,18 +346,6 @@ public class LWJGLRenderPanel extends RenderPanel
         JGLObj best = hits.get(0);
         System.out.println("  "+best.getScreen());
         return best;
-    }
-
-    @Override
-    public Set<Short> getFilter()
-    {
-        return mFilter;
-    }
-
-    @Override
-    public void setFilter(Set<Short> filter)
-    {
-        mFilter = filter;
     }
 
     @Override

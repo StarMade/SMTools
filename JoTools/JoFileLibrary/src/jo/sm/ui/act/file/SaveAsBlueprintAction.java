@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
 import jo.sm.logic.BlueprintLogic;
 import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
-import jo.sm.logic.StringUtils;
+import jo.sm.logic.utils.StringUtils;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ui.RenderFrame;

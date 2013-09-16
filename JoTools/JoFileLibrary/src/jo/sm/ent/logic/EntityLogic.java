@@ -16,7 +16,7 @@ import jo.sm.data.Vector3f;
 import jo.sm.data.Vector3i;
 import jo.sm.ent.data.Tag;
 import jo.sm.ent.data.TagType;
-import jo.sm.logic.DebugLogic;
+import jo.sm.logic.utils.DebugLogic;
 
 public class EntityLogic
 {

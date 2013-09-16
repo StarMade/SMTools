@@ -21,8 +21,8 @@ import java.util.zip.InflaterInputStream;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.CubeIterator;
-import jo.sm.logic.DebugLogic;
 import jo.sm.logic.IOLogic;
+import jo.sm.logic.utils.DebugLogic;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;

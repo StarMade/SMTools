@@ -21,6 +21,7 @@ public class StarMade extends PCSBean
     private Point3i			mSelectedUpper;
     private Point3i			mSelectedLower;
     private String			mStatusMessage;
+    private IBlocksPlugin	mViewFilter;
     
     public StarMade()
     {
@@ -127,5 +128,15 @@ public class StarMade extends PCSBean
 		queuePropertyChange("statusMessage", mStatusMessage, statusMessage);
 		mStatusMessage = statusMessage;
 		firePropertyChange();
+	}
+
+	public IBlocksPlugin getViewFilter()
+	{
+		return mViewFilter;
+	}
+
+	public void setViewFilter(IBlocksPlugin viewFilter)
+	{
+		mViewFilter = viewFilter;
 	}
 }

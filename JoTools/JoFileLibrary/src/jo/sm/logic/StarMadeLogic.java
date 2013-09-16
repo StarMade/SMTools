@@ -16,6 +16,7 @@ import java.util.jar.Manifest;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IStarMadePlugin;
+import jo.sm.mods.IStarMadePluginFactory;
 
 public class StarMadeLogic
 {
@@ -67,14 +68,17 @@ public class StarMadeLogic
         }
         
         List<String> blocksPlugins = new ArrayList<String>();
-        discoverPlugins(baseDir, blocksPlugins);
-        loadPlugins(blocksPlugins);
+        List<String> pluginFactories = new ArrayList<String>();
+        discoverPlugins(baseDir, blocksPlugins, pluginFactories);
+        loadPlugins(blocksPlugins, pluginFactories);
     }
     
-    private static void loadPlugins(List<String> blocksPlugins)
+    private static void loadPlugins(List<String> blocksPlugins, List<String> pluginFactories)
     {
         for (String blocksPluginClassName : blocksPlugins)
             addBlocksPlugin(blocksPluginClassName);
+        for (String pluginFactoryClassName : pluginFactories)
+            addPluginFactory(pluginFactoryClassName);
     }
 
     public static boolean addBlocksPlugin(String blocksPluginClassName)
@@ -98,13 +102,39 @@ public class StarMadeLogic
         
     }
 
+    public static boolean addPluginFactory(String pluginFactoryClassName)
+    {
+        try
+        {
+            Class<?> pluginFactoryClass = getInstance().getModLoader().loadClass(pluginFactoryClassName);
+            if (pluginFactoryClass == null)
+                return false;
+            IStarMadePluginFactory factory = (IStarMadePluginFactory)pluginFactoryClass.newInstance();
+            if (factory == null)
+                return false;
+            IStarMadePlugin[] plugins = factory.getPlugins();
+            if (plugins == null)
+            	return false;
+            for (IStarMadePlugin plugin : plugins)
+            	if (plugin instanceof IBlocksPlugin)
+            		addBlocksPlugin((IBlocksPlugin)plugin);
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        
+    }
+
     public static void addBlocksPlugin(IBlocksPlugin plugin)
     {
         getInstance().getBlocksPlugins().add(plugin);
     }
    
     private static void discoverPlugins(String baseDir,
-            List<String> blocksPlugins)
+            List<String> blocksPlugins, List<String> pluginFactories)
     {
         List<URL> urls = new ArrayList<URL>();
         File pluginDir = new File(baseDir, "jo_plugins");
@@ -125,6 +155,13 @@ public class StarMadeLogic
                             {
                                 String plugin = st.nextToken();
                                 blocksPlugins.add(plugin);
+                            }
+                        String factories = manifest.getMainAttributes().getValue("PluginFactories");
+                        if (factories != null)
+                            for (StringTokenizer st = new StringTokenizer(factories, ","); st.hasMoreTokens(); )
+                            {
+                                String factory = st.nextToken();
+                                pluginFactories.add(factory);
                             }
                     }
                     catch (Exception e)
