@@ -168,6 +168,7 @@ public class DataLogic
             //System.out.println("Block count="+blockCount);
             chunk.setBlocks(blocks);
             chunks.add(chunk);
+            /*
             // backtrack offset table
             if ((superChunkIndex != null) && (superChunkIndex.z < 0))
             {
@@ -182,6 +183,7 @@ public class DataLogic
 	            	}
 	            }
             }
+            */
         }
         data.setChunks(chunks.toArray(new Chunk[0]));
         if (close)
@@ -253,6 +255,10 @@ public class DataLogic
             index.sub(superChunkOrigin);
             index.scale(1, 16);
             // weird reversal
+            if (superChunkIndex.x < 0)
+            	index.x = 15 - index.x + 1;
+            if (superChunkIndex.y < 0)
+            	index.y = 15 - index.y + 1;
             if (superChunkIndex.z < 0)
             	index.z = 15 - index.z + 1;
             offsetSizeTable[index.z][index.y][index.x][1] = 25 + compressedData.length;

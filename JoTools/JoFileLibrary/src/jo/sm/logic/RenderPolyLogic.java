@@ -562,7 +562,7 @@ public class RenderPolyLogic
     
     public static void draw(Graphics2D g2, RenderSet set, boolean fancyGraphics)
     {
-        for (RenderPoly tile : set.getVisiblePolys())
+        for (RenderPoly tile : set.getVisiblePolys().toArray(new RenderPoly[0]))
         {
             ImageIcon icon = null;
             if (fancyGraphics)
