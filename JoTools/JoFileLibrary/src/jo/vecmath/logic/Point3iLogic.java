@@ -14,6 +14,19 @@ public class Point3iLogic
 
 	public static Point3i min(Point3i p, Point3i lower, Point3i upper)
 	{
+		if (lower == null)
+			if (upper == null)
+				return p;
+			else
+			{
+				p.set(upper);
+				return p;
+			}
+		if (upper == null)
+		{
+			p.set(lower);
+			return p;
+		}
 		p.x = Math.min(lower.x, upper.x);
 		p.y = Math.min(lower.y, upper.y);
 		p.z = Math.min(lower.z, upper.z);
@@ -22,6 +35,19 @@ public class Point3iLogic
 
 	public static Point3i max(Point3i p, Point3i lower, Point3i upper)
 	{
+		if (lower == null)
+			if (upper == null)
+				return p;
+			else
+			{
+				p.set(upper);
+				return p;
+			}
+		if (upper == null)
+		{
+			p.set(lower);
+			return p;
+		}
 		p.x = Math.max(lower.x, upper.x);
 		p.y = Math.max(lower.y, upper.y);
 		p.z = Math.max(lower.z, upper.z);
@@ -30,11 +56,19 @@ public class Point3iLogic
 
 	public static Point3i min(Point3i lower, Point3i upper)
 	{
+		if (lower == null)
+			return upper;
+		if (upper == null)
+			return lower;
 		return min(new Point3i(), lower, upper);
 	}
 
 	public static Point3i max(Point3i lower, Point3i upper)
 	{
+		if (lower == null)
+			return upper;
+		if (upper == null)
+			return lower;
 		return max(new Point3i(), lower, upper);
 	}
 

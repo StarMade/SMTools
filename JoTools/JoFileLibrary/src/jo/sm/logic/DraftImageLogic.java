@@ -91,9 +91,9 @@ public class DraftImageLogic
         mPreTranslate.x = -(lower.x + upper.x)/2;
         mPreTranslate.y = -(lower.y + upper.y)/2;
         mPreTranslate.z = -(lower.z + upper.z)/2;
-        float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z);
-        float maxScreen = Math.max(size.width, size.height);
-        scale = maxScreen/maxModel/2f;
+        float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z) + 1;
+        float minScreen = Math.min(size.width, size.height);
+        scale = minScreen/maxModel;
 
         postTranslate.x = size.width/2;
         postTranslate.y = size.height/2;

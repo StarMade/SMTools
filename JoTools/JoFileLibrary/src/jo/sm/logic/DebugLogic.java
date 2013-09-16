@@ -6,6 +6,8 @@ public class DebugLogic
     
     private static String mIndent = "";
 
+	public static final boolean	HULL_ONLY = false;
+
     public static void indent()
     {
         mIndent += "  ";

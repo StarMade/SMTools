@@ -19,12 +19,16 @@ import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+import jo.sm.data.BlockTypes;
+import jo.sm.data.CubeIterator;
+import jo.sm.logic.DebugLogic;
 import jo.sm.logic.IOLogic;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;
 import jo.sm.ship.data.Data;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.Point3iLogic;
 
 public class DataLogic 
 {
@@ -39,9 +43,13 @@ public class DataLogic
                 files.add(dataFile);
         if (files.size() == 0)
             for (File dataFile : dataDir.listFiles())
-                if (dataFile.getName().endsWith(".smd2") && 
-                        dataFile.getName().startsWith("ENTITY_SHIP_"))
+                if (dataFile.getName().endsWith(".smd2"))
+                { 
+                	if ((dataFile.toString().indexOf("server-database") >= 0)
+                        && !dataFile.getName().startsWith("ENTITY_SHIP_"))
+                		continue;
                 	files.add(dataFile);
+                }
         cb.startTask(files.size());
         for (File dataFile : files)
         {
@@ -59,12 +67,31 @@ public class DataLogic
         Point3i position = new Point3i(Integer.parseInt(parts[1]),
                 Integer.parseInt(parts[2]),
                 Integer.parseInt(parts[3]));
-        //System.out.println("Reading from "+dataFile.getName()+" - "+position);
-        Data datum = DataLogic.readFile(new FileInputStream(dataFile), true);
+        System.out.println("Reading from "+dataFile.getName()+" - "+position);
+        Data datum = DataLogic.readFile(new FileInputStream(dataFile), true, position);
         data.put(position, datum);
+        if (datum.getChunks().length > 0)
+        {
+        	Point3i upper = null;
+        	Point3i lower = null;
+        	for (Chunk c : datum.getChunks())
+        	{
+        		upper = Point3iLogic.max(upper, c.getPosition());
+        		lower = Point3iLogic.min(lower, c.getPosition());
+        	}
+            upper.x += 15;
+            upper.y += 15;
+            upper.z += 15;
+            System.out.println("Range: "+lower+" -- "+upper);
+        }
     }
     
     public static Data readFile(InputStream is, boolean close) throws IOException
+	{
+    	return readFile(is, close, null);
+	}
+    
+    public static Data readFile(InputStream is, boolean close, Point3i superChunkIndex) throws IOException
 	{
         //System.out.println("Reading...");
 		DataInputStream dis;
@@ -77,6 +104,13 @@ public class DataLogic
 		int[][][][] offsetSizeTable = new int[16][16][16][2];
 		IOLogic.readFully(dis, offsetSizeTable);
 		//data.setOffsetSizeTable(unknown2);
+		if ((superChunkIndex != null) && (superChunkIndex.z < 0))
+            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
+            {
+            	Point3i p = i.next();
+            	if (offsetSizeTable[p.z][p.y][p.x][0] >= 0)
+            		System.out.println("Offset "+p+" = "+offsetSizeTable[p.z][p.y][p.x][0]);
+            }
         long[][][] timestampTable = new long[16][16][16];
         IOLogic.readFully(dis, timestampTable);
         //data.setTimestampTable(unknown3);
@@ -119,7 +153,6 @@ public class DataLogic
                         blocks[x][y][z].setActive(((bitfield>>20)&0x1) == 1);
                         blocks[x][y][z].setOrientation((short)(((bitfield>>21)&0x7)
                                 | ((bitfield>>(20-3))&0x8)));
-                        blocks[x][y][z].setBitfield(bitfield);
                         //if (BlockTypes.isHull(blocks[x][y][z].getBlockID()))
                         //    System.out.println("  Block "+Integer.toHexString(bitfield)
                         //            +" (id="+ blocks[x][y][z].getBlockID()+", hp="+ blocks[x][y][z].getHitPoints()+")"
@@ -128,29 +161,31 @@ public class DataLogic
                         //    blockCount++;
                         if (blocks[x][y][z].getBlockID() <= 0)
                             blocks[x][y][z] = null; // clear out unneeded blocks
+                        else if (DebugLogic.HULL_ONLY)
+                        	if (!BlockTypes.isAnyHull(blocks[x][y][z].getBlockID()))
+                                blocks[x][y][z] = null; // clear out unneeded blocks
                     }
             //System.out.println("Block count="+blockCount);
             chunk.setBlocks(blocks);
             chunks.add(chunk);
+            // backtrack offset table
+            if ((superChunkIndex != null) && (superChunkIndex.z < 0))
+            {
+	            int chunkNum = chunks.size() - 1;
+	            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
+	            {
+	            	Point3i p = i.next();
+	            	if (offsetSizeTable[p.z][p.y][p.x][0] == chunkNum)
+	            	{
+	            		System.out.println("Chunk "+chunk.getPosition()+" at offset "+p);
+	            		break;
+	            	}
+	            }
+            }
         }
         data.setChunks(chunks.toArray(new Chunk[0]));
         if (close)
             dis.close();
-        // cross check
-        for (int z = 0; z < 16; z++)
-            for (int y = 0; y < 16; y++)
-                for (int x = 0; x < 16; x++)
-                {
-                    int off = offsetSizeTable[x][y][z][0];
-                    //int siz = offsetSizeTable[x][y][z][1];
-                    //long ts = timestampTable[x][y][z];
-                    if (off < 0)
-                        continue;
-//                    System.out.print(off+" x"+siz+" ");
-//                    Chunk chunk = data.getChunks()[off];
-//                    System.out.println("idx="+x+","+y+","+z+" -> "+chunk.getPosition());
-//                    System.out.println("     "+ts+" -> "+chunk.getTimestamp());
-                }
 		return data;
 	}
     
@@ -218,12 +253,8 @@ public class DataLogic
             index.sub(superChunkOrigin);
             index.scale(1, 16);
             // weird reversal
-            if (superChunkIndex.x < 0)
-            	index.x = 15 - index.x;
-            if (superChunkIndex.y < 0)
-            	index.y = 15 - index.y;
             if (superChunkIndex.z < 0)
-            	index.z = 15 - index.z;
+            	index.z = 15 - index.z + 1;
             offsetSizeTable[index.z][index.y][index.x][1] = 25 + compressedData.length;
             offsetSizeTable[index.z][index.y][index.x][0] = i;
             timestampTable[index.z][index.y][index.x] = chunk.getTimestamp();

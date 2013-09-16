@@ -12,26 +12,33 @@ import java.net.URI;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+
+import jo.sm.logic.ResourceUtils;
 
 @SuppressWarnings("serial")
 public class DlgAbout extends JDialog
 {
-	private JTextArea	mMessage;
+	private JEditorPane	mMessage;
     
     public DlgAbout(JFrame base)
     {
         super(base, "About SMEdit", Dialog.ModalityType.DOCUMENT_MODAL);
         // instantiate
-        mMessage = new JTextArea();
-        mMessage.setLineWrap(true);
-        mMessage.setWrapStyleWord(true);
+        mMessage = new JEditorPane();
+        mMessage.setContentType("text/html");
         mMessage.setEditable(false);
-        mMessage.setText(BegPanel.MESSAGE);
+        try
+		{
+			mMessage.setText(ResourceUtils.loadSystemResourceString("about.htm", DlgAbout.class));
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
         JButton ok = new JButton("OK");
         JButton audio = new JButton("Audiobook");
         JButton ebook = new JButton("E-book");        // layout

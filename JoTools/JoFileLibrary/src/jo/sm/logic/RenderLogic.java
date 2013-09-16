@@ -194,7 +194,7 @@ public class RenderLogic
                 doRect(blocks, p, polys, RenderTile.ZPXP);
                 break;
             default:
-                System.out.println("Wedge with unknown ori="+blocks.get(p).getOrientation());
+                //System.out.println("Wedge with unknown ori="+blocks.get(p).getOrientation());
                 break;
         }
     }

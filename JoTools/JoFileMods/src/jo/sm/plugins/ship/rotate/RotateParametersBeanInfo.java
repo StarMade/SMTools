@@ -38,7 +38,6 @@ public class RotateParametersBeanInfo implements BeanInfo
         PropertyDescriptor[] props = mRootBeanInfo.getPropertyDescriptors();
         for (int i = 0; i < props.length; i++)
         {
-            System.out.println("  "+props[i].getName());
             if (props[i].getName().endsWith("otate"))
                 try
                 {
