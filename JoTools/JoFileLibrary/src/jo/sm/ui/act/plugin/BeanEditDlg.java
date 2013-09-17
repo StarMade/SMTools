@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.BeanInfo;
@@ -11,11 +12,16 @@ import java.beans.Customizer;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import jo.sm.logic.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class BeanEditDlg extends JDialog
@@ -55,12 +61,34 @@ public class BeanEditDlg extends JDialog
         JButton ok = new JButton("OK");
         JButton cancel = new JButton("Cancel");
         // layout
-        JPanel client = new JPanel();
-        getContentPane().add(client);
-        client.setLayout(new BorderLayout());
-        client.add(BorderLayout.CENTER, new JScrollPane((Component)mCustomizer));
+        JPanel innerClient = new JPanel();
+        innerClient.setLayout(new BorderLayout());
+        innerClient.setBorder(BorderFactory.createEmptyBorder(2, 6, 2, 6));
+        innerClient.add(BorderLayout.CENTER, new JScrollPane((Component)mCustomizer));
+        Description d = mBeanClass.getAnnotation(Description.class);
+        if (d != null)
+        {
+            if (StringUtils.nonTrivial(d.displayName()))
+            {
+                JLabel name = new JLabel(d.displayName());
+                name.setFont(new Font("Dialog", Font.BOLD, 14));
+                innerClient.add(BorderLayout.NORTH, name);
+            }
+            if (StringUtils.nonTrivial(d.shortDescription()))
+            {
+                JTextArea desc = new JTextArea(d.shortDescription());
+                desc.setEditable(false);
+                desc.setFont(new Font("Dialog", Font.ITALIC, 10));
+                innerClient.add(BorderLayout.SOUTH, desc);
+            }
+        }
+        
+        JPanel outerClient = new JPanel();
+        getContentPane().add(outerClient);
+        outerClient.setLayout(new BorderLayout());
+        outerClient.add(BorderLayout.CENTER, innerClient);
         JPanel buttonBar = new JPanel();
-        client.add(BorderLayout.SOUTH, buttonBar);
+        outerClient.add(BorderLayout.SOUTH, buttonBar);
         buttonBar.setLayout(new FlowLayout());
         buttonBar.add(ok);
         buttonBar.add(cancel);
@@ -79,7 +107,8 @@ public class BeanEditDlg extends JDialog
             }});
         
         mCustomizer.setObject(mBean);
-        setSize(640, 480);
+        //setSize(640, 480);
+        pack();
         setLocationRelativeTo(base);
     }
     

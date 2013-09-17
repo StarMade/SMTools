@@ -87,10 +87,16 @@ public class StarMadeLogic
         {
             Class<?> blocksPluginClass = getInstance().getModLoader().loadClass(blocksPluginClassName);
             if (blocksPluginClass == null)
+            {
+                System.err.println("No such class: "+blocksPluginClassName);
                 return false;
+            }
             IBlocksPlugin plugin = (IBlocksPlugin)blocksPluginClass.newInstance();
             if (plugin == null)
+            {
+                System.err.println("Can't instantiate class: "+blocksPluginClassName);
                 return false;
+            }
             addBlocksPlugin(plugin);
             return true;
         }
@@ -155,6 +161,7 @@ public class StarMadeLogic
                             {
                                 String plugin = st.nextToken();
                                 blocksPlugins.add(plugin);
+                                //System.out.println("BLock Plugin = "+plugin);
                             }
                         String factories = manifest.getMainAttributes().getValue("PluginFactories");
                         if (factories != null)
@@ -162,6 +169,7 @@ public class StarMadeLogic
                             {
                                 String factory = st.nextToken();
                                 pluginFactories.add(factory);
+                                //System.out.println("Plugin Factory = "+factory);
                             }
                     }
                     catch (Exception e)
