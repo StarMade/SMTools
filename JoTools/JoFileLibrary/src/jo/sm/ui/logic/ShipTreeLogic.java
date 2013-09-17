@@ -117,7 +117,8 @@ public class ShipTreeLogic
             spec.setClassification(IBlocksPlugin.TYPE_SHOP);
         else if (fname.indexOf("_SPACESTATION_") >= 0)
             spec.setClassification(IBlocksPlugin.TYPE_STATION);
-        
+        else if (fname.indexOf("_PLANET_") >= 0)
+            spec.setClassification(IBlocksPlugin.TYPE_PLANET);
     }
 
     public static SparseMatrix<Block> loadShip(ShipSpec spec, IPluginCallback cb)
