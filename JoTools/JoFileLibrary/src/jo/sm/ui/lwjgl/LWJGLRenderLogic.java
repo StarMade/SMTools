@@ -2,6 +2,8 @@ package jo.sm.ui.lwjgl;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +20,10 @@ import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.MathUtils;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 public class LWJGLRenderLogic
 {
@@ -194,6 +200,26 @@ public class LWJGLRenderLogic
         	info.uv.add(new Point2f(rec.x + rec.width, rec.y + rec.height));
         	info.uv.add(new Point2f(rec.x, rec.y + rec.height));
         }
+    }
+    
+    //http://stackoverflow.com/questions/12019920/opengl-mouse-coordinate-to-world-coordinate
+    public Point3f intersect(JGLObj node, int mouseX, int mouseY)
+    {
+    	FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+    	GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
+    	FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+    	GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
+    	IntBuffer viewport = BufferUtils.createIntBuffer(4);
+    	GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
+    	float winX = mouseX;
+    	float winY = viewport.get(3) - mouseY;
+    	FloatBuffer winZBuffer = BufferUtils.createFloatBuffer(1);
+    	GL11.glReadPixels(mouseX, mouseY, 1, 1, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, winZBuffer);
+    	float winZ = winZBuffer.get(0);
+    	FloatBuffer pos = BufferUtils.createFloatBuffer(3);
+    	GLU.gluUnProject(winX, winY, winZ, modelview, projection, viewport, pos);
+    	Point3f intersection = new Point3f(pos.get(0), pos.get(1), pos.get(2));
+    	return intersection;
     }
 }
 
