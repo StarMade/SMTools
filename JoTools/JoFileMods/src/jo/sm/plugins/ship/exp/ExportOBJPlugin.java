@@ -124,7 +124,7 @@ public class ExportOBJPlugin implements IBlocksPlugin
         		int facePoints = (obj.getMode() == JGLObj.TRIANGLES) ? 3 : 4;
         		ShortBuffer indexes = obj.getIndexBuffer();
         		indexes.rewind();
-        		for (int i = 0; i < faceCount; i += facePoints)
+        		for (int i = 0; i < faceCount; i++)
         		{
         			wtr.write("f");
         			for (int j = 0; j < facePoints; j++)

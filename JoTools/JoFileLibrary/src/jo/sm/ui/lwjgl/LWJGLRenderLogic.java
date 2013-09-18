@@ -2,8 +2,6 @@ package jo.sm.ui.lwjgl;
 
 import java.awt.Color;
 import java.awt.geom.Rectangle2D;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,10 +18,6 @@ import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.MathUtils;
-
-import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 public class LWJGLRenderLogic
 {
@@ -63,8 +57,8 @@ public class LWJGLRenderLogic
         Block b = grid.get(p);
         if (b == null)
             return;
-        Point3f lower = new Point3f(p.x, p.y, p.z);
-        Point3f upper = new Point3f(p.x + 1, p.y + 1, p.z + 1);
+        Point3f lower = new Point3f(p.x - .5f, p.y - .5f, p.z - .5f);
+        Point3f upper = new Point3f(p.x + .5f, p.y + .5f, p.z + .5f);
         short[] colors = new short[] { b.getBlockID() };
         List<JGLObj> objs = new ArrayList<JGLObj>();
         if (!grid.contains(p.x + 1, p.y, p.z))
@@ -163,15 +157,6 @@ public class LWJGLRenderLogic
         }
     }
 
-    private static final List<Point2f> square = new ArrayList<Point2f>();
-    static
-    {
-        square.add(new Point2f(0, 0));
-        square.add(new Point2f(0, 1));
-        square.add(new Point2f(1, 1));
-        square.add(new Point2f(1, 0));
-    }
-    
     public static void addSelectQuad(MeshInfo info, Point3f left, Point3f top, Point3f right, Point3f bottom,
             short type)
     {
@@ -200,26 +185,6 @@ public class LWJGLRenderLogic
         	info.uv.add(new Point2f(rec.x + rec.width, rec.y + rec.height));
         	info.uv.add(new Point2f(rec.x, rec.y + rec.height));
         }
-    }
-    
-    //http://stackoverflow.com/questions/12019920/opengl-mouse-coordinate-to-world-coordinate
-    public Point3f intersect(JGLObj node, int mouseX, int mouseY)
-    {
-    	FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
-    	GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
-    	FloatBuffer projection = BufferUtils.createFloatBuffer(16);
-    	GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
-    	IntBuffer viewport = BufferUtils.createIntBuffer(4);
-    	GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
-    	float winX = mouseX;
-    	float winY = viewport.get(3) - mouseY;
-    	FloatBuffer winZBuffer = BufferUtils.createFloatBuffer(1);
-    	GL11.glReadPixels(mouseX, mouseY, 1, 1, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, winZBuffer);
-    	float winZ = winZBuffer.get(0);
-    	FloatBuffer pos = BufferUtils.createFloatBuffer(3);
-    	GLU.gluUnProject(winX, winY, winZ, modelview, projection, viewport, pos);
-    	Point3f intersection = new Point3f(pos.get(0), pos.get(1), pos.get(2));
-    	return intersection;
     }
 }
 

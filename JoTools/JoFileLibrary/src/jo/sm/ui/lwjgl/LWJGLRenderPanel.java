@@ -1,16 +1,13 @@
 package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.util.List;
 
 import jo.sm.data.RenderPoly;
-import jo.sm.data.RenderSet;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.UndoBuffer;
 import jo.sm.logic.RenderPolyLogic;
@@ -18,23 +15,22 @@ import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderPanel;
 import jo.sm.ui.logic.ShipSpec;
-import jo.util.jgl.logic.SceneLogic;
 import jo.util.jgl.obj.JGLCamera;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLScene;
-import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.lwjgl.win.JGLCanvas;
 import jo.vecmath.Color4f;
+import jo.vecmath.Matrix3f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
+import jo.vecmath.Vector4f;
 import jo.vecmath.logic.Matrix4fLogic;
 
 @SuppressWarnings("serial")
 public class LWJGLRenderPanel extends RenderPanel
 {
     private static final float  PIXEL_TO_RADIANS = (1f/3.14159f/16f);
-    private static final float  ROLL_SCALE = 1.1f;
     
     private static final int MOUSE_MODE_NULL = 0;
     private static final int MOUSE_MODE_PIVOT = 1;
@@ -55,25 +51,13 @@ public class LWJGLRenderPanel extends RenderPanel
     private boolean             mPlainGraphics;
     private UndoBuffer          mUndoer;
     private ShipSpec            mSpec;
-    private RenderSet           mTiles;
 
-    private Vector3f            mPreTranslate;
-    private float               mScale;
-    private float               mRotX;
-    private float               mRotY;
     Vector3f            		mPOVTranslate;
-    private Vector3f            mPostTranslate;
 
     public LWJGLRenderPanel()
     {
         mUndoer = new UndoBuffer();
-        mTiles = new RenderSet();
-        mPreTranslate = new Vector3f();
         mPOVTranslate = new Vector3f();
-        mScale = 1f;
-        mRotX = (float)Math.PI;
-        mRotY = 0;
-        mPostTranslate = new Vector3f();
         mScene = new JGLScene();
         mScene.setBackground(new Color4f());
         mUniverse = new JGLCamera();
@@ -152,6 +136,7 @@ public class LWJGLRenderPanel extends RenderPanel
             {
                 if (mMousePivotAround == null)
                 {
+                    System.out.println("Pivot around ourselves");
                     if (dx != 0)
                         mUniverse.getCamera().yaw(-dx*PIXEL_TO_RADIANS);
                     if (dy != 0)
@@ -159,8 +144,10 @@ public class LWJGLRenderPanel extends RenderPanel
                 }
                 else
                 {
-                    System.out.println("Pivot around "+mMousePivotAround);
-                    mUniverse.getCamera().rotateAround(mMousePivotAround, new Point3f(dx*PIXEL_TO_RADIANS, dy*PIXEL_TO_RADIANS, 0));
+                    Point3f rot = new Point3f(dx*PIXEL_TO_RADIANS, dy*PIXEL_TO_RADIANS, 0);
+                    System.out.println("Pivot around "+mMousePivotAround+", location="+mUniverse.getCamera().getLocation()+" by "+rot);
+                    mUniverse.getCamera().rotateAround(mMousePivotAround, rot);
+                    System.out.println("After pivot=\n"+mUniverse.getCamera());
                 }
                 updateTransform();
             }
@@ -247,19 +234,17 @@ public class LWJGLRenderPanel extends RenderPanel
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
         mGrid.getBounds(lower, upper);
-        Point3f lookAtThis = new Point3f(upper.x + lower.x, upper.y + lower.y, upper.z + lower.z);
+        Point3f lookAtThis = new Point3f(upper.x + lower.x, -(upper.y + lower.y), upper.z + lower.z);
         lookAtThis.scale(.5f);
         float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z);
         Point3f standHere = new Point3f(lookAtThis);
         standHere.z -= maxModel*4;
-        Dimension s = getSize();
-        float maxScreen = Math.max(s.width, s.height);
-        mScale = maxScreen/maxModel/2f;
         //mUniverse.getCamera().setLocation(lookAtThis);
         Matrix4fLogic.lookAt(mUniverse.getCamera(), standHere, lookAtThis);
         //mUniverse.getCamera().scale(mScale);
         System.out.println("Standing at "+standHere+", looking at "+lookAtThis);
         //mUniverse.setTransformer(new SpinningTransformer(new Point3f(0, 20, 0)));
+        System.out.println("After setGrid=\n"+mUniverse.getCamera());
         updateTiles();
     }
 
@@ -320,32 +305,28 @@ public class LWJGLRenderPanel extends RenderPanel
     @Override
     public Block getBlockAt(double x, double y)
     {
-        JGLObj cube = getObjAt(x, y);
-        if (cube == null)
+        Point3i p = getPointAt(x, y);
+        if (p == null)
             return null;
-        return (Block)cube.getData("block");
+        return mGrid.get(p);
     }
 
     public Point3i getPointAt(double x, double y)
     {
-        JGLObj cube = getObjAt(x, y);
-        if (cube == null)
+        Point3f eye = mCanvas.getEyeRay();
+        Matrix3f rot = new Matrix3f();
+        mUniverse.getCamera().get(rot);
+        Vector4f trans = new Vector4f();
+        mUniverse.getCamera().getColumn(3, trans);
+        rot.invert();
+        Point3f model = new Point3f();
+        rot.transform(eye, model);
+        model.x += trans.x; model.y -= trans.y; model.z -= trans.z;
+        Point3i p = new Point3i(model);
+        System.out.println(eye+" -> "+model+" -> "+p);
+        if (!mGrid.contains(p))
             return null;
-        return (Point3i)cube.getData("point");
-    }
-
-    public JGLObj getObjAt(double x, double y)
-    {
-        List<JGLObj> hits = SceneLogic.intersect(mBlocks, (float)x, (float)y);
-        if (hits.size() == 0)
-        {
-            System.out.println("No hits on "+x+","+y+"!");
-            return null;
-        }
-        System.out.println(hits.size()+" hits on "+x+","+y+"!");
-        JGLObj best = hits.get(0);
-        System.out.println("  "+best.getScreen());
-        return best;
+        return p;
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import jo.util.jgl.enm.JGLColorMaterialFace;
 import jo.util.jgl.enm.JGLColorMaterialMode;
 import jo.util.jgl.enm.JGLFogMode;
 import jo.util.jgl.obj.JGLScene;
+import jo.vecmath.Point3f;
 import jo.vecmath.logic.Color4fLogic;
 import jo.vecmath.logic.Matrix4fLogic;
 
@@ -25,11 +27,13 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 
 @SuppressWarnings("serial")
 public class JGLCanvas extends Canvas
 {
     private JGLScene           mScene;
+    private Point3f            mEyeRay;
 
     private final IntBuffer mIB16;
     //private int mViewportX;
@@ -209,6 +213,7 @@ public class JGLCanvas extends Canvas
                }
                doRender();
                doMouse();
+               doEye();
                Display.update();
             }
 
@@ -216,6 +221,26 @@ public class JGLCanvas extends Canvas
          } catch (Exception e) {
             e.printStackTrace();
          }        
+    }
+    
+    private void doEye()
+    {
+        int mouseX = Mouse.getX();
+        int mouseY = Mouse.getY();
+        FloatBuffer modelview = BufferUtils.createFloatBuffer(16);
+        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, modelview);
+        FloatBuffer projection = BufferUtils.createFloatBuffer(16);
+        GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, projection);
+        IntBuffer viewport = BufferUtils.createIntBuffer(16);
+        GL11.glGetInteger(GL11.GL_VIEWPORT, viewport);
+        float winX = mouseX;
+        float winY = viewport.get(3) - mouseY;
+        FloatBuffer winZBuffer = BufferUtils.createFloatBuffer(1);
+        GL11.glReadPixels(mouseX, mouseY, 1, 1, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, winZBuffer);
+        float winZ = winZBuffer.get(0);
+        FloatBuffer pos = BufferUtils.createFloatBuffer(3);
+        GLU.gluUnProject(winX, winY, winZ, modelview, projection, viewport, pos);
+        mEyeRay = new Point3f(pos.get(0), pos.get(1), pos.get(2));
     }
     
     private void doMouse()
@@ -236,7 +261,7 @@ public class JGLCanvas extends Canvas
     			int jButton = (button == 0) ? MouseEvent.BUTTON1 : (button == 1) ? MouseEvent.BUTTON2 : MouseEvent.BUTTON3;
     			if (mMouseState[button] != buttonState)
     			{
-    	    		System.out.println("Button="+button+", state="+buttonState+", x="+x+", y="+y);
+    	    		//System.out.println("Button="+button+", state="+buttonState+", x="+x+", y="+y);
 	    			if (buttonState)
 	    			{
 	    				MouseEvent event = new MouseEvent(this, MouseEvent.MOUSE_PRESSED, nanoseconds, modifiers, x, y, 1, false, jButton);
@@ -272,7 +297,6 @@ public class JGLCanvas extends Canvas
 			}
 			if (dWheel != 0)
 			{
-				System.out.println("Wheel="+dWheel);
 				MouseWheelEvent event = new MouseWheelEvent(this, MouseEvent.MOUSE_WHEEL, nanoseconds, modifiers, 
 						x, y, 1, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, dWheel, dWheel/120);
 				fireMouseWheelEvent(event);
@@ -379,5 +403,15 @@ public class JGLCanvas extends Canvas
     	for (MouseWheelListener l : mMouseWheelListeners)
     		if (e.getID() == MouseEvent.MOUSE_WHEEL)
     			l.mouseWheelMoved(e);
+    }
+
+    public Point3f getEyeRay()
+    {
+        return mEyeRay;
+    }
+
+    public void setEyeRay(Point3f eyeRay)
+    {
+        mEyeRay = eyeRay;
     }
 }

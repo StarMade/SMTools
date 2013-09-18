@@ -31,7 +31,6 @@
 
 package jo.vecmath;
 
-import jo.vecmath.Tuple3i;
 
 
 /**
@@ -81,6 +80,23 @@ import jo.vecmath.Tuple3i;
      */
      public Point3i() {
       super();
+    }
+
+
+    public Point3i(Tuple3f v)
+    {
+        if (v.x < 0)
+            x = (int)(v.x - .5f);
+        else
+            x = (int)(v.x + .5f);
+        if (v.y < 0)
+            y = (int)(v.y - .5f);
+        else
+            y = (int)(v.y + .5f);
+        if (v.z < 0)
+            z = (int)(v.z - .5f);
+        else
+            z = (int)(v.z + .5f);
     }
 
 }
