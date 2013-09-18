@@ -4,14 +4,24 @@ import java.util.Iterator;
 import java.util.Set;
 
 import jo.sm.data.BlockTypes;
+import jo.sm.data.CubeIterator;
 import jo.sm.data.RenderTile;
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
 public class SmoothLogic
 {
+    public static final int EXTERIOR = 1;
+    public static final int INTERIOR = 2;
+    public static final int EVERYWHERE = EXTERIOR+INTERIOR;
+    
+    public static final int WEDGES = 1;
+    public static final int CORNERS = 2;
+    public static final int EVERYTHING = WEDGES+CORNERS;
+    
     private static Point3i[] DELTAS = {
         new Point3i(1, 0, 0),
         new Point3i(-1, 0, 0),
@@ -21,18 +31,41 @@ public class SmoothLogic
         new Point3i(0, 0, -1),        
     };
     
-    public static void smooth(SparseMatrix<Block> grid, IPluginCallback cb)
+    public static void smooth(SparseMatrix<Block> grid, int scope, int type, StarMade sm, IPluginCallback cb)
     {
     	Set<Point3i> exterior = HullLogic.findExterior(grid, cb);
         boolean[] edges = new boolean[6];
         cb.setStatus("Smoothing");
-        cb.startTask(exterior.size());
-        for (Iterator<Point3i> i = exterior.iterator(); i.hasNext(); )
+        Point3i lower = new Point3i();
+        Point3i upper = new Point3i();
+        if ((sm.getSelectedLower() != null) && (sm.getSelectedUpper() != null))
+        {
+            lower.set(sm.getSelectedLower());
+            upper.set(sm.getSelectedUpper());
+        }
+        else
+        {
+            grid.getBounds(lower, upper);
+            lower.x--; lower.y--; lower.z--;
+            upper.x++; upper.y++; upper.z++;
+        }
+        cb.startTask((upper.x - lower.x + 1)*(upper.y - lower.y + 1)*(upper.z - lower.z + 1));
+        for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
         {
         	cb.workTask(1);
             Point3i p = i.next();
             if (grid.contains(p))
                 continue;
+            if (exterior.contains(p))
+            {
+                if ((scope&EXTERIOR) == 0)
+                    continue;
+            }
+            else
+            {
+                if ((scope&INTERIOR) == 0)
+                    continue;
+            }
             int tot = 0;
             for (int j = 0; j < edges.length; j++)
             {
@@ -40,9 +73,9 @@ public class SmoothLogic
                 if (edges[j])
                     tot++;
             }
-            if (tot == 2)
+            if ((tot == 2) && ((type&WEDGES) != 0))
                 doWedge(grid, p, edges);
-            else if (tot == 3)
+            if ((tot == 3) && ((type&CORNERS) != 0))
                 doCorner(grid, p, edges);
         }
         cb.endTask();

@@ -38,7 +38,7 @@ public class SmoothPlugin implements IBlocksPlugin
     @Override
     public Object getParameterBean()
     {
-        return null;
+        return new SmoothParameters();
     }
 
     @Override
@@ -51,8 +51,9 @@ public class SmoothPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
+       SmoothParameters params = (SmoothParameters)p;
        SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
-       SmoothLogic.smooth(modified, cb);
+       SmoothLogic.smooth(modified, params.getScope(), params.getType(), sm, cb);
         return modified;
     }
 }
