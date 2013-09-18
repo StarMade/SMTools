@@ -1,10 +1,12 @@
 package jo.sm.ship.logic;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderTile;
 import jo.sm.data.SparseMatrix;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
@@ -19,11 +21,15 @@ public class SmoothLogic
         new Point3i(0, 0, -1),        
     };
     
-    public static void smooth(SparseMatrix<Block> grid)
+    public static void smooth(SparseMatrix<Block> grid, IPluginCallback cb)
     {
+    	Set<Point3i> exterior = HullLogic.findExterior(grid, cb);
         boolean[] edges = new boolean[6];
-        for (Iterator<Point3i> i = grid.iterator(); i.hasNext(); )
+        cb.setStatus("Smoothing");
+        cb.startTask(exterior.size());
+        for (Iterator<Point3i> i = exterior.iterator(); i.hasNext(); )
         {
+        	cb.workTask(1);
             Point3i p = i.next();
             if (grid.contains(p))
                 continue;
@@ -39,6 +45,7 @@ public class SmoothLogic
             else if (tot == 3)
                 doCorner(grid, p, edges);
         }
+        cb.endTask();
     }
     
     private static void doCorner(SparseMatrix<Block> grid, Point3i p, boolean[] edges)

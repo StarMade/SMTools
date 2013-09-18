@@ -52,7 +52,7 @@ public class SmoothPlugin implements IBlocksPlugin
             Object p, StarMade sm, IPluginCallback cb)
     {
        SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
-       SmoothLogic.smooth(modified);
+       SmoothLogic.smooth(modified, cb);
         return modified;
     }
 }

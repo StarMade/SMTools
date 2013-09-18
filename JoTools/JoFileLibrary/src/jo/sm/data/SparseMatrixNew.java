@@ -8,21 +8,22 @@ import java.util.Map;
 
 import jo.vecmath.Point3i;
 import jo.vecmath.Point3s;
+import jo.vecmath.Tuple3i;
 
-public class SparseMatrix<T>
+public class SparseMatrixNew<T>
 {
-    private Map<Integer,Map<Integer,Map<Integer,T>>> mMatrix;
+    private Map<Long,T> mMatrix;
     private Point3i		mLower;
     private Point3i		mUpper;
-
-    public SparseMatrix()
+    
+    public SparseMatrixNew()
     {
-        mMatrix = new HashMap<Integer, Map<Integer,Map<Integer,T>>>();
+        mMatrix = new HashMap<Long,T>();
         mLower = null;
         mUpper = null;
     }
     
-    public SparseMatrix(SparseMatrix<T> original)
+    public SparseMatrixNew(SparseMatrixNew<T> original)
     {
         this();
         set(original);
@@ -31,7 +32,7 @@ public class SparseMatrix<T>
         original.getBounds(mLower, mUpper);
     }
     
-    public void addAll(SparseMatrix<T> original)
+    public void addAll(SparseMatrixNew<T> original)
     {
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
@@ -40,7 +41,7 @@ public class SparseMatrix<T>
         }
     }
     
-    public void set(SparseMatrix<T> original)
+    public void set(SparseMatrixNew<T> original)
     {
         mMatrix.clear();
         addAll(original);
@@ -48,22 +49,11 @@ public class SparseMatrix<T>
     
     public void set(int x, int y, int z, T val)
     {
-        Map<Integer,Map<Integer,T>> xrow = mMatrix.get(x);
-        if (xrow == null)
-        {
-            xrow = new HashMap<Integer, Map<Integer,T>>();
-            mMatrix.put(x, xrow);
-        }
-        Map<Integer,T> yrow = xrow.get(y);
-        if (yrow == null)
-        {
-            yrow = new HashMap<Integer, T>();
-            xrow.put(y,  yrow);
-        }
+    	long idx = Tuple3i.hashCode(x, y, z);
         if (val == null)
-            yrow.remove(z);
+            mMatrix.remove(idx);
         else
-            yrow.put(z,  val);
+            mMatrix.put(idx,  val);
         if (mLower == null)
         	mLower = new Point3i(x, y, z);
         else
@@ -84,13 +74,8 @@ public class SparseMatrix<T>
     
     public T get(int x, int y, int z)
     {
-        Map<Integer,Map<Integer,T>> xrow = mMatrix.get(x);
-        if (xrow == null)
-            return null;
-        Map<Integer,T> yrow = xrow.get(y);
-        if (yrow == null)
-            return null;
-        return yrow.get(z);        
+    	long idx = Tuple3i.hashCode(x, y, z);
+        return mMatrix.get(idx);        
     }
     
     public boolean contains(int x, int y, int z)
@@ -124,22 +109,6 @@ public class SparseMatrix<T>
     	upper.set(mUpper);
     }
     
-    public Point3i find(T val)
-    {
-        for (Integer x : mMatrix.keySet())
-        {
-            Map<Integer,Map<Integer,T>> xrow = mMatrix.get(x);
-            for (Integer y : xrow.keySet())
-            {
-                Map<Integer,T> yrow = xrow.get(y);
-                for (Integer z : yrow.keySet())
-                	if (yrow.get(z) == val)
-                		return new Point3i(x, y, z);
-            }
-        }
-        return null;
-    }
-
     public Iterator<Point3i> iterator()
     {
         return new CubeIterator(mLower, mUpper);
@@ -159,9 +128,6 @@ public class SparseMatrix<T>
     
     public int size()
     {
-        int size = 0;
-        for (Iterator<Point3i> i = iteratorNonNull(); i.hasNext(); i.next())
-            size++;
-        return size;
+        return mMatrix.size();
     }
 }

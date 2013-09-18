@@ -1,12 +1,15 @@
 package jo.sm.plugins.planet.hollow;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.HullLogic;
 import jo.vecmath.Point3i;
 
 public class HollowPlugin implements IBlocksPlugin
@@ -57,35 +60,31 @@ public class HollowPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        Point3i lower = new Point3i();
-        Point3i upper = new Point3i();
-        original.getBounds(lower, upper);
+        Set<Point3i> exterior = HullLogic.findExterior(original, cb);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (CubeIterator i = new CubeIterator(lower, upper); i.hasNext(); )
+        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
-            if (b == null)
-                continue;
-            if (isEdge(original, xyz) || (b.getBlockID() == BlockTypes.CORE_ID))
+            if (isEdge(exterior, xyz) || (b.getBlockID() == BlockTypes.CORE_ID))
                 modified.set(xyz, b);
         }
         return modified;
     }
 
-    private boolean isEdge(SparseMatrix<Block> grid, Point3i xyz)
+    private boolean isEdge(Set<Point3i> exterior, Point3i xyz)
     {
-        if (!grid.contains(xyz.x - 1, xyz.y, xyz.z))
+        if (exterior.contains(new Point3i(xyz.x - 1, xyz.y, xyz.z)))
             return true;
-        if (!grid.contains(xyz.x + 1, xyz.y, xyz.z))
+        if (exterior.contains(new Point3i(xyz.x + 1, xyz.y, xyz.z)))
             return true;
-        if (!grid.contains(xyz.x, xyz.y - 1, xyz.z))
+        if (exterior.contains(new Point3i(xyz.x, xyz.y - 1, xyz.z)))
             return true;
-        if (!grid.contains(xyz.x, xyz.y + 1, xyz.z))
+        if (exterior.contains(new Point3i(xyz.x, xyz.y + 1, xyz.z)))
             return true;
-        if (!grid.contains(xyz.x, xyz.y, xyz.z - 1))
+        if (exterior.contains(new Point3i(xyz.x, xyz.y, xyz.z - 1)))
             return true;
-        if (!grid.contains(xyz.x, xyz.y, xyz.z + 1))
+        if (exterior.contains(new Point3i(xyz.x, xyz.y, xyz.z + 1)))
             return true;
         return false;
     }

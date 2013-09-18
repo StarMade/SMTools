@@ -340,13 +340,16 @@ package jo.vecmath;
      * @return the integer hash code value
      */
      public int hashCode() {
-      long bits = 1L;
-      bits = 31L * bits + (long)x;
-      bits = 31L * bits + (long)y;
-      bits = 31L * bits + (long)z;
-      return (int) (bits ^ (bits >> 32));
+      return hashCode(x, y, z);
     }
 
+     public static int hashCode(int x, int y, int z) {
+         long bits = 1L;
+         bits = 31L * bits + (long)x;
+         bits = 31L * bits + (long)y;
+         bits = 31L * bits + (long)z;
+         return (int) (bits ^ (bits >> 32));
+       }
 
     /**
      *  Clamps the tuple parameter to the range [low, high] and
