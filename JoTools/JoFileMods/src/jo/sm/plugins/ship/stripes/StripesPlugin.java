@@ -61,7 +61,6 @@ public class StripesPlugin implements IBlocksPlugin
         //        +", X="+params.isXAxis()+","+params.getXWidth1()+","+params.getXWidth2()
         //        +", Y="+params.isYAxis()+","+params.getYWidth1()+","+params.getYWidth2()
         //        +", Z="+params.isZAxis()+","+params.getZWidth1()+","+params.getZWidth2());
-        cb.setStatus("Adding stripes");
         cb.startTask(original.size());
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )

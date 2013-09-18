@@ -1,14 +1,22 @@
 package jo.sm.plugins.ship.text;
 
 import jo.sm.data.BlockTypes;
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Write Text on Model", shortDescription="Write text along the length of the selection area")
 public class TextParameters
 {
+	@Description(displayName="Ink", shortDescription="Color to use for lettering")
     private short   mInk;
+	@Description(displayName="Font", shortDescription="Font from your computer to draw with")
     private String  mFont;
+	@Description(displayName="Boldface")
     private boolean mBold;
+	@Description(displayName="Italic")
     private boolean mItalic;
+	@Description(displayName="Size", shortDescription="Size of font")
     private int     mSize;
+	@Description(displayName="Text", shortDescription="The text you want to draw")
     private String  mText;
     
     public TextParameters()

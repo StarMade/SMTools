@@ -1,10 +1,14 @@
 package jo.sm.plugins.ship.replace;
 
 import jo.sm.data.BlockTypes;
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Replace Colors", shortDescription="Do a selective replace of colors")
 public class ReplaceParameters
 {
+	@Description(displayName="Replace this")
     private short   mColor1;
+	@Description(displayName="With this")
     private short   mColor2;
     
     public ReplaceParameters()

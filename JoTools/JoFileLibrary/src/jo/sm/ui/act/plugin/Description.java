@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Description {
-    String displayName();
-    String shortDescription();
+    String displayName() default "";
+    String shortDescription() default "";
 }

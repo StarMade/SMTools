@@ -1,10 +1,15 @@
 package jo.sm.plugins.ship.move;
 
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Move Ship's Core")
 public class MoveParameters
 {
+	@Description(displayName="Starboard/Port", shortDescription="How far along X axis")
     private int     mXMove;
+	@Description(displayName="Dorsal/Ventral", shortDescription="How far along Y axis")
     private int     mYMove;
+	@Description(displayName="Fore/Aft", shortDescription="How far along Z axis")
     private int     mZMove;
     
     public MoveParameters()

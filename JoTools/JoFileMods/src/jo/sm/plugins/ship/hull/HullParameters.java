@@ -1,6 +1,8 @@
 package jo.sm.plugins.ship.hull;
 
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Generate Hull",shortDescription="Create an empty hull of a regular shape")
 public class HullParameters
 {
 	public static final int OPEN_FRAME = 0;
@@ -12,12 +14,19 @@ public class HullParameters
 	public static final int DISC = 6;
 	public static final int IRREGULAR = 7;
 	
+	@Description(displayName="Hull Type",shortDescription="Overall shape of hull")
 	private int	mType;
+	@Description(displayName="Width", shortDescription="Port/Starboard dimension")
 	private int	mSizeX;
+	@Description(displayName="Height", shortDescription="Dorsal/Ventral dimension")
 	private int	mSizeY;
+	@Description(displayName="Length", shortDescription="Fore/Aft dimension")
 	private int	mSizeZ;
+	@Description(displayName="Center X", shortDescription="Core Position")
 	private int	mCenterX;
+	@Description(displayName="Center Y")
 	private int	mCenterY;
+	@Description(displayName="Center Z")
 	private int	mCenterZ;
     
     public HullParameters()

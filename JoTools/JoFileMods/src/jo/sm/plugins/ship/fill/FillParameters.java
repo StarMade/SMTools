@@ -1,16 +1,27 @@
 package jo.sm.plugins.ship.fill;
 
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Fill Interior",shortDescription="Quick creation of starship interiors.")
 public class FillParameters
 {
+	@Description(displayName="% Empty Space")
     private int mEmpty;
+	@Description(displayName="% Engines")
     private int mThrusters;
+	@Description(displayName="% Power Generators")
     private int mPower;
+	@Description(displayName="% Weapon System")
     private int mWeapon;
+	@Description(displayName="% Shield Generators")
     private int mShield;
+	@Description(displayName="% Salvage Ray")
     private int mSalvage;
+	@Description(displayName="% Dumb Missiles")
     private int mMissileDumb;
+	@Description(displayName="% Heat Seeking Missiles")
     private int mMissileHeat;
+	@Description(displayName="% FAFO Missiles")
     private int mMissileFafo;
     
     public FillParameters()

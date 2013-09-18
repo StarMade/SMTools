@@ -1,10 +1,15 @@
 package jo.sm.plugins.ship.rotate;
 
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Rotate ship around core")
 public class RotateParameters
 {
+	@Description(displayName="Pitch", shortDescription="Around X axis")
     private int     mXRotate;
+	@Description(displayName="Yaw", shortDescription="Around Y axis")
     private int     mYRotate;
+	@Description(displayName="Roll", shortDescription="Around Z axis")
     private int     mZRotate;
     
     public RotateParameters()

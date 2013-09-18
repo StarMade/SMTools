@@ -1,19 +1,32 @@
 package jo.sm.plugins.ship.stripes;
 
 import jo.sm.data.BlockTypes;
+import jo.sm.ui.act.plugin.Description;
 
+@Description(displayName="Paint With Pattern", shortDescription="Paint a pattern of strips or checks on object")
 public class StripesParameters
 {
+	@Description(displayName="First Color")
     private short   mColor1;
+	@Description(displayName="Second Color")
     private short   mColor2;
+	@Description(displayName="Left to Right")
     private boolean mXAxis;
+	@Description(displayName="First", shortDescription="Width of first color stripe")
     private int     mXWidth1;
+	@Description(displayName="Second", shortDescription="Width of second color stripe")
     private int     mXWidth2;
+	@Description(displayName="Top to Bottom")
     private boolean mYAxis;
+	@Description(displayName="First", shortDescription="Width of first color stripe")
     private int     mYWidth1;
+	@Description(displayName="Second", shortDescription="Width of second color stripe")
     private int     mYWidth2;
+	@Description(displayName="Fore to Aft")
     private boolean mZAxis;
+	@Description(displayName="First", shortDescription="Width of first color stripe")
     private int     mZWidth1;
+	@Description(displayName="Second", shortDescription="Width of second color stripe")
     private int     mZWidth2;
     
     public StripesParameters()
