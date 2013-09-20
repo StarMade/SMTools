@@ -56,8 +56,6 @@ public class ShipLogic
             Point3i u = new Point3i();
             Data datum = data.get(o);
             getBounds(datum, l, u);
-            adjustByBigChunk(l, o);
-            adjustByBigChunk(u, o);
             if (first)
             {
                 lower.set(l);
@@ -116,14 +114,6 @@ public class ShipLogic
         return blocks;
     }
     
-    private static void adjustByBigChunk(Point3i v, Point3i mod)
-    {
-        // looks like no mod is needed
-//        v.a += mod.a*16*16;
-//        v.b += mod.b*16*16;
-//        v.c += mod.c*16*16;
-    }
-    
     public static Map<Point3i, Data> getData(SparseMatrix<Block> blocks)
     {
         long now = System.currentTimeMillis();
@@ -131,63 +121,18 @@ public class ShipLogic
         Point3i lowerUniverse = new Point3i();
         Point3i upperUniverse = new Point3i();
         blocks.getBounds(lowerUniverse, upperUniverse);
-        Point3i lowerData = new Point3i();
-        if (lowerUniverse.x >= -128)
-        	lowerData.x = MathUtils.stride(lowerUniverse.x + 128, 256);
-        else
-        	lowerData.x = MathUtils.stride(lowerUniverse.x + 128, 256 - 16);
-        if (lowerUniverse.y >= -128)
-        	lowerData.y = MathUtils.stride(lowerUniverse.y + 128, 256);
-        else
-        	lowerData.y = MathUtils.stride(lowerUniverse.y + 128, 256 - 16);
-        if (lowerUniverse.z >= -128)
-        	lowerData.z = MathUtils.stride(lowerUniverse.z + 128, 256);
-        else
-        	lowerData.z = MathUtils.stride(lowerUniverse.z + 128, 256 - 16);
-        Point3i upperData = new Point3i();
-		if (upperUniverse.x >= -128)
-			upperData.x = MathUtils.stride(upperUniverse.x + 128, 256);
-		else
-			upperData.x = MathUtils.stride(upperUniverse.x + 128, 256 - 16);
-		if (upperUniverse.y >= -128)
-			upperData.y = MathUtils.stride(upperUniverse.y + 128, 256);
-		else
-			upperData.y = MathUtils.stride(upperUniverse.y + 128, 256 - 16);
-		if (upperUniverse.z >= -128)
-			upperData.z = MathUtils.stride(upperUniverse.z + 128, 256);
-		else
-			upperData.z = MathUtils.stride(upperUniverse.z + 128, 256 - 16);
+        Point3i lowerData = getSuperChunkIndexFromPoint(lowerUniverse);
+        Point3i upperData = getSuperChunkIndexFromPoint(upperUniverse);
+        System.out.println("Universe: "+lowerUniverse+" -- "+upperUniverse);
+        System.out.println("Superchunks: "+lowerData+" -- "+upperData);
         for (Iterator<Point3i> i = new CubeIterator(lowerData, upperData); i.hasNext(); )
         {
             Point3i superChunkIndex = i.next();
             Data datum = new Data();
-            Point3i superChunkOrigin = new Point3i();
-            if (superChunkIndex.x >= 0)
-            	superChunkOrigin.x = superChunkIndex.x*256;
-            else
-            	superChunkOrigin.x = superChunkIndex.x*(256 - 16);
-            if (superChunkIndex.y >= 0)
-            	superChunkOrigin.y = superChunkIndex.y*256;
-            else
-            	superChunkOrigin.y = superChunkIndex.y*(256 - 16);
-            if (superChunkIndex.z >= 0)
-            	superChunkOrigin.z = superChunkIndex.z*256;
-            else
-            	superChunkOrigin.z = superChunkIndex.z*(256 - 16);
-            Point3i lowerSuperChunk = new Point3i(superChunkOrigin.x - 128, superChunkOrigin.y - 128, superChunkOrigin.z - 128);
-            Point3i upperSuperChunk = new Point3i();
-            if (superChunkIndex.x >= 0)
-            	upperSuperChunk.x = superChunkOrigin.x + 127;
-            else
-            	upperSuperChunk.x = superChunkOrigin.x + 127 - 16;
-            if (superChunkIndex.y >= 0)
-            	upperSuperChunk.y = superChunkOrigin.y + 127;
-            else
-            	upperSuperChunk.y = superChunkOrigin.y + 127 - 16;
-            if (superChunkIndex.z >= 0)
-            	upperSuperChunk.z = superChunkOrigin.z + 127;
-            else
-            	upperSuperChunk.z = superChunkOrigin.z + 127 - 16;
+            Point3i superChunkOrigin = getSuperChunkOriginFromIndex(superChunkIndex);
+            Point3i lowerSuperChunk = getSuperChunkLowerFromOrigin(superChunkOrigin);
+            Point3i upperSuperChunk = getSuperChunkUpperFromOrigin(superChunkOrigin);
+            System.out.println("  Index="+superChunkIndex+", origin="+superChunkOrigin+", lower="+lowerSuperChunk+", upper="+upperSuperChunk);
             List<Chunk> chunks = new ArrayList<Chunk>();
             System.out.println("Splitting "+superChunkIndex+" -> "+lowerSuperChunk+" / "+upperSuperChunk);
             for (Iterator<Point3i> j = new CubeIterator(lowerSuperChunk, upperSuperChunk, new Point3i(16, 16, 16)); j.hasNext(); )
@@ -261,5 +206,64 @@ public class ShipLogic
         }
         return finds;
     }
-
+    
+    public static Point3i getSuperChunkOriginFromIndex(Point3i superChunkIndex)
+    {
+        Point3i superChunkOrigin = new Point3i();
+        if (superChunkIndex.x >= 0)
+            superChunkOrigin.x = superChunkIndex.x*256;
+        else
+            superChunkOrigin.x = superChunkIndex.x*(256 - 16);
+        if (superChunkIndex.y >= 0)
+            superChunkOrigin.y = superChunkIndex.y*256;
+        else
+            superChunkOrigin.y = superChunkIndex.y*(256 - 16);
+        if (superChunkIndex.z >= 0)
+            superChunkOrigin.z = superChunkIndex.z*256;
+        else
+            superChunkOrigin.z = superChunkIndex.z*(256 - 16);
+        return superChunkOrigin;
+    }
+    
+    public static Point3i getSuperChunkLowerFromOrigin(Point3i superChunkOrigin)
+    {
+        Point3i lowerSuperChunk = new Point3i(superChunkOrigin.x - 128, superChunkOrigin.y - 128, superChunkOrigin.z - 128);
+        return lowerSuperChunk;
+    }
+    
+    public static Point3i getSuperChunkUpperFromOrigin(Point3i superChunkOrigin)
+    {
+        Point3i upperSuperChunk = new Point3i();
+        if (superChunkOrigin.x >= 0)
+            upperSuperChunk.x = superChunkOrigin.x + 127;
+        else
+            upperSuperChunk.x = superChunkOrigin.x + 127 - 16;
+        if (superChunkOrigin.y >= 0)
+            upperSuperChunk.y = superChunkOrigin.y + 127;
+        else
+            upperSuperChunk.y = superChunkOrigin.y + 127 - 16;
+        if (superChunkOrigin.z >= 0)
+            upperSuperChunk.z = superChunkOrigin.z + 127;
+        else
+            upperSuperChunk.z = superChunkOrigin.z + 127 - 16;
+        return upperSuperChunk;
+    }
+    
+    public static Point3i getSuperChunkIndexFromPoint(Point3i universePoint)
+    {
+        Point3i superChunkIndex = new Point3i();
+        if (universePoint.x >= -128)
+            superChunkIndex.x = MathUtils.stride(universePoint.x + 128, 256);
+        else
+            superChunkIndex.x = MathUtils.stride(universePoint.x + 128, 256 - 16);
+        if (universePoint.y >= -128)
+            superChunkIndex.y = MathUtils.stride(universePoint.y + 128, 256);
+        else
+            superChunkIndex.y = MathUtils.stride(universePoint.y + 128, 256 - 16);
+        if (universePoint.z >= -128)
+            superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256);
+        else
+            superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256 - 16);
+        return superChunkIndex;
+    }
 }

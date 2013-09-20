@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import jo.sm.logic.utils.ByteUtils;
 import jo.vecmath.Point3i;
 import jo.vecmath.Point3s;
-import jo.vecmath.Tuple3i;
 
 public class SparseMatrixNew<T>
 {
@@ -49,7 +49,7 @@ public class SparseMatrixNew<T>
     
     public void set(int x, int y, int z, T val)
     {
-    	long idx = Tuple3i.hashCode(x, y, z);
+    	long idx = toHashCode(x, y, z);
         if (val == null)
             mMatrix.remove(idx);
         else
@@ -74,7 +74,7 @@ public class SparseMatrixNew<T>
     
     public T get(int x, int y, int z)
     {
-    	long idx = Tuple3i.hashCode(x, y, z);
+    	long idx = toHashCode(x, y, z);
         return mMatrix.get(idx);        
     }
     
@@ -117,11 +117,10 @@ public class SparseMatrixNew<T>
     public Iterator<Point3i> iteratorNonNull()
     {
         List<Point3i> points = new ArrayList<Point3i>();
-        for (Iterator<Point3i> i = iterator(); i.hasNext(); )
+        for (Long l : mMatrix.keySet())
         {
-        	Point3i p = i.next();
-        	if (contains(p))
-        		points.add(p);
+        	Point3i p = fromHashCode(l);
+        	points.add(p);
         }
         return points.iterator();
     }
@@ -129,5 +128,27 @@ public class SparseMatrixNew<T>
     public int size()
     {
         return mMatrix.size();
+    }
+    
+    public static long toHashCode(int x, int y, int z)
+    {
+        byte[] buffer = new byte[8];
+        buffer[0] = 0;
+        ByteUtils.toBytes((short)x, buffer, 1);
+        ByteUtils.toBytes((short)y, buffer, 3);
+        ByteUtils.toBytes((short)z, buffer, 5);
+        buffer[7] = 1;
+        return ByteUtils.toLong(buffer);
+    }
+    
+    public static Point3i fromHashCode(long hash)
+    {
+        byte[] buffer = new byte[8];
+        ByteUtils.toBytes(hash, buffer);
+        short x = ByteUtils.toShort(buffer, 1);
+        short y = ByteUtils.toShort(buffer, 3);
+        short z = ByteUtils.toShort(buffer, 5);
+        Point3i p = new Point3i(x, y, z);
+        return p;
     }
 }

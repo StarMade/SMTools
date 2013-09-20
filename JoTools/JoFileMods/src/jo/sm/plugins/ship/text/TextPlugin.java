@@ -6,6 +6,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.StarMadeLogic;
@@ -91,7 +92,8 @@ public class TextPlugin implements IBlocksPlugin
                     Point3i depth = new Point3i(height);
                     for (int z = 0; z < mDepthLength; z++)
                     {
-                        if (modified.contains(depth))
+                        Block b = modified.get(depth);
+                        if ((b != null) && (b.getBlockID() != BlockTypes.CORE_ID))
                             modified.set(depth, new Block(params.getInk()));
                         depth.add(mDepthVector);
                     }
