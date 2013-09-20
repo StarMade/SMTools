@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
 
 public class SMEdit
 {
@@ -104,7 +107,19 @@ public class SMEdit
                 File local = new File(mStarMadeDir, target[0]);
                 if (local.exists())
                     local.delete();
+                File localParent = local.getParentFile();
+                if (!localParent.exists())
+                    localParent.mkdirs();
                 System.out.println(remote+" -> "+local);
+                JDialog win = new JDialog();
+                win.setTitle("SMEdit Update");
+                JTextArea msg = new JTextArea(remote+" -> "+local);
+                msg.setEditable(false);
+                msg.setWrapStyleWord(true);
+                msg.setLineWrap(true);
+                win.getContentPane().add("Center", msg);
+                win.setSize(320, 200);
+                win.setVisible(true);
                 InputStream is = new BufferedInputStream(remote.openStream());
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(local));
                 int count = 0;
@@ -119,6 +134,8 @@ public class SMEdit
                 is.close();
                 os.close();
                 System.out.println("  "+count+" bytes");
+                win.setVisible(false);
+                win.dispose();
             }
             catch (Exception e)
             {

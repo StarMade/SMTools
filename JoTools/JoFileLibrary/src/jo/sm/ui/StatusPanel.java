@@ -23,6 +23,8 @@ public class StatusPanel extends JPanel
     private JLabel  mStatus;
     private JButton mAbout;
     
+    private Color mNormal;
+    
     public StatusPanel()
     {
         // instantiate
@@ -32,6 +34,7 @@ public class StatusPanel extends JPanel
         mMemory = new JProgressBar(0, (int)(Runtime.getRuntime().maxMemory()/1024L/1024L));
         mMemory.setStringPainted(true);
         mMemory.setIndeterminate(true);
+        mNormal = mMemory.getBackground();
         // layout
         setLayout(new BorderLayout());
         add("Center", mStatus);
@@ -72,10 +75,20 @@ public class StatusPanel extends JPanel
         	int free = (int)(Runtime.getRuntime().freeMemory()/1024L/1024L);
         	int total = (int)(Runtime.getRuntime().totalMemory()/1024L/1024L);
         	int max = (int)(Runtime.getRuntime().maxMemory()/1024L/1024L);
-        	free +=  + (max - total);
+        	free +=  (max - total);
             mMemory.setValue(free);
             mMemory.setString(free+"M");
             mMemory.setToolTipText("Free="+free+", max="+max+", total="+total);
+            if (free*100/max < 5)
+            {
+                mMemory.setBackground(Color.red);
+                mStatus.setText("LOW ON MEMORY");
+            }
+            else
+            {
+                mMemory.setBackground(mNormal);
+                mStatus.setText(StarMadeLogic.getInstance().getStatusMessage());
+            }
             try
             {
                 Thread.sleep(5000);

@@ -28,7 +28,7 @@ public class ImportSchematicParametersBeanInfo implements BeanInfo
         		{ "Minecraft Schematic file", "schematic" },
         });
         mInfo.setDialogType(JFileChooser.OPEN_DIALOG);
-        mInfo.setApproveButtonText("OPEN");
+        mInfo.setApproveButtonText("Open");
         mInfo.setApproveButtonTooltipText("Select file to import from");
         mRootBeanInfo = Introspector.getBeanInfo(ImportSchematicParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
     }
