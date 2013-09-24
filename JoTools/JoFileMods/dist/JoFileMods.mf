@@ -1,5 +1,8 @@
 Manifest-Version: 1.0
 BlocksPlugins: jo.sm.plugins.planet.hollow.HollowPlugin,
+ jo.sm.plugins.planet.gen.GiantsCausewayPlugin,
+ jo.sm.plugins.planet.gen.UndulatingPlugin,
+ jo.sm.plugins.planet.gen.VolcanoPlugin,
  jo.sm.plugins.planet.info.ReportPlugin,
  jo.sm.plugins.planet.select.SelectCopyPlugin,
  jo.sm.plugins.planet.select.SelectCutPlugin,
