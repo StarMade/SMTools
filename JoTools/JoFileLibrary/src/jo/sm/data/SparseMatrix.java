@@ -23,7 +23,7 @@ public class SparseMatrix<T>
         mUpper = null;
     }
     
-    public SparseMatrix(SparseMatrixNew<T> original)
+    public SparseMatrix(SparseMatrix<T> original)
     {
         this();
         set(original);
@@ -32,7 +32,7 @@ public class SparseMatrix<T>
         original.getBounds(mLower, mUpper);
     }
     
-    public void addAll(SparseMatrixNew<T> original)
+    public void addAll(SparseMatrix<T> original)
     {
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
@@ -41,7 +41,7 @@ public class SparseMatrix<T>
         }
     }
     
-    public void set(SparseMatrixNew<T> original)
+    public void set(SparseMatrix<T> original)
     {
         mMatrix.clear();
         addAll(original);
