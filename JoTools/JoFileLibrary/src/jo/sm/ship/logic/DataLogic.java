@@ -20,7 +20,6 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 import jo.sm.data.BlockTypes;
-import jo.sm.data.CubeIterator;
 import jo.sm.logic.IOLogic;
 import jo.sm.logic.utils.DebugLogic;
 import jo.sm.mods.IPluginCallback;
@@ -90,13 +89,13 @@ public class DataLogic
 		int[][][][] offsetSizeTable = new int[16][16][16][2];
 		IOLogic.readFully(dis, offsetSizeTable);
 		//data.setOffsetSizeTable(unknown2);
-		if ((superChunkIndex != null) && (superChunkIndex.z < 0))
-            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
-            {
-            	Point3i p = i.next();
-            	if (offsetSizeTable[p.z][p.y][p.x][0] >= 0)
-            		System.out.println("Offset "+p+" = "+offsetSizeTable[p.z][p.y][p.x][0]);
-            }
+//		if ((superChunkIndex != null) && (superChunkIndex.z < 0))
+//            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
+//            {
+//            	Point3i p = i.next();
+//            	if (offsetSizeTable[p.z][p.y][p.x][0] >= 0)
+//            		System.out.println("Offset "+p+" = "+offsetSizeTable[p.z][p.y][p.x][0]);
+//            }
         long[][][] timestampTable = new long[16][16][16];
         IOLogic.readFully(dis, timestampTable);
         //data.setTimestampTable(unknown3);
