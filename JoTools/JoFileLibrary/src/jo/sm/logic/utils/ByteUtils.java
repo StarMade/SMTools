@@ -58,45 +58,171 @@ public class ByteUtils
         return objArray;
     }
 
-    // assumes MSB first
-    public static int toUnsignedInt(byte[] bytes)
+    // LONG CONVERSION
+
+
+    public static long toLong(byte[] readBuffer, int o)
     {
-        return toUnsignedInt(bytes, 0, bytes.length);
+        return (((long)readBuffer[0] << 56) +
+                                ((long)(readBuffer[1] & 255) << 48) +
+                                ((long)(readBuffer[2] & 255) << 40) +
+                                ((long)(readBuffer[3] & 255) << 32) +
+                                ((long)(readBuffer[4] & 255) << 24) +
+                                ((readBuffer[5] & 255) << 16) +
+                                ((readBuffer[6] & 255) <<  8) +
+                                ((readBuffer[7] & 255) <<  0));
+    }
+    
+    public static long toLong(byte[] readBuffer)
+    {
+        return toLong(readBuffer, 0);
+    }
+    
+    public static long[] toLongs(byte[] readBuffer, int o, int l)
+    {
+        long[] v = new long[l/8];
+        for (int i = 0; i < v.length; i++)
+            v[i] = toLong(readBuffer, o + i*8);
+        return v;
+    }
+  
+    public static byte[] toBytes(long v, byte[] writeBuffer, int o)
+    {
+        writeBuffer[o+0] = (byte)(v >>> 56);
+        writeBuffer[o+1] = (byte)(v >>> 48);
+        writeBuffer[o+2] = (byte)(v >>> 40);
+        writeBuffer[o+3] = (byte)(v >>> 32);
+        writeBuffer[o+4] = (byte)(v >>> 24);
+        writeBuffer[o+5] = (byte)(v >>> 16);
+        writeBuffer[o+6] = (byte)(v >>>  8);
+        writeBuffer[o+7] = (byte)(v >>>  0);
+        return writeBuffer;
+    }
+    public static byte[] toBytes(long v, byte[] writeBuffer)
+    {
+        return toBytes(v, writeBuffer, 0);
+    }
+    
+    public static byte[] toBytes(long v)
+    {
+        byte[] writeBuffer = new byte[8];
+        return toBytes(v, writeBuffer, 0);
+    }
+    
+    public static byte[] toBytes(long[] v, byte[] writeBuffer, int o)
+    {
+        for (int i = 0; i < v.length; i++)
+            toBytes(v[i], writeBuffer, o + i*8);
+        return writeBuffer;
+    }
+    
+    public static byte[] toBytes(long[] v)
+    {
+        byte[] writeBuffer = new byte[8*v.length];
+        return toBytes(v, writeBuffer, 0);
+    }
+    
+    // INT CONVERSION
+
+    public static int toInt(byte[] readBuffer, int o)
+    {
+        int ch1 = readBuffer[o++];
+        int ch2 = readBuffer[o++];
+        int ch3 = readBuffer[o++];
+        int ch4 = readBuffer[o++];
+        if ((ch1 | ch2 | ch3 | ch4) < 0)
+            throw new IllegalStateException();
+        return ((ch1 << 24) + (ch2 << 16) + (ch3 << 8) + (ch4 << 0));    
+    }
+    
+    public static int toInt(byte[] readBuffer)
+    {
+        return toInt(readBuffer, 0);
+    }
+    
+    public static int[] toInts(byte[] readBuffer, int o, int l)
+    {
+        int[] v = new int[l/4];
+        for (int i = 0; i < v.length; i++)
+            v[i] = toInt(readBuffer, o + i*4);
+        return v;
+    }
+    
+    public static byte[] toBytes(int v, byte[] writeBuffer, int o)
+    {
+        writeBuffer[o+0] = (byte)(v >>> 24);
+        writeBuffer[o+1] = (byte)(v >>> 16);
+        writeBuffer[o+2] = (byte)(v >>>  8);
+        writeBuffer[o+3] = (byte)(v >>>  0);
+        return writeBuffer;
+    }
+    
+    public static byte[] toBytes(int v)
+    {
+        byte[] writeBuffer = new byte[4];
+        return toBytes(v, writeBuffer, 0);
+    }
+    
+    public static byte[] toBytes(int[] v, byte[] writeBuffer, int o)
+    {
+        for (int i = 0; i < v.length; i++)
+            toBytes(v[i], writeBuffer, o + i*4);
+        return writeBuffer;
+    }
+    
+    public static byte[] toBytes(int[] v)
+    {
+        byte[] writeBuffer = new byte[4*v.length];
+        return toBytes(v, writeBuffer, 0);
     }
 
-    public static int toUnsignedInt(byte[] bytes, int o, int l)
+    // SHORT CONVERSION
+
+    public static short toShort(byte[] readBuffer, int o)
     {
-        long v = 0;
-        for (int i = 0; i < l; i++)
-            v = (v<<8) | (bytes[o + i]&0xff);
-        return (int)v;
+        return (short)(((readBuffer[0] & 255) <<  8) +
+                ((readBuffer[1] & 255) <<  0));
+    }
+    
+    public static short toShort(byte[] readBuffer)
+    {
+        return toShort(readBuffer, 0);
+    }
+    
+    public static short[] toShorts(byte[] readBuffer, int o, int l)
+    {
+        short[] v = new short[l/2];
+        for (int i = 0; i < v.length; i++)
+            v[i] = toShort(readBuffer, o + i*2);
+        return v;
     }
 
-    public static int toUnsignedInt(byte b1, byte b2)
+    public static byte[] toBytes(short v, byte[] writeBuffer, int o)
     {
-        return ((((int)b1)&0xff)<<8 | ((int)b2&0xff));
+        writeBuffer[o+0] = (byte)(v >>>  8);
+        writeBuffer[o+1] = (byte)(v >>>  0);
+        return writeBuffer;
     }
-
-    // assumes MSB first
-    public static int toSignedInt(byte[] bytes)
+    
+    public static byte[] toBytes(short v)
     {
-        return toSignedInt(bytes, 0, bytes.length);
+        byte[] writeBuffer = new byte[2];
+        return toBytes(v, writeBuffer, 0);
     }
-    public static int toSignedInt(byte[] bytes, int o, int l)
+    
+    public static byte[] toBytes(short[] v, byte[] writeBuffer, int o)
     {
-        int v = 0;
-        int max = 1;
-        for (int i = 0; i < l; i++)
-        {
-            v = (v<<8) | (bytes[o + i]&0xff);
-            max = max<<8;
-        }
-        if ((bytes[0]&0x80) == 0x80)
-            return v - max;
-        else
-            return v;
+        for (int i = 0; i < v.length; i++)
+            toBytes(v[i], writeBuffer, o + i*2);
+        return writeBuffer;
     }
-
+    
+    public static byte[] toBytes(short[] v)
+    {
+        byte[] writeBuffer = new byte[2*v.length];
+        return toBytes(v, writeBuffer, 0);
+    }
+    
     public static String toString(byte[] bytes)
     {
         StringBuffer sb = new StringBuffer();
