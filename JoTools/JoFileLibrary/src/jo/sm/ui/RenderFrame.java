@@ -166,7 +166,7 @@ public class RenderFrame extends JFrame implements WindowListener
         	if ((thisCount > 0) && (lastCount > 0))
         	{
                 JSeparator sep = new JSeparator();
-                sep.setToolTipText("plugin");
+                sep.setName("plugin");
                 menu.add(sep, lastModIndex);
                 lastCount = 0;
         	}

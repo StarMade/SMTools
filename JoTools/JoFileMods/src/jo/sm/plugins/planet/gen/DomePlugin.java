@@ -8,10 +8,10 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.logic.MathUtils;
 
-public class VolcanoPlugin implements IBlocksPlugin
+public class DomePlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Shape/Volcano";
-    public static final String DESC = "One single mountain";
+    public static final String NAME = "Shape/Dome";
+    public static final String DESC = "Domed surface";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
@@ -39,7 +39,7 @@ public class VolcanoPlugin implements IBlocksPlugin
     @Override
     public Object getParameterBean()
     {
-        return new VolcanoParameters();
+        return new DomeParameters();
     }
 
     @Override
@@ -52,15 +52,15 @@ public class VolcanoPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        VolcanoParameters params = (VolcanoParameters)p;
+        DomeParameters params = (DomeParameters)p;
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         fillGrid(modified, params, cb);
         return modified;
     }
     
-    private void fillGrid(SparseMatrix<Block> grid, VolcanoParameters params, IPluginCallback cb)
+    private void fillGrid(SparseMatrix<Block> grid, DomeParameters params, IPluginCallback cb)
     {
-        cb.setStatus("Filling in terrain");
+        cb.setStatus("Filling in dome");
         cb.startTask(params.getPlanetRadius()*2);        
         for (int x = -params.getPlanetRadius(); x <= params.getPlanetRadius(); x++)
         {
@@ -71,21 +71,16 @@ public class VolcanoPlugin implements IBlocksPlugin
         cb.endTask();
     }
     
-    private void fillColumn(int x, int y, SparseMatrix<Block> grid, VolcanoParameters params)
+    private void fillColumn(int x, int y, SparseMatrix<Block> grid, DomeParameters params)
     {
         double r = Math.sqrt(x*x + y*y);
         if (r > params.getPlanetRadius())
             return; // out of radius        
-        int calderaHeight;
-        if (params.getPlanetHeight() < 0)
-            calderaHeight = params.getPlanetHeight() + Math.abs(params.getCalderaDepth());
+        int columnDepth;
+        if (params.isConcave())
+            columnDepth = (int)MathUtils.interpolateSin(r, params.getPlanetRadius(), 0, params.getPlanetHeight(), 0);
         else
-            calderaHeight = params.getPlanetHeight() - Math.abs(params.getCalderaDepth());
-        int columnHeight;
-        if (r < params.getCalderaRadius())
-            columnHeight = (int)MathUtils.interpolate(r, 0, params.getCalderaRadius(), calderaHeight, params.getPlanetHeight());
-        else
-            columnHeight = (int)MathUtils.interpolateCos(r, params.getPlanetRadius(), params.getCalderaRadius(), 0, params.getPlanetHeight());
-        PluginUtils.fill(grid, x,  0,  y,  x, columnHeight, y, params.getFillWith(), 0);
+            columnDepth = (int)MathUtils.interpolateCos(r, 0, params.getPlanetRadius(), params.getPlanetHeight(), 0);
+        PluginUtils.fill(grid, x, 0, y, x, columnDepth, y, params.getFillWith(), 0);
     }
 }

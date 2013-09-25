@@ -11,6 +11,7 @@ import jo.sm.data.BlockTypes;
 import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.plugins.ship.rotate.RotateParameters;
@@ -89,28 +90,28 @@ public class HullPlugin implements IBlocksPlugin
         switch (params.getType())
         {
         	case HullParameters.OPEN_FRAME:
-        		generateOpenFrame(modified, center, lower, upper);
+        		generateOpenFrame(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.NEEDLE:
-        		generateNeedle(modified, center, lower, upper);
+        		generateNeedle(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.CONE:
-        		generateCone(modified, center, lower, upper);
+        		generateCone(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.CYLINDER:
-        		generateCylinder(modified, center, lower, upper);
+        		generateCylinder(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.BOX:
-        		generateBox(modified, center, lower, upper);
+        		generateBox(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.SPHERE:
-        		generateSphere(modified, center, lower, upper);
+        		generateSphere(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.DISC:
-        		generateDisc(modified, center, lower, upper);
+        		generateDisc(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.IRREGULAR:
-        		generateIrregular(modified, center, lower, upper);
+        		generateIrregular(modified, center, lower, upper, cb);
         		break;
         }
         if (ShipLogic.findCore(modified) == null)
@@ -118,34 +119,46 @@ public class HullPlugin implements IBlocksPlugin
         return modified;
     }
     
-    private void generateBox(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateBox(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling Box");
+        cb.startTask(PluginUtils.getVolume(lower, upper));
     	for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
     	{
     		Point3i p = i.next();
     		addHull(grid, p);
+    		cb.workTask(1);
     	}
+    	cb.endTask();
     }
     
-    private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling sphere");
     	int xMidRad = center.x - lower.x;
     	int yMidRad = center.y - lower.y;
     	int zMidRad = center.z - lower.z;
     	if ((xMidRad == yMidRad) && (yMidRad == zMidRad))
     	{	// perfect sphere
     		int r2 = xMidRad*xMidRad;
+            cb.startTask(xMidRad*2);
     		for (int x = -xMidRad; x <= xMidRad; x++)
+    		{
         		for (int y = -yMidRad; y <= yMidRad; y++)
             		for (int z = -zMidRad; z <= zMidRad; z++)
             			if (x*x + y*y + z*z <= r2)
             				addHull(grid, center.x + x, center.y + y, center.z + z);
+        		cb.workTask(1);
+    		}
+    		cb.endTask();
     		return;
     	}
         int xRad;
     	int yRad;
+    	cb.startTask(upper.z - lower.z + 1);
     	for (int z = lower.z; z <= upper.z; z++)
     	{
+    	    cb.workTask(1);
     		if (z < center.z)
     		{
     			xRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, xMidRad);
@@ -158,20 +171,27 @@ public class HullPlugin implements IBlocksPlugin
     		}
     		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     	}
+    	cb.endTask();
     }
     
-    private void generateCone(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateCone(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling Cone");
+        cb.startTask(upper.z - lower.z + 1);
     	for (int z = lower.z; z <= upper.z; z++)
     	{
+    	    cb.workTask(1);
     		int xRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.x - lower.x)/2, 0);
     		int yRad = (int)MathUtils.interpolate(z, lower.z, upper.z, (upper.y - lower.y)/2, 0);
     		drawElipse(grid, center.x, center.y, z, xRad, yRad);
     	}
+    	cb.endTask();
     }
     
-    private void generateNeedle(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateNeedle(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling Cone");
+        cb.startTask(upper.z - lower.z + 1);
     	int xMidRad = center.x - lower.x;
     	int yMidRad = center.y - lower.y;
     	int xRad;
@@ -189,35 +209,51 @@ public class HullPlugin implements IBlocksPlugin
     			yRad = (int)MathUtils.interpolate(z, center.z, upper.z, yMidRad, 0);
     		}
     		drawElipse(grid, center.x, center.y, z, xRad, yRad);
+    		cb.workTask(1);
     	}
+        cb.endTask();
     }
     
-    private void generateCylinder(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateCylinder(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling Cylinder");
+        cb.startTask(upper.z - lower.z + 1);
 		int xRad = (upper.x - lower.x)/2;
 		int yRad = (upper.y - lower.y)/2;
     	for (int z = lower.z; z <= upper.z; z++)
+    	{
     		drawElipse(grid, center.x, center.y, z, xRad, yRad);
+            cb.workTask(1);
+        }
+        cb.endTask();
     }
     
-    private void generateDisc(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateDisc(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
+        cb.setStatus("Filling Disk");
+        cb.startTask(upper.y - lower.y + 1);
 		int xRad = (upper.x - lower.x)/2;
 		int zRad = (upper.z - lower.z)/2;
     	for (int y = lower.y; y <= upper.y; y++)
+    	{
     		drawElipse(grid, center.x, center.z, y, xRad, zRad);
+            cb.workTask(1);
+        }
+        cb.endTask();
     	RotateParameters params = new RotateParameters();
     	params.setXRotate(90);
     	SparseMatrix<Block> modified = RotatePlugin.rotateAround(grid, params, center);
     	grid.set(modified);
     }
     
-    private void generateIrregular(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateIrregular(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
     	Set<Point3i> done = new HashSet<Point3i>();
     	List<Point3i> todo = new ArrayList<Point3i>();
     	todo.add(center);
-    	int volume = (upper.x - lower.x)*(upper.y - lower.y)*(upper.z - lower.z);
+    	int volume = PluginUtils.getVolume(lower, upper);
+        cb.setStatus("Filling Irregular");
+        cb.startTask(volume);
     	for (int i = 0; i < volume; i++)
     	{
     		int idx = mRND.nextInt(todo.size());
@@ -231,7 +267,9 @@ public class HullPlugin implements IBlocksPlugin
     		add(done, todo, p, 0, -1, 0);
     		add(done, todo, p, 0, 0, 1);
     		add(done, todo, p, 0, 0, -1);
-    	}
+            cb.workTask(1);
+        }
+        cb.endTask();
     }
 
 	private void add(Set<Point3i> done, List<Point3i> todo, Point3i p, int dx,
@@ -244,12 +282,14 @@ public class HullPlugin implements IBlocksPlugin
 			todo.add(next);
 	}
     
-    private void generateOpenFrame(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper)
+    private void generateOpenFrame(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
     {
     	Set<Point3i> done = new HashSet<Point3i>();
     	List<Point3i> todo = new ArrayList<Point3i>();
     	todo.add(new Point3i(0,0,0));
-    	int volume = (upper.x - lower.x)*(upper.y - lower.y)*(upper.z - lower.z);
+    	int volume = PluginUtils.getVolume(lower, upper);
+        cb.setStatus("Filling Open frame");
+        cb.startTask(volume);
     	for (int i = volume/(8*8*8); i > 0; i--)
     	{
     		int idx = mRND.nextInt(todo.size());
@@ -263,7 +303,9 @@ public class HullPlugin implements IBlocksPlugin
     		addFrameLink(grid, done, todo, p, center, 0, -1, 0);
     		addFrameLink(grid, done, todo, p, center, 0, 0, 1);
     		addFrameLink(grid, done, todo, p, center, 0, 0, -1);
-    	}
+            cb.workTask(1);
+        }
+        cb.endTask();
     }
 
 	private void addFrameLink(SparseMatrix<Block> grid, Set<Point3i> done, List<Point3i> todo, Point3i p, Point3i center, int dx, int dy, int dz)

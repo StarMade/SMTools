@@ -1,5 +1,6 @@
 package jo.sm.plugins.planet.gen;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.ui.act.plugin.Description;
 
 
@@ -9,22 +10,19 @@ public class GiantsCausewayParameters
 {
     @Description(displayName="", shortDescription="Planetary radius")
     private int     mPlanetRadius;
-    @Description(displayName="", shortDescription="Tallest point above baseline")
+    @Description(displayName="", shortDescription="Tallest point above baseline (-ve for below)")
     private int     mPlanetHeight;
-    @Description(displayName="", shortDescription="Thickest point beneath baseline")
-    private int     mPlanetDepth;
     @Description(displayName="Hex", shortDescription="Radius of hex slab")
     private int     mHexRadius;
-    @Description(displayName="", shortDescription="Should bottom mirror top")
-    private boolean mReflexive;
+    @Description(displayName="", shortDescription="Block type to fill with")
+    private short mFillWith;
     
     public GiantsCausewayParameters()
     {
         mPlanetRadius = 250;
         mPlanetHeight = 32;
-        mPlanetDepth = 32;
         mHexRadius = 5;
-        mReflexive = false;
+        mFillWith = BlockTypes.TERRAIN_ROCK_ID;
     }
 
     public int getPlanetRadius()
@@ -47,16 +45,6 @@ public class GiantsCausewayParameters
         mPlanetHeight = planetHeight;
     }
 
-    public int getPlanetDepth()
-    {
-        return mPlanetDepth;
-    }
-
-    public void setPlanetDepth(int planetDepth)
-    {
-        mPlanetDepth = planetDepth;
-    }
-
     public int getHexRadius()
     {
         return mHexRadius;
@@ -67,13 +55,13 @@ public class GiantsCausewayParameters
         mHexRadius = hexRadius;
     }
 
-    public boolean isReflexive()
+    public short getFillWith()
     {
-        return mReflexive;
+        return mFillWith;
     }
 
-    public void setReflexive(boolean reflexive)
+    public void setFillWith(short fillWith)
     {
-        mReflexive = reflexive;
+        mFillWith = fillWith;
     }
 }

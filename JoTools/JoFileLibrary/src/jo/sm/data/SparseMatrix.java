@@ -105,8 +105,10 @@ public class SparseMatrix<T>
     
     public void getBounds(Point3i lower, Point3i upper)
     {
-        lower.set(mLower);
-        upper.set(mUpper);
+        if (mLower != null)
+            lower.set(mLower);
+        if (mUpper != null)
+            upper.set(mUpper);
     }
     
     public Iterator<Point3i> iterator()

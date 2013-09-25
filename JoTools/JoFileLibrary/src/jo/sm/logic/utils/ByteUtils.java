@@ -180,8 +180,8 @@ public class ByteUtils
 
     public static short toShort(byte[] readBuffer, int o)
     {
-        return (short)(((readBuffer[0] & 255) <<  8) +
-                ((readBuffer[1] & 255) <<  0));
+        return (short)(((readBuffer[o+0] & 255) <<  8) +
+                ((readBuffer[o+1] & 255) <<  0));
     }
     
     public static short toShort(byte[] readBuffer)

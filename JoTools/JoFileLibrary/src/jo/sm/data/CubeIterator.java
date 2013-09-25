@@ -19,8 +19,9 @@ public class CubeIterator implements Iterator<Point3i>
     	{
 	        mLower = new Point3i(lower);
 	        mUpper = new Point3i(upper);
+            normalize();
 	        mDelta = new Point3i(1, 1, 1);
-	        mNext = new Point3i(lower);
+	        mNext = new Point3i(mLower);
     	}
     }
 
@@ -32,11 +33,34 @@ public class CubeIterator implements Iterator<Point3i>
     	{
 	        mLower = new Point3i(lower);
 	        mUpper = new Point3i(upper);
+	        normalize();
 	        mDelta = new Point3i(delta);
-	        mNext = new Point3i(lower);
+	        mNext = new Point3i(mLower);
     	}
     }
 
+    private void normalize()
+    {
+        if (mUpper.x < mLower.x)
+        {
+            int tmp = mLower.x;
+            mLower.x = mUpper.x;
+            mUpper.x = tmp;
+        }
+        if (mUpper.y < mLower.y)
+        {
+            int tmp = mLower.y;
+            mLower.y = mUpper.y;
+            mUpper.y = tmp;
+        }
+        if (mUpper.z < mLower.z)
+        {
+            int tmp = mLower.z;
+            mLower.z = mUpper.z;
+            mUpper.z = tmp;
+        }
+    }
+    
     @Override
     public boolean hasNext()
     {

@@ -1,5 +1,6 @@
 package jo.sm.plugins.planet.gen;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.ui.act.plugin.Description;
 
 
@@ -9,25 +10,22 @@ public class VolcanoParameters
 {
     @Description(displayName="", shortDescription="Planetary radius")
     private int     mPlanetRadius;
-    @Description(displayName="", shortDescription="Tallest point above baseline")
+    @Description(displayName="", shortDescription="Tallest point above baseline (-ve for below)")
     private int     mPlanetHeight;
-    @Description(displayName="", shortDescription="Thickest point beneath baseline")
-    private int     mPlanetDepth;
     @Description(displayName="", shortDescription="Radius of Caldera")
     private int     mCalderaRadius;
     @Description(displayName="", shortDescription="Depth of Caldera")
     private int     mCalderaDepth;
-    @Description(displayName="", shortDescription="Should bottom be rounded (or flat)")
-    private boolean mRoundedBottom;
-    
+    @Description(displayName="", shortDescription="Block type to fill with")
+    private short mFillWith;
+
     public VolcanoParameters()
     {
         mPlanetRadius = 250;
         mPlanetHeight = 127;
         mCalderaRadius = 16;
         mCalderaDepth = 32;
-        mPlanetDepth = 32;
-        mRoundedBottom = true;
+        mFillWith = BlockTypes.TERRAIN_ROCK_ID;
     }
 
     public int getPlanetRadius()
@@ -50,16 +48,6 @@ public class VolcanoParameters
         mPlanetHeight = planetHeight;
     }
 
-    public int getPlanetDepth()
-    {
-        return mPlanetDepth;
-    }
-
-    public void setPlanetDepth(int planetDepth)
-    {
-        mPlanetDepth = planetDepth;
-    }
-
     public int getCalderaRadius()
     {
         return mCalderaRadius;
@@ -80,14 +68,13 @@ public class VolcanoParameters
         mCalderaDepth = calderaDepth;
     }
 
-    public boolean isRoundedBottom()
+    public short getFillWith()
     {
-        return mRoundedBottom;
+        return mFillWith;
     }
 
-    public void setRoundedBottom(boolean roundedBottom)
+    public void setFillWith(short fillWith)
     {
-        mRoundedBottom = roundedBottom;
+        mFillWith = fillWith;
     }
-
 }

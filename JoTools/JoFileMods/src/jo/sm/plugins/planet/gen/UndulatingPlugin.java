@@ -2,9 +2,9 @@ package jo.sm.plugins.planet.gen;
 
 import java.util.Random;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -110,16 +110,7 @@ public class UndulatingPlugin implements IBlocksPlugin
         if (r > params.getPlanetRadius())
             return; // out of radius
         int columnHeight = (int)MathUtils.interpolate(hexHeight, hparams.elevLow, hparams.elevHigh, 0, params.getPlanetHeight());
-        int columnDepth;
-        if (params.isReflexive())
-            columnDepth = (int)MathUtils.interpolate(hexHeight, hparams.elevLow, hparams.elevHigh, 0, -params.getPlanetDepth());
-        else
-            columnDepth = -params.getPlanetDepth();
-        for (int z = columnDepth; z <= columnHeight; z++)
-        {
-            Block b = new Block(BlockTypes.TERRAIN_ROCK_ID);
-            hparams.grid.set(x, z, y, b);
-        }
+        PluginUtils.fill(hparams.grid, x,  0,  y, x,  columnHeight,  y, params.getFillWith(), 0);
     }
     
     private int[] getFieldPosition(int fieldX, int fieldY, HexParams hparams, UndulatingParameters params)

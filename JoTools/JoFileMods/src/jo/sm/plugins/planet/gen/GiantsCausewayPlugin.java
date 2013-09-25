@@ -2,9 +2,9 @@ package jo.sm.plugins.planet.gen;
 
 import java.util.Random;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -92,17 +92,7 @@ public class GiantsCausewayPlugin implements IBlocksPlugin
         int[] hexXY = findNearestHex(blockXY, hparams, params);
         int hexHeight = hparams.field[hexXY[0]][hexXY[1]];
         int columnHeight = (int)MathUtils.interpolate(hexHeight, hparams.elevLow, hparams.elevHigh, 0, params.getPlanetHeight());
-        int columnDepth;
-        if (params.isReflexive())
-            columnDepth = (int)MathUtils.interpolate(hexHeight, hparams.elevLow, hparams.elevHigh, 0, -params.getPlanetDepth());
-        else
-            columnDepth = -params.getPlanetDepth();
-        //System.out.println("Filling "+blockXY[0]+","+blockXY[1]+" from "+columnDepth+" to "+columnHeight);
-        for (int z = columnDepth; z <= columnHeight; z++)
-        {
-            Block b = new Block(BlockTypes.TERRAIN_ROCK_ID);
-            hparams.grid.set(blockXY[0], z, blockXY[1], b);
-        }
+        PluginUtils.fill(hparams.grid, blockXY[0],  0,  blockXY[1], blockXY[0],  columnHeight,  blockXY[1], params.getFillWith(), 0);
     }
     
     private int[] findNearestHex(int[] blockXY, HexParams hparams, GiantsCausewayParameters params)
