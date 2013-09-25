@@ -32,6 +32,7 @@ import jo.sm.ui.act.file.SaveAction;
 import jo.sm.ui.act.file.SaveAsBlueprintAction;
 import jo.sm.ui.act.file.SaveAsFileAction;
 import jo.sm.ui.act.view.AxisAction;
+import jo.sm.ui.act.view.DontDrawAction;
 import jo.sm.ui.act.view.PlainAction;
 import jo.sm.ui.logic.MenuLogic;
 import jo.sm.ui.logic.ShipSpec;
@@ -83,6 +84,7 @@ public class RenderFrame extends JFrame implements WindowListener
         menuBar.add(menuView);
         menuView.add(new JCheckBoxMenuItem(new PlainAction(this)));
         menuView.add(new JCheckBoxMenuItem(new AxisAction(this)));
+        menuView.add(new JCheckBoxMenuItem(new DontDrawAction(this)));
         JSeparator viewFileStart = new JSeparator();
         viewFileStart.setName("pluginsStartHere");
         menuView.add(viewFileStart);

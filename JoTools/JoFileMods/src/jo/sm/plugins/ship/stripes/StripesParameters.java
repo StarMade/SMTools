@@ -3,7 +3,7 @@ package jo.sm.plugins.ship.stripes;
 import jo.sm.data.BlockTypes;
 import jo.sm.ui.act.plugin.Description;
 
-@Description(displayName="Paint With Pattern", shortDescription="Paint a pattern of strips or checks on object")
+@Description(displayName="Paint With Pattern", shortDescription="Paint a pattern of stripes or checks on object")
 public class StripesParameters
 {
 	@Description(displayName="First Color")

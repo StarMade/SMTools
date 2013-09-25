@@ -1,4 +1,4 @@
-package jo.sm.plugins.ship.imp;
+package jo.sm.plugins.ship.exp;
 
 import java.awt.Image;
 import java.beans.BeanDescriptor;
@@ -14,23 +14,23 @@ import javax.swing.JFileChooser;
 import jo.sm.ui.act.plugin.FilePropertyDescriptor;
 import jo.sm.ui.act.plugin.FilePropertyInfo;
 
-public class ImportSchematicParametersBeanInfo implements BeanInfo
+public class ExportDAEParametersBeanInfo implements BeanInfo
 {
     private BeanInfo mRootBeanInfo;
     private FilePropertyInfo	mInfo;
     
-    public ImportSchematicParametersBeanInfo() throws IntrospectionException
+    public ExportDAEParametersBeanInfo() throws IntrospectionException
     {
         super();
         mInfo = new FilePropertyInfo();
-        mInfo.setDialogTitle("Import from Schematic file");
+        mInfo.setDialogTitle("Save to DAE file");
         mInfo.setFilters(new String[][]{
-        		{ "Minecraft Schematic file", "schematic" },
+        		{ "Wavefront DAE file", "dae" },
         });
-        mInfo.setDialogType(JFileChooser.OPEN_DIALOG);
-        mInfo.setApproveButtonText("OPEN");
-        mInfo.setApproveButtonTooltipText("Select file to import from");
-        mRootBeanInfo = Introspector.getBeanInfo(ImportSchematicParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+        mInfo.setDialogType(JFileChooser.SAVE_DIALOG);
+        mInfo.setApproveButtonText("Save");
+        mInfo.setApproveButtonTooltipText("Select file to export to");
+        mRootBeanInfo = Introspector.getBeanInfo(ExportDAEParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
     }
 
     @Override

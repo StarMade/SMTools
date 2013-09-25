@@ -40,6 +40,7 @@ public class AWTRenderPanel extends RenderPanel
     private int					mMouseMode;
     private boolean				mPlainGraphics;
     private boolean				mAxis;
+    private boolean				mDontDraw;
     private UndoBuffer          mUndoer;
     
     private ShipSpec            mSpec;
@@ -245,10 +246,17 @@ public class AWTRenderPanel extends RenderPanel
     
     public void updateTiles()
     {
-        if (StarMadeLogic.getInstance().getViewFilter() == null)
-            mFilteredGrid = mGrid;
-        else
-            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
+    	if (mDontDraw)
+    	{
+    		mFilteredGrid = new SparseMatrix<Block>();
+    	}
+    	else
+    	{
+	        if (StarMadeLogic.getInstance().getViewFilter() == null)
+	            mFilteredGrid = mGrid;
+	        else
+	            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
+    	}
         RenderPolyLogic.fillPolys(mFilteredGrid, mTiles);
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
@@ -428,5 +436,16 @@ public class AWTRenderPanel extends RenderPanel
     {
         // ignore
     }
+
+	public boolean isDontDraw()
+	{
+		return mDontDraw;
+	}
+
+	public void setDontDraw(boolean dontDraw)
+	{
+		mDontDraw = dontDraw;
+		updateTiles();
+	}
 
 }

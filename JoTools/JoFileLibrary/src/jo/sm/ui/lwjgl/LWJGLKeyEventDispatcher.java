@@ -3,6 +3,7 @@ package jo.sm.ui.lwjgl;
 import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
@@ -13,7 +14,7 @@ import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.Point3iLogic;
 
-public class LWJGLKeyEventDispatcher implements KeyEventDispatcher
+public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
 {
     private static final int PAN_XM = 'A';
     private static final int PAN_XP = 'D';
@@ -21,6 +22,13 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher
     private static final int PAN_YP = 'S';
     private static final int PAN_ZM = 'Q';
     private static final int PAN_ZP = 'E';
+
+    private static final int ROT_YM = 'J';
+    private static final int ROT_YP = 'L';
+    private static final int ROT_PM = 'I';
+    private static final int ROT_PP = 'K';
+    private static final int ROT_RM = 'U';
+    private static final int ROT_RP = 'O';
 
     private static final int SELECTION_MOVE = 0;
     private static final int SELECTION_MOVE_UPPER = 0x40;
@@ -83,7 +91,11 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher
 		if (keyMod == 0)
 		{
 			Point3i delta = keyToDelta(keyCode, null);
-			mPanel.moveCamera(delta);
+			if (delta != null)
+				mPanel.moveCamera(delta);
+			delta = keyToRot(keyCode, null);
+			if (delta != null)
+				mPanel.rotateCamera(delta);
 		}
 	}
 
@@ -129,6 +141,27 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher
 			delta.z++;
 		else if (keyCode == PAN_ZM)
 			delta.z--;
+		return null;
+	}
+
+	private Point3i keyToRot(int keyCode, Point3i delta)
+	{
+		if (delta == null)
+			delta = new Point3i();
+		if (keyCode == ROT_YP)
+			delta.x++;
+		else if (keyCode == ROT_YM)
+			delta.x--;
+		else if (keyCode == ROT_PP)
+			delta.y++;
+		else if (keyCode == ROT_PM)
+			delta.y--;
+		else if (keyCode == ROT_RP)
+			delta.z++;
+		else if (keyCode == ROT_RM)
+			delta.z--;
+		else
+			return null;
 		return delta;
 	}
     
@@ -147,4 +180,21 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher
         }
         return false;
     }
+
+	@Override
+	public void keyPressed(KeyEvent e)
+	{
+		doKeyDown(e.getKeyCode(), e.getModifiers());
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e)
+	{
+		doKeyUp(e.getKeyCode(), e.getModifiers());
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e)
+	{
+	}
 }

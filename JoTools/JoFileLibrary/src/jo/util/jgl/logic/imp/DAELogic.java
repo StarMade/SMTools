@@ -197,18 +197,18 @@ public class DAELogic
         return floats;
     }
 
-    private static String findInputSource(Node parent, String semantic)
-    {
-        Node i = findNodeWithValue(parent, "input", "semantic", semantic);
-        if (i != null)
-        {
-            String source = XMLUtils.getAttribute(i, "source");
-            if (source.startsWith("#"))
-                source = source.substring(1);
-            return source;
-        }
-        return null;
-    }
+//    private static String findInputSource(Node parent, String semantic)
+//    {
+//        Node i = findNodeWithValue(parent, "input", "semantic", semantic);
+//        if (i != null)
+//        {
+//            String source = XMLUtils.getAttribute(i, "source");
+//            if (source.startsWith("#"))
+//                source = source.substring(1);
+//            return source;
+//        }
+//        return null;
+//    }
 
     private static Node findNodeWithValue(Node parent, String nodeName, String attrName, String attrValue)
     {

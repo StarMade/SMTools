@@ -98,19 +98,8 @@ public class ImportSchematicPlugin implements IBlocksPlugin
     
     private void readFile(String objFile, SparseMatrix<Block> grid, Point3i center, IPluginCallback cb) throws Exception
     {
-        Tag.Compound schematic;
-        try
-        {
-            DataInputStream rdr = new DataInputStream(new FileInputStream(new File(objFile)));
-            schematic = IO.Read(rdr);
-            rdr.close();
-        }
-        catch (Exception e)
-        {
-            DataInputStream rdr = new DataInputStream(new FileInputStream(new File(objFile)));
-            schematic = IO.ReadUncompressed(rdr);
-            rdr.close();
-        }
+    	DataInputStream rdr = new DataInputStream(new FileInputStream(new File(objFile)));
+    	Tag.Compound schematic = IO.Read(rdr);
     	Tag.Short width = (Tag.Short)schematic.Get("Width");
     	Tag.Short height = (Tag.Short)schematic.Get("Height");
     	Tag.Short length = (Tag.Short)schematic.Get("Length");
@@ -142,6 +131,7 @@ public class ImportSchematicPlugin implements IBlocksPlugin
     					grid.set(center.x + x, center.y + y, center.z + z, new Block((short)map.mSMBlock));
     			}
     	cb.endTask();
+    	rdr.close();
     }
 
     private void readData(StarMade sm)

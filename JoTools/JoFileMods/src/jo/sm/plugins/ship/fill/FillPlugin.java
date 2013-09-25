@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
@@ -11,6 +12,7 @@ import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.HullLogic;
 import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 
@@ -61,31 +63,42 @@ public class FillPlugin implements IBlocksPlugin
         FillParameters params = (FillParameters)p;    
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
         List<Point3i> interior = new ArrayList<Point3i>();
+        Set<Point3i> exterior = HullLogic.findExterior(original, cb);
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
         original.getBounds(lower, upper);
-        scopeInterior(original, modified, interior, lower, upper);
+        scopeInterior(original, modified, interior, exterior, lower, upper, cb);
         int interiorSize = interior.size();
         int oneHundredPercent = params.getEmpty() + params.getMissileDumb() + params.getMissileFafo()
                 + params.getMissileHeat() + params.getPower() + params.getSalvage()
                 + params.getShield() + params.getThrusters() + params.getWeapon();
+        cb.setStatus("Filling");
+        cb.startTask(oneHundredPercent);
         fill(modified, interior, params.getThrusters()*interiorSize/oneHundredPercent, (short)-1, BlockTypes.THRUSTER_ID,
                 new FillStrategy(FillStrategy.MINUS, FillStrategy.Z, lower, upper));
+        cb.workTask(params.getThrusters());
         fill(modified, interior, params.getMissileDumb()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_DUMB_CONTROLLER_ID, BlockTypes.MISSILE_DUMB_ID,
                 new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        cb.workTask(params.getMissileDumb());
         fill(modified, interior, params.getMissileHeat()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_HEAT_CONTROLLER_ID, BlockTypes.MISSILE_HEAT_ID,
                 new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        cb.workTask(params.getMissileHeat());
         fill(modified, interior, params.getMissileFafo()*interiorSize/oneHundredPercent, BlockTypes.MISSILE_FAFO_CONTROLLER_ID, BlockTypes.MISSILE_FAFO_ID,
                 new FillStrategy(FillStrategy.PLUS, FillStrategy.Z, lower, upper));
+        cb.workTask(params.getMissileFafo());
         fill(modified, interior, params.getWeapon()*interiorSize/oneHundredPercent, BlockTypes.WEAPON_CONTROLLER_ID, BlockTypes.WEAPON_ID,
                 new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.X, lower, upper));
+        cb.workTask(params.getWeapon());
         fill(modified, interior, params.getSalvage()*interiorSize/oneHundredPercent, BlockTypes.SALVAGE_CONTROLLER_ID, BlockTypes.SALVAGE_ID,
                 new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.Y, lower, upper));
+        cb.workTask(params.getSalvage());
         fill(modified, interior, params.getPower()*interiorSize/oneHundredPercent, BlockTypes.POWER_COIL_ID, BlockTypes.POWER_ID,
                 new FillStrategy(FillStrategy.CENTER, FillStrategy.X|FillStrategy.Y|FillStrategy.Z, lower, upper));
+        cb.workTask(params.getPower());
         fill(modified, interior, params.getShield()*interiorSize/oneHundredPercent, (short)-1, BlockTypes.SHIELD_ID,
                 new FillStrategy(FillStrategy.OUTSIDE, FillStrategy.X|FillStrategy.Y|FillStrategy.Z, lower, upper));
-        
+        cb.workTask(params.getShield());
+        cb.endTask();
         return modified;
     }
 
@@ -113,24 +126,26 @@ public class FillPlugin implements IBlocksPlugin
 
     private void scopeInterior(SparseMatrix<Block> original,
             SparseMatrix<Block> modified, List<Point3i> interior,
-            Point3i lower, Point3i upper)
+            Set<Point3i> exterior, Point3i lower, Point3i upper, 
+            IPluginCallback cb)
     {
-        for (int x = lower.x; x <= upper.x; x++)
-            for (int y = lower.y; y <= upper.y; y++)
-            {
-                int bottom = findBottom(original, x, y, lower.z, upper.z);
-                int top = findTop(original, x, y, lower.z, upper.z);
-                if (bottom > top)
-                    continue; // no blocks;
-                for (int z = bottom; z <= top; z++)
-                {
-                    Point3i xyz = new Point3i(x, y, z);
-                    if (original.contains(xyz))
-                        modified.set(xyz, original.get(xyz));
-                    else
-                        interior.add(xyz);
-                }
-            }
+    	cb.setStatus("Calculating interior");
+    	cb.startTask(original.size());
+    	for (Iterator<Point3i> i = original.iterator(); i.hasNext(); )
+    	{
+    		Point3i p = i.next();
+    		if (exterior.contains(p))
+    			continue;
+    		Block b = original.get(p);
+    		if (b != null)
+    		{
+    			modified.set(p, b);
+    			cb.workTask(1);
+    		}
+    		else
+    			interior.add(p);
+    	}
+    	cb.endTask();
         Point3i core = ShipLogic.findCore(modified);
         if (core == null)
         {
@@ -144,21 +159,5 @@ public class FillPlugin implements IBlocksPlugin
             if ((Math.abs(p.x - core.x) <= accessRadius) || (Math.abs(p.y - core.y) <= accessRadius) || (Math.abs(p.z - core.z) <= accessRadius))
                 i.remove();
         }
-    }
-
-    private int findBottom(SparseMatrix<Block> grid, int x, int y, int lowZ, int highZ)
-    {
-        for (int z = lowZ; z <= highZ; z++)
-            if (grid.contains(x, y, z))
-                return z;
-        return highZ + 1;
-    }
-
-    private int findTop(SparseMatrix<Block> grid, int x, int y, int lowZ, int highZ)
-    {
-        for (int z = highZ; z >= lowZ; z--)
-            if (grid.contains(x, y, z))
-                return z;
-        return lowZ - 1;
     }
 }

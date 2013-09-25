@@ -1,7 +1,6 @@
 package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
-import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,8 +23,6 @@ import jo.vecmath.Matrix3f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
-import jo.vecmath.Vector4f;
-import jo.vecmath.logic.Matrix4fLogic;
 
 @SuppressWarnings("serial")
 public class LWJGLRenderPanel extends RenderPanel
@@ -49,6 +46,7 @@ public class LWJGLRenderPanel extends RenderPanel
     private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private boolean             mPlainGraphics;
+    private boolean             mDontDraw;
     private UndoBuffer          mUndoer;
     private ShipSpec            mSpec;
 
@@ -96,8 +94,9 @@ public class LWJGLRenderPanel extends RenderPanel
         mCanvas.addMouseListener(ma);
         mCanvas.addMouseMotionListener(ma);
         mCanvas.addMouseWheelListener(ma);
-        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
-        		new LWJGLKeyEventDispatcher(this));
+//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
+//        		new LWJGLKeyEventDispatcher(this));
+        mCanvas.addKeyListener(new LWJGLKeyEventDispatcher(this));
     }
     
     private void doMouseDown(Point p, int modifiers)
@@ -236,11 +235,11 @@ public class LWJGLRenderPanel extends RenderPanel
         mGrid.getBounds(lower, upper);
         Point3f lookAtThis = new Point3f(upper.x + lower.x, -(upper.y + lower.y), upper.z + lower.z);
         lookAtThis.scale(.5f);
-        float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z);
+        float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z) + 1;
         Point3f standHere = new Point3f(lookAtThis);
         standHere.z -= maxModel*4;
         //mUniverse.getCamera().setLocation(lookAtThis);
-        Matrix4fLogic.lookAt(mUniverse.getCamera(), standHere, lookAtThis);
+        mUniverse.getCamera().lookAt(standHere, lookAtThis);
         //mUniverse.getCamera().scale(mScale);
         System.out.println("Standing at "+standHere+", looking at "+lookAtThis);
         //mUniverse.setTransformer(new SpinningTransformer(new Point3f(0, 20, 0)));
@@ -251,7 +250,9 @@ public class LWJGLRenderPanel extends RenderPanel
     @Override
     public void updateTiles()
     {
-        if (StarMadeLogic.getInstance().getViewFilter() == null)
+    	if (mDontDraw)
+    		mFilteredGrid = new SparseMatrix<Block>();
+    	else if (StarMadeLogic.getInstance().getViewFilter() == null)
             mFilteredGrid = mGrid;
         else
             mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
@@ -313,17 +314,19 @@ public class LWJGLRenderPanel extends RenderPanel
 
     public Point3i getPointAt(double x, double y)
     {
-        Point3f eye = mCanvas.getEyeRay();
         Matrix3f rot = new Matrix3f();
         mUniverse.getCamera().get(rot);
-        Vector4f trans = new Vector4f();
-        mUniverse.getCamera().getColumn(3, trans);
+        Point3f trans = new Point3f(mUniverse.getCamera().getLocation());
         rot.invert();
-        Point3f model = new Point3f();
-        rot.transform(eye, model);
+    	System.out.println("Trans: "+trans+"\nRot^-1:\n"+rot);
+        Point3f eye = mCanvas.getEyeRay();
+        System.out.print(eye);
+        Point3f model = new Point3f(eye);
         model.x += trans.x; model.y -= trans.y; model.z -= trans.z;
+        System.out.print(" -> "+model);
+        rot.transform(model);
         Point3i p = new Point3i(model);
-        System.out.println(eye+" -> "+model+" -> "+p);
+        System.out.println(" -> "+model+" -> "+p);
         if (!mGrid.contains(p))
             return null;
         return p;
@@ -400,5 +403,25 @@ public class LWJGLRenderPanel extends RenderPanel
 		mUniverse.getCamera().moveRight(delta.x);
 		mUniverse.getCamera().moveUp(delta.y);
 		mUniverse.getCamera().moveForward(delta.z);
+	}
+
+	public void rotateCamera(Point3i delta)
+	{
+		//System.out.println("Before rotate:\n"+mUniverse.getCamera());
+		mUniverse.getCamera().yaw(delta.x*PIXEL_TO_RADIANS);
+		mUniverse.getCamera().pitch(delta.y*PIXEL_TO_RADIANS);
+		mUniverse.getCamera().roll(delta.z*PIXEL_TO_RADIANS);
+		//System.out.println("After rotate "+delta+":\n"+mUniverse.getCamera());
+	}
+
+	public boolean isDontDraw()
+	{
+		return mDontDraw;
+	}
+
+	public void setDontDraw(boolean dontDraw)
+	{
+		mDontDraw = dontDraw;
+		updateTiles();
 	}
 }

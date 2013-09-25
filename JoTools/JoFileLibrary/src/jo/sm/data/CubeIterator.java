@@ -13,18 +13,28 @@ public class CubeIterator implements Iterator<Point3i>
     
     public CubeIterator(Point3i lower, Point3i upper)
     {
-        mLower = new Point3i(lower);
-        mUpper = new Point3i(upper);
-        mDelta = new Point3i(1, 1, 1);
-        mNext = new Point3i(lower);
+    	if ((lower == null) || (upper == null))
+    		mNext = null;
+    	else
+    	{
+	        mLower = new Point3i(lower);
+	        mUpper = new Point3i(upper);
+	        mDelta = new Point3i(1, 1, 1);
+	        mNext = new Point3i(lower);
+    	}
     }
 
     public CubeIterator(Point3i lower, Point3i upper, Point3i delta)
     {
-        mLower = new Point3i(lower);
-        mUpper = new Point3i(upper);
-        mDelta = new Point3i(delta);
-        mNext = new Point3i(lower);
+    	if ((lower == null) || (upper == null))
+    		mNext = null;
+    	else
+    	{
+	        mLower = new Point3i(lower);
+	        mUpper = new Point3i(upper);
+	        mDelta = new Point3i(delta);
+	        mNext = new Point3i(lower);
+    	}
     }
 
     @Override
@@ -36,6 +46,8 @@ public class CubeIterator implements Iterator<Point3i>
     @Override
     public Point3i next()
     {
+    	if (mNext == null)
+    		return null;
         Point3i next = new Point3i(mNext);
         mNext.x += mDelta.x;
         if (mNext.x > mUpper.x)

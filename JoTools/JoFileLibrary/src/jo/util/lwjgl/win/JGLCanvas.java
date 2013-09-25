@@ -4,6 +4,8 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -12,7 +14,9 @@ import java.awt.event.MouseWheelListener;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import jo.util.jgl.enm.JGLColorMaterialFace;
@@ -24,6 +28,7 @@ import jo.vecmath.logic.Color4fLogic;
 import jo.vecmath.logic.Matrix4fLogic;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
@@ -48,6 +53,7 @@ public class JGLCanvas extends Canvas
     private List<MouseListener>	mMouseListeners = new ArrayList<MouseListener>();
     private List<MouseMotionListener>	mMouseMotionListeners = new ArrayList<MouseMotionListener>();
     private List<MouseWheelListener>	mMouseWheelListeners = new ArrayList<MouseWheelListener>();
+    private List<KeyListener> mKeyListeners = new ArrayList<KeyListener>();
 
     public JGLCanvas()
     {
@@ -213,6 +219,7 @@ public class JGLCanvas extends Canvas
                }
                doRender();
                doMouse();
+               doKeys();
                doEye();
                Display.update();
             }
@@ -221,6 +228,63 @@ public class JGLCanvas extends Canvas
          } catch (Exception e) {
             e.printStackTrace();
          }        
+    }
+    
+    private static final Map<Integer, Integer> KEY_LWJGL_TO_AWT = new HashMap<Integer, Integer>();
+    static
+    {
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_0, KeyEvent.VK_0);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_1, KeyEvent.VK_1);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_2, KeyEvent.VK_2);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_3, KeyEvent.VK_3);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_4, KeyEvent.VK_4);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_5, KeyEvent.VK_5);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_6, KeyEvent.VK_6);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_7, KeyEvent.VK_7);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_8, KeyEvent.VK_8);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_9, KeyEvent.VK_9);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_A, KeyEvent.VK_A);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_B, KeyEvent.VK_B);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_C, KeyEvent.VK_C);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_D, KeyEvent.VK_D);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_E, KeyEvent.VK_E);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_F, KeyEvent.VK_F);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_G, KeyEvent.VK_G);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_H, KeyEvent.VK_H);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_I, KeyEvent.VK_I);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_J, KeyEvent.VK_J);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_K, KeyEvent.VK_K);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_L, KeyEvent.VK_L);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_M, KeyEvent.VK_M);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_N, KeyEvent.VK_N);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_O, KeyEvent.VK_O);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_P, KeyEvent.VK_P);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_Q, KeyEvent.VK_Q);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_R, KeyEvent.VK_R);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_S, KeyEvent.VK_S);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_T, KeyEvent.VK_T);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_U, KeyEvent.VK_U);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_V, KeyEvent.VK_V);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_W, KeyEvent.VK_W);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_X, KeyEvent.VK_X);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_Y, KeyEvent.VK_Y);
+    	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_Z, KeyEvent.VK_Z);
+    }
+    
+    private void doKeys()
+    {
+    	while (Keyboard.next())
+    	{
+    		char eventChar = Keyboard.getEventCharacter();
+    		int eventKey = Keyboard.getEventKey();
+    		long eventTick = Keyboard.getEventNanoseconds();
+    		boolean eventState = Keyboard.getEventKeyState();
+    		if (KEY_LWJGL_TO_AWT.containsKey(eventKey))
+    			eventKey = KEY_LWJGL_TO_AWT.get(eventKey);
+    		KeyEvent e = new KeyEvent(this, eventState ? KeyEvent.KEY_PRESSED : KeyEvent.KEY_RELEASED, 
+    				eventTick, 0, eventKey, eventChar);
+    		fireKeyEvent(e);
+    	}
     }
     
     private void doEye()
@@ -379,6 +443,17 @@ public class JGLCanvas extends Canvas
     {
     	mMouseWheelListeners.remove(l);
     }
+
+    @Override
+    public synchronized void addKeyListener(KeyListener l)
+    {
+    	mKeyListeners.add(l);
+    }
+    
+    public synchronized void removeKeyListener(KeyListener l)
+    {
+    	mKeyListeners.remove(l);
+    }
     
     private void fireMouseEvent(MouseEvent e)
     {
@@ -403,6 +478,17 @@ public class JGLCanvas extends Canvas
     	for (MouseWheelListener l : mMouseWheelListeners)
     		if (e.getID() == MouseEvent.MOUSE_WHEEL)
     			l.mouseWheelMoved(e);
+    }
+
+    private void fireKeyEvent(KeyEvent e)
+    {
+    	for (KeyListener l : mKeyListeners)
+    		if (e.getID() == KeyEvent.KEY_PRESSED)
+    			l.keyPressed(e);
+			else if (e.getID() == KeyEvent.KEY_RELEASED)
+    			l.keyReleased(e);
+			else if (e.getID() == KeyEvent.KEY_TYPED)
+    			l.keyTyped(e);
     }
 
     public Point3f getEyeRay()

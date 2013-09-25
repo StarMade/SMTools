@@ -17,7 +17,7 @@ public class Block
     public Block(short id)
     {
         this();
-        mBlockID = id;
+        setBlockID(id);
     }
     
     public Block(Block b)

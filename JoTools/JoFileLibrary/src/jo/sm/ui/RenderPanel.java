@@ -23,6 +23,8 @@ public abstract class RenderPanel extends JPanel
 	public abstract void setPlainGraphics(boolean plainGraphics);
 	public abstract boolean isAxis();
 	public abstract void setAxis(boolean axis);
+	public abstract boolean isDontDraw();
+	public abstract void setDontDraw(boolean dontDraw);
 	public abstract void setCloseRequested(boolean pleaseClose);
     public abstract UndoBuffer getUndoer();
     public abstract void setUndoer(UndoBuffer undoer);

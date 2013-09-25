@@ -6,8 +6,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Iterator;
 
-import javax.imageio.ImageIO;
+import javax.imageio.IIOImage;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageWriterSpi;
+import javax.imageio.spi.ServiceRegistry;
+import javax.imageio.stream.FileImageOutputStream;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
@@ -19,6 +27,8 @@ import jo.sm.ui.lwjgl.LWJGLRenderLogic;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLNode;
 import jo.util.jgl.obj.tri.JGLObj;
+import jo.vecmath.Point3f;
+import jo.vecmath.logic.Point3fLogic;
 
 public class ExportOBJPlugin implements IBlocksPlugin
 {
@@ -85,13 +95,67 @@ public class ExportOBJPlugin implements IBlocksPlugin
     
     private void writeTexture(String objFile) throws IOException
     {
-    	String pngFile = objFile.substring(0, objFile.length() - 4) + ".png";
-    	ImageIO.write(BlockTypeColors.mAllTextures, "PNG", new File(pngFile));
+    	String jpgFile = objFile.substring(0, objFile.length() - 4) + ".jpg";
+    	//ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
+    	
+    	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
+    	jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+    	jpegParams.setCompressionQuality(0.15f);
+    	jpegParams.setProgressiveMode(ImageWriteParam.MODE_DISABLED);
+    	
+    	// use IIORegistry to get the available services
+    	IIORegistry registry = IIORegistry.getDefaultInstance();
+    	// return an iterator for the available ImageWriterSpi for jpeg images
+    	ServiceRegistry.Filter filter = new ServiceRegistry.Filter() {
+			@Override
+			public boolean filter(Object provider)
+			{
+	            if (!(provider instanceof ImageWriterSpi)) return false;
+
+	            ImageWriterSpi writerSPI = (ImageWriterSpi) provider;
+	            String[] formatNames = writerSPI.getFormatNames();
+	            for (int i = 0; i < formatNames.length; i++) {
+	                if (formatNames[i].equalsIgnoreCase("JPEG")) {
+	                    return true;
+	                }
+	            }
+
+	            return false;
+			}
+		};
+    	
+    	Iterator<ImageWriterSpi> services = registry.getServiceProviders(ImageWriterSpi.class,
+    	                                                 filter,
+    	   true);
+    	//...assuming that servies.hasNext() == true, I get the first available service.
+    	ImageWriterSpi writerSpi = services.next();
+    	ImageWriter writer = writerSpi.createWriterInstance();
+
+    	// specifies where the jpg image has to be written
+    	FileImageOutputStream os = new FileImageOutputStream(
+    	    	  new File(jpgFile));
+    	writer.setOutput(os);
+
+    	// writes the file with given compression level 
+    	// from your JPEGImageWriteParam instance
+    	writer.write(null, new IIOImage(BlockTypeColors.mAllTextures, null, null), jpegParams);
+    	os.close();
     }
     
     private void writeFile(String objFile, JGLGroup quads) throws IOException
     {
+    	File mtlFile = new File(objFile.substring(0, objFile.length() - 4) + ".mtl");
+    	File jpgFile = new File(objFile.substring(0, objFile.length() - 4) + ".jpg");
         BufferedWriter wtr = new BufferedWriter(new FileWriter(new File(objFile)));
+        wtr.write("mtllib "+mtlFile.getName());
+        wtr.newLine();
+        wtr.newLine();
+        wtr.write("g Mesh1 Model");
+        wtr.newLine();
+        wtr.newLine();
+        wtr.write("usemtl material0");
+        wtr.newLine();
+        wtr.newLine();
         int vertPosition = 1;
         for (JGLNode node : quads.getChildren())
         	if (node instanceof JGLObj)
@@ -100,6 +164,9 @@ public class ExportOBJPlugin implements IBlocksPlugin
         		int vertCount = obj.getVertices();
         		FloatBuffer verts = obj.getVertexBuffer();
         		verts.rewind();
+        		Point3f v1 = null;
+        		Point3f v2 = null;
+        		Point3f v3 = null;
         		for (int i = 0; i < vertCount; i++)
         		{
         			float x = verts.get();
@@ -107,6 +174,12 @@ public class ExportOBJPlugin implements IBlocksPlugin
         			float z = verts.get();
         			wtr.write("v "+x+" "+y+" "+z);
         			wtr.newLine();
+        			if (i == 0)
+        				v1 = new Point3f(x, y, z);
+        			else if (i == 1)
+        				v2 = new Point3f(x, y, z);
+        			else if (i == 2)
+        				v3 = new Point3f(x, y, z);
         		}
         		FloatBuffer texts = obj.getTexturesBuffer();
         		texts.rewind();
@@ -117,6 +190,14 @@ public class ExportOBJPlugin implements IBlocksPlugin
 	        			float u = texts.get();
 	        			float v = texts.get();
 	        			wtr.write("vt "+u+" "+v);
+	        			wtr.newLine();
+            		}
+            		Point3f edge1 = Point3fLogic.sub(v2, v1);
+            		Point3f edge2 = Point3fLogic.sub(v3, v1);
+            		Point3f norm = Point3fLogic.cross(edge1, edge2);
+            		for (int i = 0; i < vertCount; i++)
+            		{
+	        			wtr.write("vn "+norm.x+" "+norm.y+" "+norm.z);
 	        			wtr.newLine();
             		}
 				}
@@ -131,11 +212,22 @@ public class ExportOBJPlugin implements IBlocksPlugin
         			{
         				short face = indexes.get();
         				wtr.write(" "+(face + vertPosition));
+        				wtr.write("/"+(face + vertPosition));
+        				wtr.write("/"+(face + vertPosition));
         			}
         			wtr.newLine();
         		}
         		vertPosition += vertCount;
             }
+        wtr.close();
+        wtr = new BufferedWriter(new FileWriter(mtlFile));
+        wtr.write("newmtl material0"); wtr.newLine();
+        wtr.write("Ka 1.000000 1.000000 1.000000"); wtr.newLine();
+        wtr.write("Kd 1.000000 1.000000 1.000000"); wtr.newLine();
+        wtr.write("Ks 0.000000 0.000000 0.000000"); wtr.newLine();
+        wtr.write("map_Kd "+jpgFile.getName()); wtr.newLine();
+        wtr.newLine();
+        wtr.newLine();
         wtr.close();
     }
 }

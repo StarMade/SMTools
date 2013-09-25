@@ -1,4 +1,4 @@
-package jo.sm.plugins.ship.imp;
+package jo.sm.plugins.ship.stripes;
 
 import java.awt.Image;
 import java.beans.BeanDescriptor;
@@ -9,28 +9,16 @@ import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
 
-import javax.swing.JFileChooser;
+import jo.sm.ui.act.plugin.ColorPropertyDescriptor;
 
-import jo.sm.ui.act.plugin.FilePropertyDescriptor;
-import jo.sm.ui.act.plugin.FilePropertyInfo;
-
-public class ImportSchematicParametersBeanInfo implements BeanInfo
+public class OmbreParametersBeanInfo implements BeanInfo
 {
     private BeanInfo mRootBeanInfo;
-    private FilePropertyInfo	mInfo;
     
-    public ImportSchematicParametersBeanInfo() throws IntrospectionException
+    public OmbreParametersBeanInfo() throws IntrospectionException
     {
         super();
-        mInfo = new FilePropertyInfo();
-        mInfo.setDialogTitle("Import from Schematic file");
-        mInfo.setFilters(new String[][]{
-        		{ "Minecraft Schematic file", "schematic" },
-        });
-        mInfo.setDialogType(JFileChooser.OPEN_DIALOG);
-        mInfo.setApproveButtonText("OPEN");
-        mInfo.setApproveButtonTooltipText("Select file to import from");
-        mRootBeanInfo = Introspector.getBeanInfo(ImportSchematicParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
+        mRootBeanInfo = Introspector.getBeanInfo(OmbreParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
     }
 
     @Override
@@ -39,11 +27,11 @@ public class ImportSchematicParametersBeanInfo implements BeanInfo
         PropertyDescriptor[] props = mRootBeanInfo.getPropertyDescriptors();
         for (int i = 0; i < props.length; i++)
         {
-            if (props[i].getName().endsWith("ile"))
+            if (props[i].getName().startsWith("color"))
                 try
                 {
-                    props[i] = new FilePropertyDescriptor(props[i].getName(), 
-                            props[i].getReadMethod(), props[i].getWriteMethod(), mInfo);
+                    props[i] = new ColorPropertyDescriptor(props[i].getName(), 
+                            props[i].getReadMethod(), props[i].getWriteMethod());
                 }
                 catch (IntrospectionException e)
                 {

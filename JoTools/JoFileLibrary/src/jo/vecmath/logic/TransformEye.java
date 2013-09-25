@@ -299,4 +299,30 @@ public class TransformEye extends Matrix4f
         System.out.println("Right  : "+mRight);
         System.out.println("Forward: "+mForward);
     }
+
+    public void lookAt(Point3f standHere, Point3f lookAtThis)
+    {
+        // assume +z is the direction we are looking
+        Vector3f zaxis = new Vector3f(lookAtThis);
+        zaxis.sub(standHere);
+        zaxis.normalize();
+        Vector3f provisionalUp;
+        // if we're not looking along +y make that up, otherwise make it +z
+        if (!MathUtils.equals(zaxis.x, 0) || !MathUtils.equals(zaxis.z, 0))
+            provisionalUp = new Vector3f(0, 1, 0);
+        else
+            provisionalUp = new Vector3f(0, 0, 1);
+        Vector3f xaxis = new Vector3f();
+        xaxis.cross(zaxis, provisionalUp); // +x is left
+        xaxis.normalize();
+        Vector3f yaxis = new Vector3f();
+        yaxis.cross(xaxis, zaxis); // +y is the real up
+        yaxis.normalize();
+        mRight.set(xaxis);
+        mUp.set(yaxis);
+        mForward.set(zaxis);
+        mLocation.set(standHere);
+        assemble();
+    }
+
 }
