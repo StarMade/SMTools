@@ -264,6 +264,6 @@ public class ShipLogic
             superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256);
         else
             superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256 - 16);
-        return universePoint;
+        return superChunkIndex;
     }
 }
