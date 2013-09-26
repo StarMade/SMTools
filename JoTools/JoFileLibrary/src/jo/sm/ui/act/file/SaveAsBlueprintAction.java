@@ -9,6 +9,7 @@ import jo.sm.logic.BlueprintLogic;
 import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.logic.utils.StringUtils;
+import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ui.RenderFrame;
@@ -53,6 +54,7 @@ public class SaveAsBlueprintAction extends GenericAction
         File dir = new File(prints, name);
         final ShipSpec spec = new ShipSpec();
         spec.setType(mDef ? ShipSpec.DEFAULT_BLUEPRINT : ShipSpec.BLUEPRINT);
+        spec.setClassification(IBlocksPlugin.TYPE_SHIP); // TODO: autodetect
         spec.setName(name);
         spec.setFile(dir);
         IRunnableWithProgress t = new IRunnableWithProgress() {
@@ -61,7 +63,6 @@ public class SaveAsBlueprintAction extends GenericAction
 			{
 		        BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), spec, mDef, cb);
 		        mFrame.setSpec(spec);
-		        mFrame.getClient().setSpec(spec);
 			}
 		};
 		RunnableLogic.run(mFrame, name, t);
