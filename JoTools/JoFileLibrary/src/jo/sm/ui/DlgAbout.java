@@ -24,6 +24,7 @@ import jo.sm.logic.utils.ResourceUtils;
 public class DlgAbout extends JDialog
 {
 	private JEditorPane	mMessage;
+	private JScrollPane mScroller;
     
     public DlgAbout(JFrame base)
     {
@@ -39,18 +40,21 @@ public class DlgAbout extends JDialog
 		{
 			e.printStackTrace();
 		}
-        JButton ok = new JButton("OK");
+        mScroller = new JScrollPane(mMessage);
+        JButton ok = new JButton("Close");
         JButton audio = new JButton("Audiobook");
-        JButton ebook = new JButton("E-book");        // layout
+        JButton ebook = new JButton("E-book");
+        JButton doc = new JButton("Documentation");
         JPanel client = new JPanel();
         getContentPane().add(client);
         client.setLayout(new BorderLayout());
         client.add(BorderLayout.NORTH, new JLabel("About SMEdit"));
-        client.add(BorderLayout.CENTER, new JScrollPane(mMessage));
+        client.add(BorderLayout.CENTER, mScroller);
         JPanel buttonBar = new JPanel();
         client.add(BorderLayout.SOUTH, buttonBar);
         buttonBar.setLayout(new FlowLayout());
         buttonBar.add(ok);
+        buttonBar.add(doc);
         buttonBar.add(audio);
         buttonBar.add(ebook);
         // link
@@ -59,6 +63,12 @@ public class DlgAbout extends JDialog
             public void actionPerformed(ActionEvent ev)
             {
                 doOK();
+            }});
+        doc.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent ev)
+            {
+                doGoto(BegPanel.DOCUMENTATION);
             }});
         ebook.addActionListener(new ActionListener(){
             @Override
@@ -76,6 +86,18 @@ public class DlgAbout extends JDialog
         });
         setSize(640, 480);
         setLocationRelativeTo(base);
+        Thread t = new Thread() { public void run() {
+            try
+            {
+                Thread.sleep(250);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+            mScroller.getVerticalScrollBar().getModel().setValue(mScroller.getVerticalScrollBar().getModel().getMinimum());
+        }};
+        t.start();
     }
     
     private void doOK()

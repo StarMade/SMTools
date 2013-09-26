@@ -33,6 +33,8 @@ BlocksPlugins: jo.sm.factories.ship.filter.SelectSelectionFilterPlugin,
  jo.sm.plugins.ship.scale.ScalePlugin,
  jo.sm.plugins.ship.stripes.StripesPlugin,
  jo.sm.plugins.ship.stripes.OmbrePlugin,
- jo.sm.plugins.ship.text.TextPlugin
+ jo.sm.plugins.ship.text.TextPlugin,
+ jo.sm.plugins.ship.text.ImagePlugin
 PluginFactories: jo.sm.factories.planet.comp.MaterialFactory,
+ jo.sm.factories.planet.veg.VegetationFactory,
  jo.sm.factories.ship.filter.ViewFilterFactory

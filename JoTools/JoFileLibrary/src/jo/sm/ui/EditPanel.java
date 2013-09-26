@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import javax.swing.BoxLayout;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -51,6 +53,9 @@ public class EditPanel extends JPanel
     private JSpinner			mRadius;
     private JButton             mAll;
     private JButton             mPlugins;
+    private JCheckBox           mXSymmetry;
+    private JCheckBox           mYSymmetry;
+    private JCheckBox           mZSymmetry;
 
     public EditPanel(RenderPanel renderer)
     {
@@ -67,6 +72,12 @@ public class EditPanel extends JPanel
         mYellow = newButton(BlockTypes.HULL_COLOR_YELLOW_ID);
         mWhite = newButton(BlockTypes.HULL_COLOR_WHITE_ID);
         mRadius = new JSpinner(new SpinnerNumberModel(1, 1, 64, 1));
+        mXSymmetry = new JCheckBox("X Symmetry");
+        mXSymmetry.setToolTipText("Mirror paint port/starboard");
+        mYSymmetry = new JCheckBox("Y Symmetry");
+        mYSymmetry.setToolTipText("Mirror paint dorsal/ventral");
+        mZSymmetry = new JCheckBox("Z Symmetry");
+        mZSymmetry.setToolTipText("Mirror paint fore/aft");
         mClear = new JButton("Clear");
         mClear.setToolTipText("Stop painting");
         mAll = new JButton("All");
@@ -89,6 +100,9 @@ public class EditPanel extends JPanel
         add(mWhite);
         add(new JLabel("Radius:"));
         add(mRadius);
+        add(mXSymmetry);
+        add(mYSymmetry);
+        add(mZSymmetry);
         add(mClear);
         add(mAll);
         add(mPlugins);
@@ -193,25 +207,55 @@ public class EditPanel extends JPanel
         	i = new CubeIterator(StarMadeLogic.getInstance().getSelectedLower(), StarMadeLogic.getInstance().getSelectedUpper());
         else
         	i = grid.iteratorNonNull();
-        colorByIterator(grid, i);
+        colorByIterator(grid, i, false);
     }
 
-	private void colorByIterator(SparseMatrix<Block> grid, Iterator<Point3i> i)
+	private void colorByIterator(SparseMatrix<Block> grid, Iterator<Point3i> i, boolean symmetric)
 	{
+	    List<Point3i> coords = new ArrayList<Point3i>();
 		while (i.hasNext())
         {
-            Point3i coords = i.next();
-            Block block = grid.get(coords);
-            if (block == null)
-                continue;
-            short newID = BlockTypes.getColoredBlock(block.getBlockID(), StarMadeLogic.getInstance().getSelectedBlockType());
-            if (newID != -1)
+		    coords.clear();
+            coords.add(i.next());
+            if (symmetric)
             {
-                block.setBlockID(newID);
+                if (mXSymmetry.isSelected())
+                    for (int j = coords.size() - 1; j >= 0; j--)
+                    {
+                        Point3i p1 = coords.get(j);
+                        if (p1.x != 8)
+                            coords.add(new Point3i(16 - p1.x, p1.y, p1.z));
+                    }
+                if (mYSymmetry.isSelected())
+                    for (int j = coords.size() - 1; j >= 0; j--)
+                    {
+                        Point3i p1 = coords.get(j);
+                        if (p1.y != 8)
+                            coords.add(new Point3i(p1.x, 16 - p1.y, p1.z));
+                    }
+                if (mZSymmetry.isSelected())
+                    for (int j = coords.size() - 1; j >= 0; j--)
+                    {
+                        Point3i p1 = coords.get(j);
+                        if (p1.z != 8)
+                            coords.add(new Point3i(p1.x, p1.y, 16 - p1.z));
+                    }
             }
+            for (Point3i c : coords)
+                paintBlock(grid, c);
         }
         mRenderer.repaint();
 	}
+
+    private void paintBlock(SparseMatrix<Block> grid, Point3i coords)
+    {
+        Block block = grid.get(coords);
+        if (block == null)
+            return;
+        short newID = BlockTypes.getColoredBlock(block.getBlockID(), StarMadeLogic.getInstance().getSelectedBlockType());
+        if (newID != -1)
+            block.setBlockID(newID);
+    }
 
     private void doMouseClick(int x, int y)
     {
@@ -222,9 +266,11 @@ public class EditPanel extends JPanel
             return;
         SparseMatrix<Block> grid = mRenderer.getGrid();
         Point3i p = b.getPosition();
+        if (p == null)
+            return;
         int r = (Integer)mRadius.getValue() - 1;
         Point3i lower = new Point3i(p.x - r, p.y - r, p.z - r);
         Point3i upper = new Point3i(p.x + r, p.y + r, p.z + r);
-        colorByIterator(grid, new CubeIterator(lower, upper));
+        colorByIterator(grid, new CubeIterator(lower, upper), true);
     }
 }

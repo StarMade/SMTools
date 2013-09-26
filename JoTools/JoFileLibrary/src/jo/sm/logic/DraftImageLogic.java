@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 
 import jo.sm.data.RenderTile;
 import jo.sm.data.SparseMatrix;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
@@ -22,8 +23,11 @@ import jo.vecmath.logic.Matrix4fLogic;
 
 public class DraftImageLogic
 {
-    public static void saveDrafImages(File dir, String name, Dimension size, SparseMatrix<Block> grid) throws IOException
+    public static void saveDrafImages(File dir, String name, Dimension size, SparseMatrix<Block> grid,
+            IPluginCallback cb) throws IOException
     {
+        cb.setStatus("Exporting images");
+        cb.startTask(8);
         String space = "_";
         if (name.indexOf(" ") >= 0)
             space = " ";
@@ -40,18 +44,25 @@ public class DraftImageLogic
         BufferedImage img;
 
         img = saveDraftImage(new File(dir, name+space+"fore.png"), size, grid, (float)Math.PI, 0);
+        cb.workTask(1);
         g.drawImage(img, size.width*1/3, size.height*1/3, size.width*2/3, size.height*2/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"port.png"), size, grid, (float)Math.PI, (float)Math.PI/2f);
+        cb.workTask(1);
         g.drawImage(img, size.width*2/3, size.height*1/3, size.width*3/3, size.height*2/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"aft.png"), size, grid, (float)Math.PI, (float)Math.PI);
+        cb.workTask(1);
         g.drawImage(img, size.width*2/3, size.height*0/3, size.width*3/3, size.height*1/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"starboard.png"), size, grid, (float)Math.PI, -(float)Math.PI/2f);
+        cb.workTask(1);
         g.drawImage(img, size.width*0/3, size.height*1/3, size.width*1/3, size.height*2/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"dorsal.png"), size, grid, -(float)Math.PI/2, 0);
+        cb.workTask(1);
         g.drawImage(img, size.width*1/3, size.height*0/3, size.width*2/3, size.height*1/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"ventral.png"), size, grid, (float)Math.PI/2, 0);
+        cb.workTask(1);
         g.drawImage(img, size.width*1/3, size.height*2/3, size.width*2/3, size.height*3/3, 0, 0, size.width, size.height, null);
         img = saveDraftImage(new File(dir, name+space+"iso.png"), size, grid, 1.125f*(float)Math.PI, 0.125f*(float)Math.PI);
+        cb.workTask(1);
         g.drawImage(img, size.width*2/3, size.height*2/3, size.width*3/3, size.height*3/3, 0, 0, size.width, size.height, null);
         
         int dy = g.getFontMetrics().getHeight();
@@ -68,6 +79,8 @@ public class DraftImageLogic
 
         g.dispose();
         ImageIO.write(contactSheet, "PNG", new File(dir, name+space+"contact.png"));
+        cb.workTask(1);
+        cb.endTask();
     }
     
     public static BufferedImage saveDraftImage(File f, Dimension size, SparseMatrix<Block> grid, float rotX, float rotY) throws IOException

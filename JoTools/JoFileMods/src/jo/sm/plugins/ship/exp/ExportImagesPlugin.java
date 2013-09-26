@@ -65,7 +65,7 @@ public class ExportImagesPlugin implements IBlocksPlugin
         	File directory = new File(params.getDirectory());
             DraftImageLogic.saveDrafImages(directory, 
             		params.getName(), 
-            		new Dimension(params.getWidth(), params.getHeight()), original);
+            		new Dimension(params.getWidth(), params.getHeight()), original, cb);
         }
         catch (IOException e)
         {

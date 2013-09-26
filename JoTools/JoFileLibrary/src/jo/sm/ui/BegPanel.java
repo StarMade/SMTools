@@ -23,6 +23,7 @@ public class BegPanel extends JPanel
 
     public static final String THE_RAIDERS_LAMENT_AUDIO = "http://podiobooks.com/title/the-raiders-lament";
     public static final String THE_RAIDERS_LAMENT = "https://www.smashwords.com/books/view/347157";
+    public static final String DOCUMENTATION = "http://www.starmadewiki.com/wiki/SMEdit";
     
     private int mMessageOffset;
     private int mRepeats;
