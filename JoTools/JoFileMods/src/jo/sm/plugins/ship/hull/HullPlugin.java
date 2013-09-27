@@ -14,6 +14,7 @@ import jo.sm.data.StarMade;
 import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
+import jo.sm.plugins.planet.hollow.HollowPlugin;
 import jo.sm.plugins.ship.rotate.RotateParameters;
 import jo.sm.plugins.ship.rotate.RotatePlugin;
 import jo.sm.ship.data.Block;
@@ -30,6 +31,7 @@ public class HullPlugin implements IBlocksPlugin
     public static final int[][] CLASSIFICATIONS = 
         {
         { TYPE_SHIP, SUBTYPE_GENERATE },
+        { TYPE_STATION, SUBTYPE_GENERATE },
         };
     
     private static final Random mRND = new Random();
@@ -114,6 +116,7 @@ public class HullPlugin implements IBlocksPlugin
         		generateIrregular(modified, center, lower, upper, cb);
         		break;
         }
+        HollowPlugin.doHollow(modified, cb);
         if (ShipLogic.findCore(modified) == null)
             modified.set(params.getCenterX(),  params.getCenterY(), params.getCenterZ(), new Block(BlockTypes.CORE_ID));
         return modified;
@@ -151,27 +154,29 @@ public class HullPlugin implements IBlocksPlugin
         		cb.workTask(1);
     		}
     		cb.endTask();
-    		return;
     	}
-        int xRad;
-    	int yRad;
-    	cb.startTask(upper.z - lower.z + 1);
-    	for (int z = lower.z; z <= upper.z; z++)
+    	else
     	{
-    	    cb.workTask(1);
-    		if (z < center.z)
-    		{
-    			xRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, xMidRad);
-    			yRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, yMidRad);
-    		}
-    		else
-    		{
-    			xRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, xMidRad);
-    			yRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, yMidRad);
-    		}
-    		drawElipse(grid, center.x, center.y, z, xRad, yRad);
+            int xRad;
+        	int yRad;
+        	cb.startTask(upper.z - lower.z + 1);
+        	for (int z = lower.z; z <= upper.z; z++)
+        	{
+        	    cb.workTask(1);
+        		if (z < center.z)
+        		{
+        			xRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, xMidRad);
+        			yRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, yMidRad);
+        		}
+        		else
+        		{
+        			xRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, xMidRad);
+        			yRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, yMidRad);
+        		}
+        		drawElipse(grid, center.x, center.y, z, xRad, yRad);
+        	}
+        	cb.endTask();
     	}
-    	cb.endTask();
     }
     
     private void generateCone(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)

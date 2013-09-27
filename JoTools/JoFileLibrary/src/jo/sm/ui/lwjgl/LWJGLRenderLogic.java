@@ -40,16 +40,24 @@ public class LWJGLRenderLogic
         	info.uv = new ArrayList<Point2f>();
         for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
             addBlock(info, grid, i.next());
+        JGLObj obj = infoToObj(info);
+        group.add(obj);
+    }
+    
+    public static JGLObj infoToObj(MeshInfo info)
+    {
         JGLObj obj = new JGLObj();
         obj.setMode(JGLObj.QUADS);
         obj.setVertices(info.verts);
         obj.setIndices(info.indexes);
-        if (plain)
-        	obj.setColors(info.colors);
+        if (info.colors != null)
+            obj.setColors(info.colors);
         else
-        	obj.setTextures(info.uv);
-        obj.setTextureID(mTextureID);
-        group.add(obj);
+        {
+            obj.setTextures(info.uv);
+            obj.setTextureID(mTextureID);
+        }
+        return obj;
     }
 
     public static void addBlock(MeshInfo group, SparseMatrix<Block> grid, Point3i p)
@@ -86,11 +94,10 @@ public class LWJGLRenderLogic
         }
     }
     
-    public static List<JGLObj> addBox(MeshInfo group, Point3f lower, Point3f upper, short[] colors)
+    public static void addBox(MeshInfo group, Point3f lower, Point3f upper, short[] colors)
     {
-        List<JGLObj> objs = new ArrayList<JGLObj>();
         if ((lower == null) || (upper == null))
-            return objs;
+            return;
         upper = new Point3f(upper.x + 1, upper.y + 1, upper.z + 1); // only place where bounds are at +1
         addSelectFace(group, upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
                 RenderPoly.XP, colors[0%colors.length]);
@@ -104,7 +111,6 @@ public class LWJGLRenderLogic
                 RenderPoly.ZP, colors[4%colors.length]);
         addSelectFace(group, lower.x, lower.y, lower.z, upper.x, upper.y, lower.z,
                 RenderPoly.ZM, colors[5%colors.length]);
-        return objs;
     }
     
     public static void addSelectFace(MeshInfo group, float x1, float y1, float z1, float x2, float y2, float z2,
@@ -164,14 +170,15 @@ public class LWJGLRenderLogic
         info.verts.add(top);
         info.verts.add(right);
         info.verts.add(bottom);
-        info.indexes.add((short)(info.verts.size() - 4));
-        info.indexes.add((short)(info.verts.size() - 3));
-        info.indexes.add((short)(info.verts.size() - 2));
         info.indexes.add((short)(info.verts.size() - 1));
+        info.indexes.add((short)(info.verts.size() - 2));
+        info.indexes.add((short)(info.verts.size() - 3));
+        info.indexes.add((short)(info.verts.size() - 4));
         if (info.colors != null)
         {
 	        Color c = BlockTypeColors.getFillColor(type);
 	        Color3f color = new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);
+	        //System.out.println("Color: "+c+" -> "+color);
 	        info.colors.add(color);
 	        info.colors.add(color);
 	        info.colors.add(color);

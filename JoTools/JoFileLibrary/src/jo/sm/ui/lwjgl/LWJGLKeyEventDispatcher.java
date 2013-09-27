@@ -4,20 +4,22 @@ import java.awt.Component;
 import java.awt.KeyEventDispatcher;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.GridLogic;
-import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
+import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.logic.Point3iLogic;
 
 public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
 {
-    private static final int PAN_XM = 'A';
-    private static final int PAN_XP = 'D';
+    private static final int PAN_XM = 'D';
+    private static final int PAN_XP = 'A';
     private static final int PAN_YM = 'W';
     private static final int PAN_YP = 'S';
     private static final int PAN_ZM = 'Q';
@@ -35,7 +37,29 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
     private static final int SELECTION_MOVE_LOWER = 0x80;
     private static final int SELECTION_NUDGE = 0x200;
     
+    private static final Set<Integer> PAN_KEYS = new HashSet<Integer>();
+    static
+    {
+        PAN_KEYS.add(PAN_XM);
+        PAN_KEYS.add(PAN_XP);
+        PAN_KEYS.add(PAN_YM);
+        PAN_KEYS.add(PAN_YP);
+        PAN_KEYS.add(PAN_ZM);
+        PAN_KEYS.add(PAN_ZP);
+    }
+    private static final Set<Integer> ROT_KEYS = new HashSet<Integer>();
+    static
+    {
+        ROT_KEYS.add(ROT_YM);
+        ROT_KEYS.add(ROT_YP);
+        ROT_KEYS.add(ROT_PM);
+        ROT_KEYS.add(ROT_PP);
+        ROT_KEYS.add(ROT_RM);
+        ROT_KEYS.add(ROT_RP);
+    }
+    
 	private LWJGLRenderPanel mPanel;
+	
 	
 	public LWJGLKeyEventDispatcher(LWJGLRenderPanel panel)
 	{
@@ -56,6 +80,11 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
     
     public void doKeyDown(int keyCode, int keyMod)
     {
+        if (PAN_KEYS.contains(keyCode))
+            doPan(keyCode, keyMod);
+        else if (ROT_KEYS.contains(keyCode))
+            doRot(keyCode, keyMod);
+        /*
     	//System.out.println("code="+Integer.toHexString(keyCode)+", mod="+Integer.toHexString(keyMod));
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
         Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
@@ -76,6 +105,7 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
         {
 	    	doPan(keyCode, keyMod);
         }
+        */
     }
 
 	private void normalize(Point3i lower, Point3i upper)
@@ -93,11 +123,24 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
 			Point3i delta = keyToDelta(keyCode, null);
 			if (delta != null)
 				mPanel.moveCamera(delta);
-			delta = keyToRot(keyCode, null);
-			if (delta != null)
-				mPanel.rotateCamera(delta);
+		}
+		if (keyMod == KeyEvent.VK_SHIFT)
+		{
+            Point3i delta = keyToDelta(keyCode, null);
+            if (delta != null)
+                mPanel.setLookAt(new Point3f(delta));
 		}
 	}
+
+    private void doRot(int keyCode, int keyMod)
+    {
+        if (keyMod == 0)
+        {
+            Point3i delta = keyToRot(keyCode, null);
+            if (delta != null)
+                mPanel.rotateCamera(delta);
+        }
+    }
 
 	private void doMoveUpperSelection(int keyCode, Point3i upper)
 	{
@@ -141,7 +184,9 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
 			delta.z++;
 		else if (keyCode == PAN_ZM)
 			delta.z--;
-		return null;
+		else
+		    return null;
+		return delta;
 	}
 
 	private Point3i keyToRot(int keyCode, Point3i delta)

@@ -199,18 +199,25 @@ public class RenderFrame extends JFrame implements WindowListener
         preLoad();
         final RenderFrame f = new RenderFrame(args);
         f.setVisible(true);
-        final ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
-        if (spec != null)
+        try
         {
-        	IRunnableWithProgress t = new IRunnableWithProgress() {				
-				@Override
-				public void run(IPluginCallback cb)
-				{
-		        	f.setSpec(spec);
-		        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec, cb));
-				}
-			};
-			RunnableLogic.run(f, "Loading...", t);
+            final ShipSpec spec = ShipTreeLogic.getBlueprintSpec("Isanth-VI", true);
+            if (spec != null)
+            {
+            	IRunnableWithProgress t = new IRunnableWithProgress() {				
+    				@Override
+    				public void run(IPluginCallback cb)
+    				{
+    		        	f.setSpec(spec);
+    		        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec, cb));
+    				}
+    			};
+    			RunnableLogic.run(f, "Loading...", t);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
 

@@ -20,9 +20,9 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
-public class ReportPlugin implements IBlocksPlugin
+public class ObjectReportPlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Report";
+    public static final String NAME = "Object Report";
     public static final String DESC = "Report on object";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 

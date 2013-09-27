@@ -271,6 +271,8 @@ public class JGLCanvas extends Canvas
     	KEY_LWJGL_TO_AWT.put(Keyboard.KEY_Z, KeyEvent.VK_Z);
     }
     
+    private int mModifiers = 0;
+    
     private void doKeys()
     {
     	while (Keyboard.next())
@@ -279,10 +281,41 @@ public class JGLCanvas extends Canvas
     		int eventKey = Keyboard.getEventKey();
     		long eventTick = Keyboard.getEventNanoseconds();
     		boolean eventState = Keyboard.getEventKeyState();
+    		//System.out.println("doKeys("+eventKey+")");
+    		if (eventKey == Keyboard.KEY_LSHIFT)
+    		    if (eventState)
+    		        mModifiers |= KeyEvent.VK_SHIFT;
+    		    else
+                    mModifiers &= ~KeyEvent.VK_SHIFT;
+    		else if (eventKey == Keyboard.KEY_RSHIFT)
+                if (eventState)
+                    mModifiers |= KeyEvent.VK_SHIFT;
+                else
+                    mModifiers &= ~KeyEvent.VK_SHIFT;
+            else if (eventKey == Keyboard.KEY_LCONTROL)
+                if (eventState)
+                    mModifiers |= KeyEvent.VK_CONTROL;
+                else
+                    mModifiers &= ~KeyEvent.VK_CONTROL;
+            else if (eventKey == Keyboard.KEY_RCONTROL)
+                if (eventState)
+                    mModifiers |= KeyEvent.VK_CONTROL;
+                else
+                    mModifiers &= ~KeyEvent.VK_CONTROL;
+            else if (eventKey == Keyboard.KEY_LMENU)
+                if (eventState)
+                    mModifiers |= KeyEvent.VK_ALT;
+                else
+                    mModifiers &= ~KeyEvent.VK_ALT;
+            else if (eventKey == Keyboard.KEY_RMENU)
+                if (eventState)
+                    mModifiers |= KeyEvent.VK_ALT;
+                else
+                    mModifiers &= ~KeyEvent.VK_ALT;
     		if (KEY_LWJGL_TO_AWT.containsKey(eventKey))
     			eventKey = KEY_LWJGL_TO_AWT.get(eventKey);
     		KeyEvent e = new KeyEvent(this, eventState ? KeyEvent.KEY_PRESSED : KeyEvent.KEY_RELEASED, 
-    				eventTick, 0, eventKey, eventChar);
+    				eventTick, mModifiers, eventKey, eventChar);
     		fireKeyEvent(e);
     	}
     }
@@ -448,6 +481,7 @@ public class JGLCanvas extends Canvas
     public synchronized void addKeyListener(KeyListener l)
     {
     	mKeyListeners.add(l);
+    	super.addKeyListener(l);
     }
     
     public synchronized void removeKeyListener(KeyListener l)

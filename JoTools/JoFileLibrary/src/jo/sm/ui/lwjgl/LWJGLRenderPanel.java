@@ -1,15 +1,13 @@
 package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
+import java.util.ArrayList;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.UndoBuffer;
-import jo.sm.logic.RenderPolyLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderPanel;
@@ -17,7 +15,9 @@ import jo.sm.ui.logic.ShipSpec;
 import jo.util.jgl.obj.JGLCamera;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLScene;
+import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.lwjgl.win.JGLCanvas;
+import jo.vecmath.Color3f;
 import jo.vecmath.Color4f;
 import jo.vecmath.Matrix3f;
 import jo.vecmath.Point3f;
@@ -27,18 +27,9 @@ import jo.vecmath.Vector3f;
 @SuppressWarnings("serial")
 public class LWJGLRenderPanel extends RenderPanel
 {
-    private static final float  PIXEL_TO_RADIANS = (1f/3.14159f/16f);
-    
-    private static final int MOUSE_MODE_NULL = 0;
-    private static final int MOUSE_MODE_PIVOT = 1;
-    private static final int MOUSE_MODE_SELECT = 2;
-    
-    private Point               mMouseDownAt;
-    private Point3f             mMousePivotAround;
-    private int                 mMouseMode;
     private JGLCanvas           mCanvas;
     private JGLScene			mScene;
-    private JGLCamera			mUniverse;
+    JGLCamera			mUniverse;
     private JGLGroup			mBlocks;
     private JGLGroup			mSelection;
     private JGLGroup			mAxis;
@@ -70,147 +61,13 @@ public class LWJGLRenderPanel extends RenderPanel
         mCanvas.setScene(mScene);
         setLayout(new BorderLayout());
         add("Center", mCanvas);
-        MouseAdapter ma =  new MouseAdapter(){
-            public void mousePressed(MouseEvent ev)
-            {               
-                if (ev.getButton() == MouseEvent.BUTTON1)
-                    doMouseDown(ev.getPoint(), ev.getModifiers());
-            }
-            public void mouseReleased(MouseEvent ev)
-            {
-                if (ev.getButton() == MouseEvent.BUTTON1)
-                    doMouseUp(ev.getPoint(), ev.getModifiers());
-            }
-            public void mouseDragged(MouseEvent ev)
-            {
-                if (mMouseDownAt != null)
-                    doMouseMove(ev.getPoint(), ev.getModifiers());
-            }
-            public void mouseWheelMoved(MouseWheelEvent e)
-            {
-                doMouseWheel(e.getWheelRotation());
-            }
-        };
+        MouseAdapter ma =  new LWJGLMouseAdapter(this);
         mCanvas.addMouseListener(ma);
         mCanvas.addMouseMotionListener(ma);
         mCanvas.addMouseWheelListener(ma);
 //        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
 //        		new LWJGLKeyEventDispatcher(this));
         mCanvas.addKeyListener(new LWJGLKeyEventDispatcher(this));
-    }
-    
-    private void doMouseDown(Point p, int modifiers)
-    {
-        mMouseDownAt = p;
-        //System.out.println("MouseMod="+Integer.toHexString(modifiers));
-        if ((modifiers&MouseEvent.SHIFT_MASK) != 0)
-        {
-            RenderPoly tile = getTileAt(p.x, p.y);
-            if (tile == null)
-                return;
-            mMouseMode = MOUSE_MODE_SELECT;
-            StarMadeLogic.getInstance().setSelectedLower(null);
-            StarMadeLogic.getInstance().setSelectedUpper(null);
-            extendSelection(tile);
-        }
-        else
-        {
-            mMouseMode = MOUSE_MODE_PIVOT;
-            Point3i pivot = getPointAt(p.x, p.y);
-            if (pivot != null)
-                mMousePivotAround = new Point3f(pivot.x, pivot.y, pivot.z);
-            else
-                mMousePivotAround = null;
-        }
-    }
-    
-    private void doMouseMove(Point p, int modifiers)
-    {
-        if (mMouseMode == MOUSE_MODE_PIVOT)
-        {
-            int dx = p.x - mMouseDownAt.x;
-            int dy = p.y - mMouseDownAt.y;
-            mMouseDownAt = p;
-            if ((dx != 0) || (dy != 0))
-            {
-                if (mMousePivotAround == null)
-                {
-                    System.out.println("Pivot around ourselves");
-                    if (dx != 0)
-                        mUniverse.getCamera().yaw(-dx*PIXEL_TO_RADIANS);
-                    if (dy != 0)
-                        mUniverse.getCamera().pitch(-dy*PIXEL_TO_RADIANS);
-                }
-                else
-                {
-                    Point3f rot = new Point3f(dx*PIXEL_TO_RADIANS, dy*PIXEL_TO_RADIANS, 0);
-                    System.out.println("Pivot around "+mMousePivotAround+", location="+mUniverse.getCamera().getLocation()+" by "+rot);
-                    mUniverse.getCamera().rotateAround(mMousePivotAround, rot);
-                    System.out.println("After pivot=\n"+mUniverse.getCamera());
-                }
-                updateTransform();
-            }
-        }
-        else if (mMouseMode == MOUSE_MODE_SELECT)
-        {
-            RenderPoly tile = getTileAt(p.x, p.y);
-            if (tile != null)
-                extendSelection(tile);
-        }
-    }
-    
-    private void doMouseUp(Point p, int modifiers)
-    {
-        if (mMouseMode == MOUSE_MODE_PIVOT)
-        {
-            doMouseMove(p, modifiers);
-            mMouseDownAt = null;
-        }
-        else if (mMouseMode == MOUSE_MODE_PIVOT)
-        {
-            doMouseMove(p, modifiers);
-        }
-        mMouseMode = MOUSE_MODE_NULL;
-    }
-
-    private void doMouseWheel(int roll)
-    {
-        if (roll == 0)
-            return;
-        mUniverse.getCamera().moveForward(roll*1.0f);
-        updateTransform();
-    }
-    
-    private void extendSelection(RenderPoly tile)
-    {
-        Point3i lowest = new Point3i();
-        Point3i highest = new Point3i();
-        RenderPolyLogic.getBounds(tile, lowest, highest);
-        Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
-        if (lower == null)
-        {
-            lower = lowest;
-            StarMadeLogic.getInstance().setSelectedLower(lower);
-        }
-        else
-        {
-            lower.x = Math.min(lower.x, lowest.x);
-            lower.y = Math.min(lower.y, lowest.y);
-            lower.z = Math.min(lower.z, lowest.z);
-        }
-        Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
-        if (upper == null)
-        {
-            upper = highest;
-            StarMadeLogic.getInstance().setSelectedUpper(upper);
-        }
-        else
-        {
-            upper.x = Math.min(upper.x, highest.x);
-            upper.y = Math.min(upper.y, highest.y);
-            upper.z = Math.min(upper.z, highest.z);
-        }
-        updateTiles();
     }
 
     @Override
@@ -230,20 +87,24 @@ public class LWJGLRenderPanel extends RenderPanel
     public void setGrid(SparseMatrix<Block> grid)
     {
         mGrid = grid;
+        setLookAt(new Point3f(0, 0, -1));
+    }
+    
+    public void setLookAt(Point3f axis)
+    {
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
         mGrid.getBounds(lower, upper);
-        Point3f lookAtThis = new Point3f(upper.x + lower.x, -(upper.y + lower.y), upper.z + lower.z);
-        lookAtThis.scale(.5f);
+        Point3f lookAtThis = new Point3f((upper.x + lower.x)/2, (upper.y + lower.y)/2, (upper.z + lower.z)/2);
         float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z) + 1;
-        Point3f standHere = new Point3f(lookAtThis);
-        standHere.z -= maxModel*4;
+        Point3f standHere = new Point3f(axis);
+        standHere.scale(maxModel*2);
+        standHere.add(lookAtThis);
         //mUniverse.getCamera().setLocation(lookAtThis);
         mUniverse.getCamera().lookAt(standHere, lookAtThis);
         //mUniverse.getCamera().scale(mScale);
         System.out.println("Standing at "+standHere+", looking at "+lookAtThis);
         //mUniverse.setTransformer(new SpinningTransformer(new Point3f(0, 20, 0)));
-        System.out.println("After setGrid=\n"+mUniverse.getCamera());
         updateTiles();
     }
 
@@ -256,6 +117,15 @@ public class LWJGLRenderPanel extends RenderPanel
             mFilteredGrid = mGrid;
         else
             mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
+    	updateAxis();
+        mBlocks.getChildren().clear();
+        LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid, mPlainGraphics);
+        System.out.println("Quads:"+mBlocks.getChildren().size());
+        updateSelectionBox();
+    }
+
+    public void updateSelectionBox()
+    {
         /*
         mSelection.getChildren().clear();
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
@@ -264,36 +134,28 @@ public class LWJGLRenderPanel extends RenderPanel
             LWJGLRenderLogic.addBox(mSelection, new Point3f(lower), new Point3f(upper), new short[] { BlockTypes.SPECIAL_SELECT_XP, BlockTypes.SPECIAL_SELECT_XM,
                     BlockTypes.SPECIAL_SELECT_YP, BlockTypes.SPECIAL_SELECT_YM,
                     BlockTypes.SPECIAL_SELECT_ZP, BlockTypes.SPECIAL_SELECT_ZM,});
+        */
+    }
+    
+    public void updateAxis()
+    {
         mAxis.getChildren().clear();
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(8-256,8,8), new Point3f(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(8,9,8), new Point3f(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
-        LWJGLRenderLogic.addBox(mAxis, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
-        */
-        mBlocks.getChildren().clear();
-        LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid, mPlainGraphics);
-        System.out.println("Quads:"+mBlocks.getChildren().size());
-
-/*
-        mBlocks.getChildren().clear();
-        for (Iterator<Point3i> i = mFilteredGrid.iteratorNonNull(); i.hasNext(); )
-        {
-        	Point3i p = i.next();
-        	Block b = mFilteredGrid.get(p);
-        	Point3f center = new Point3f(p.x, p.y, p.z);
-        	Color c = BlockTypeColors.getFillColor(b.getBlockID());
-        	Point3f color = new Point3f(c.getComponents(null));
-        	//System.out.println("Added at "+center+", color="+color);
-        	JGLObjCube cube = new JGLObjCube(new Point3f(1, 1, 1), center);
-        	cube.setSolidColor(color);
-        	cube.setData("point", p);
-        	cube.setData("block", b);
-        	mBlocks.add(cube);
-        }
-        System.out.println("Added "+mBlocks.getChildren().size()+" blocks");
-        */
+        MeshInfo info = new MeshInfo();
+        info.verts = new ArrayList<Point3f>();
+        info.indexes = new ArrayList<Short>();
+        info.colors = new ArrayList<Color3f>();
+        //info.uv = new ArrayList<Point2f>();
+        LWJGLRenderLogic.addBox(info, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
+        LWJGLRenderLogic.addBox(info, new Point3f(8-256,8,8), new Point3f(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,9,8), new Point3f(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+        JGLObj obj = LWJGLRenderLogic.infoToObj(info);
+        for (int i = 0; i < obj.getColorBuffer().limit(); i++)
+            System.out.print(" "+obj.getColorBuffer().get(i));
+        System.out.println();
+        mAxis.add(obj);
     }
 
     @Override
@@ -366,6 +228,7 @@ public class LWJGLRenderPanel extends RenderPanel
     public void setAxis(boolean axis)
     {
         mAxis.setCull(!axis);
+        updateAxis();
     }
 
     public UndoBuffer getUndoer()
@@ -403,14 +266,15 @@ public class LWJGLRenderPanel extends RenderPanel
 		mUniverse.getCamera().moveRight(delta.x);
 		mUniverse.getCamera().moveUp(delta.y);
 		mUniverse.getCamera().moveForward(delta.z);
+        //System.out.println("After moveCamera=\n"+mUniverse.getCamera());
 	}
 
 	public void rotateCamera(Point3i delta)
 	{
 		//System.out.println("Before rotate:\n"+mUniverse.getCamera());
-		mUniverse.getCamera().yaw(delta.x*PIXEL_TO_RADIANS);
-		mUniverse.getCamera().pitch(delta.y*PIXEL_TO_RADIANS);
-		mUniverse.getCamera().roll(delta.z*PIXEL_TO_RADIANS);
+		mUniverse.getCamera().yaw(delta.x*LWJGLMouseAdapter.PIXEL_TO_RADIANS);
+		mUniverse.getCamera().pitch(delta.y*LWJGLMouseAdapter.PIXEL_TO_RADIANS);
+		mUniverse.getCamera().roll(delta.z*LWJGLMouseAdapter.PIXEL_TO_RADIANS);
 		//System.out.println("After rotate "+delta+":\n"+mUniverse.getCamera());
 	}
 

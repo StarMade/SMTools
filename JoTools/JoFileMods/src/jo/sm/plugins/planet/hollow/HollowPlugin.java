@@ -60,19 +60,24 @@ public class HollowPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        Set<Point3i> exterior = HullLogic.findExterior(original, cb);
-        SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
-        {
-            Point3i xyz = i.next();
-            Block b = original.get(xyz);
-            if (isEdge(exterior, xyz) || (b.getBlockID() == BlockTypes.CORE_ID))
-                modified.set(xyz, b);
-        }
+        SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
+        doHollow(modified, cb);
         return modified;
     }
+    
+    public static void doHollow(SparseMatrix<Block> grid, IPluginCallback cb)
+    {
+        Set<Point3i> exterior = HullLogic.findExterior(grid, cb);
+        for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
+        {
+            Point3i xyz = i.next();
+            Block b = grid.get(xyz);
+            if (!isEdge(exterior, xyz) && (b.getBlockID() != BlockTypes.CORE_ID))
+                grid.set(xyz, null);
+        }
+    }
 
-    private boolean isEdge(Set<Point3i> exterior, Point3i xyz)
+    private static boolean isEdge(Set<Point3i> exterior, Point3i xyz)
     {
         if (exterior.contains(new Point3i(xyz.x - 1, xyz.y, xyz.z)))
             return true;
