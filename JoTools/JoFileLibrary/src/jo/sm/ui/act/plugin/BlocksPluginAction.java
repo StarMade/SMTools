@@ -42,7 +42,7 @@ public class BlocksPluginAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        final Object params = mPlugin.getParameterBean();
+        final Object params = mPlugin.newParameterBean();
         loadProps(params);
         if (!getParams(params))
             return;

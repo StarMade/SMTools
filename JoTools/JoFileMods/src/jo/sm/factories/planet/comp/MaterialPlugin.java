@@ -53,9 +53,14 @@ public class MaterialPlugin implements IBlocksPlugin
 	}
 
 	@Override
-	public Object getParameterBean()
+	public Object newParameterBean()
 	{
 		return null;
+	}
+	@Override
+	public void initParameterBean(SparseMatrix<Block> original, Object params,
+			StarMade sm, IPluginCallback cb)
+	{
 	}
 
 	@Override

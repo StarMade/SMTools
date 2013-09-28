@@ -44,10 +44,15 @@ public class PluginReportPlugin implements IBlocksPlugin
     }
 
     @Override
-    public Object getParameterBean()
+    public Object newParameterBean()
     {
         return null;
     }
+	@Override
+	public void initParameterBean(SparseMatrix<Block> original, Object params,
+			StarMade sm, IPluginCallback cb)
+	{
+	}
 
     @Override
     public int[][] getClassifications()
@@ -90,6 +95,9 @@ public class PluginReportPlugin implements IBlocksPlugin
             {
                 switch (classification[0])
                 {
+                    case TYPE_ALL:
+                        wtr.print("All ");
+                        break;
                     case TYPE_FLOATINGROCK:
                         wtr.print("Floating Rock ");
                         break;

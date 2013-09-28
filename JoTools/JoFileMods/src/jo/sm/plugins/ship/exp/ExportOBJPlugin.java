@@ -63,10 +63,15 @@ public class ExportOBJPlugin implements IBlocksPlugin
     }
 
     @Override
-    public Object getParameterBean()
+    public Object newParameterBean()
     {
         return new ExportOBJParameters();
     }
+	@Override
+	public void initParameterBean(SparseMatrix<Block> original, Object params,
+			StarMade sm, IPluginCallback cb)
+	{
+	}
 
     @Override
     public int[][] getClassifications()

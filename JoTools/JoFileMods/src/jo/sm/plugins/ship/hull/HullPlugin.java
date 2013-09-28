@@ -55,10 +55,15 @@ public class HullPlugin implements IBlocksPlugin
     }
 
     @Override
-    public Object getParameterBean()
+    public Object newParameterBean()
     {
         return new HullParameters();
     }
+	@Override
+	public void initParameterBean(SparseMatrix<Block> original, Object params,
+			StarMade sm, IPluginCallback cb)
+	{
+	}
 
     @Override
     public int[][] getClassifications()

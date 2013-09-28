@@ -100,7 +100,7 @@ public class MenuLogic
             int[][] classifications = plugin.getClassifications();
             int priority = 50;
             for (int[] classification : classifications)
-                if ((classification[0] == type) && (classification[1] == subtype))
+                if (StarMadeLogic.isClassification(classification[0], type) && (classification[1] == subtype))
                     if (classification.length > 2)
                     {
                         priority = classification[2];

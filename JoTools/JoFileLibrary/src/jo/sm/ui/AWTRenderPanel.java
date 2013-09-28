@@ -137,8 +137,14 @@ public class AWTRenderPanel extends RenderPanel
 	        int dx = p.x - mMouseDownAt.x;
 	        int dy = p.y - mMouseDownAt.y;
 	        mMouseDownAt = p;
-	        mRotX += dy*PIXEL_TO_RADIANS;
-	        mRotY += dx*PIXEL_TO_RADIANS;
+	        if (StarMadeLogic.isProperty(StarMadeLogic.INVERT_Y_AXIS))
+	        	mRotX -= dy*PIXEL_TO_RADIANS;
+	        else
+	        	mRotX += dy*PIXEL_TO_RADIANS;
+	        if (StarMadeLogic.isProperty(StarMadeLogic.INVERT_X_AXIS))
+	        	mRotY -= dx*PIXEL_TO_RADIANS;
+	        else
+	        	mRotY += dx*PIXEL_TO_RADIANS;
 	        updateTransform();
     	}
     	else if (mMouseMode == MOUSE_MODE_SELECT)

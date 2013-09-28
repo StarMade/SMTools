@@ -41,10 +41,15 @@ public class UndulatingPlugin implements IBlocksPlugin
     }
 
     @Override
-    public Object getParameterBean()
+    public Object newParameterBean()
     {
         return new UndulatingParameters();
     }
+	@Override
+	public void initParameterBean(SparseMatrix<Block> original, Object params,
+			StarMade sm, IPluginCallback cb)
+	{
+	}
 
     @Override
     public int[][] getClassifications()

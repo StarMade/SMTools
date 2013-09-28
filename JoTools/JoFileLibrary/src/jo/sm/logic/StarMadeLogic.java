@@ -14,13 +14,17 @@ import java.util.StringTokenizer;
 import java.util.jar.Manifest;
 
 import jo.sm.data.StarMade;
+import jo.sm.logic.utils.BooleanUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IStarMadePlugin;
 import jo.sm.mods.IStarMadePluginFactory;
 
 public class StarMadeLogic
 {
-    private static StarMade mStarMade;
+    public static final String	INVERT_X_AXIS	= "InvertXAxis";
+	public static final String	INVERT_Y_AXIS	= "InvertYAxis";
+	
+	private static StarMade mStarMade;
     
     public static synchronized StarMade getInstance()
     {
@@ -196,7 +200,7 @@ public class StarMadeLogic
         try
         {   // lets be protective against badly written plugins
             for (int[] classification : plugin.getClassifications())
-                if ((type == -1) || (type == classification[0]))
+                if ((type == -1) || (IBlocksPlugin.TYPE_ALL == classification[0]) || (type == classification[0]))
                     if ((subtype == -1) || (subtype == classification[1]))
                         return true;
         }
@@ -258,4 +262,30 @@ public class StarMadeLogic
             
         }
     }
+
+	public static String getProperty(String key)
+	{
+		return getProps().getProperty(key);
+	}
+
+	public static boolean isProperty(String key)
+	{
+		return BooleanUtils.parseBoolean(getProperty(key));
+	}
+	
+	public static void setProperty(String key, String value)
+	{
+		getProps().setProperty(key, value);
+		saveProps();
+	}
+
+	public static void setProperty(String key, boolean value)
+	{
+		setProperty(key, String.valueOf(value));
+	}
+
+	public static boolean isClassification(int class1, int class2)
+	{
+		return ((class1 == IBlocksPlugin.TYPE_ALL) || (class1 == class2));
+	}
 }

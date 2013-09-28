@@ -1,24 +1,20 @@
-package jo.sm.plugins.planet.select;
+package jo.sm.plugins.all.props;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
-import jo.vecmath.Point3i;
 
-public class SelectAllPlugin implements IBlocksPlugin
+public class PropsPlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Select All";
-    public static final String DESC = "Select Entire Object";
+    public static final String NAME = "Properties...";
+    public static final String DESC = "System Proeprties";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {
-        { TYPE_SHIP, SUBTYPE_EDIT, 23 },
-        { TYPE_STATION, SUBTYPE_EDIT, 23 },
-        { TYPE_SHOP, SUBTYPE_EDIT, 23 },
-        { TYPE_FLOATINGROCK, SUBTYPE_EDIT, 23 },
-        { TYPE_PLANET, SUBTYPE_EDIT, 23 },
+        { TYPE_ALL, SUBTYPE_FILE, 99 },
         };
 
     @Override
@@ -42,14 +38,16 @@ public class SelectAllPlugin implements IBlocksPlugin
     @Override
     public Object newParameterBean()
     {
-        return null;
+        return new PropsParameters();
     }
 	@Override
 	public void initParameterBean(SparseMatrix<Block> original, Object params,
 			StarMade sm, IPluginCallback cb)
 	{
+		PropsParameters p = (PropsParameters)params;
+		p.setInvertXAxis(StarMadeLogic.isProperty(StarMadeLogic.INVERT_X_AXIS));
+		p.setInvertYAxis(StarMadeLogic.isProperty(StarMadeLogic.INVERT_Y_AXIS));
 	}
-
     @Override
     public int[][] getClassifications()
     {
@@ -60,11 +58,9 @@ public class SelectAllPlugin implements IBlocksPlugin
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        Point3i lower = new Point3i();
-        Point3i upper = new Point3i();
-        original.getBounds(lower, upper);
-        sm.setSelectedLower(lower);
-        sm.setSelectedUpper(upper);
+        PropsParameters params = (PropsParameters)p;
+        StarMadeLogic.setProperty(StarMadeLogic.INVERT_X_AXIS, params.isInvertXAxis());
+        StarMadeLogic.setProperty(StarMadeLogic.INVERT_Y_AXIS, params.isInvertYAxis());
         return null;
     }
 }
