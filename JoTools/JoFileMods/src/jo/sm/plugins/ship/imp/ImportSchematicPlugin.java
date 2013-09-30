@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.utils.IntegerUtils;
@@ -90,8 +91,9 @@ public class ImportSchematicPlugin implements IBlocksPlugin
         		center.add(sm.getSelectedUpper());
         		center.scale(1, 2);
         	}
-            SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
+            SparseMatrix<Block> modified = new SparseMatrix<Block>();
             readFile(params.getFile(), modified, center, cb);
+            modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
             return modified;
         }
         catch (Exception e)
@@ -184,7 +186,16 @@ public class ImportSchematicPlugin implements IBlocksPlugin
     		if (MinecraftTypes.NAME_TO_ID.containsKey(mcBlock))
     			map.mMCBlock = MinecraftTypes.NAME_TO_ID.get(mcBlock);
     		else
-    			map.mMCBlock = IntegerUtils.parseInt(mcBlock);
+    		{
+    			int mcBlockNum = IntegerUtils.parseInt(mcBlock);
+    			if (mcBlockNum != 0)
+    				map.mMCBlock = IntegerUtils.parseInt(mcBlock);
+    			else
+    			{
+    				System.out.println("Unknown MC Block type: "+mcBlock);
+    				continue;
+    			}
+    		}
     		map.mMCData = IntegerUtils.parseInt(XMLUtils.getAttribute(b, "mcData"));
     		String smBlock = XMLUtils.getAttribute(b, "smBlock");
     		if (BlockTypeColors.mBlockTypes.containsKey(smBlock))
