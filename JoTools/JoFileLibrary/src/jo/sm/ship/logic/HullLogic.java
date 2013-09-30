@@ -73,13 +73,13 @@ public class HullLogic
     	Set<Point3i> exterior = new HashSet<Point3i>();
     	Point3i p = new Point3i();
     	// do z
-    	for (p.x = lower.x - 1; p.x <= upper.x; p.x++)
-    		for (p.y = lower.y - 1; p.y <= upper.y; p.y++)
+    	for (p.x = lower.x - 1; p.x <= upper.x + 1; p.x++)
+    		for (p.y = lower.y - 1; p.y <= upper.y + 1; p.y++)
     		{
     			if (cb != null)
     				cb.workTask(1);
     			// lower to upper
-    			for (p.z = lower.z; p.z <= upper.z; p.z++)
+    			for (p.z = lower.z; p.z <= upper.z + 1; p.z++)
     			{
     				if (grid.contains(p))
     					break;
@@ -87,7 +87,7 @@ public class HullLogic
     					exterior.add(new Point3i(p));
     			}
     			if (p.z < upper.z) // upper to lower
-        			for (p.z = upper.z; p.z >= lower.z; p.z--)
+        			for (p.z = upper.z + 1; p.z >= lower.z; p.z--)
         			{
         				if (grid.contains(p))
         					break;
