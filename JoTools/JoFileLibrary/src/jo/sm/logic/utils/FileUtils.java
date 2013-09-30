@@ -37,9 +37,22 @@ public class FileUtils
         return ret;
     }
 
+    public static byte[] readFile(String fname, int limit) throws IOException
+    {
+        FileInputStream fis = new FileInputStream(fname);
+        byte[] ret = StreamUtils.readStream(fis, limit);
+        fis.close();
+        return ret;
+    }
+
     public static String readFileAsString(String fname) throws IOException
     {
         return new String(readFile(fname));
+    }
+
+    public static String readFileAsString(String fname, int limit) throws IOException
+    {
+        return new String(readFile(fname, limit));
     }
 
     public static String readFileAsString(String fname, String charset) throws IOException

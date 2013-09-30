@@ -52,6 +52,12 @@ public class GridLogic
     
     public static String toString(SparseMatrix<Block> grid)
     {
+        Document doc = toDocument(grid);
+        return XMLUtils.writeString(doc.getFirstChild());
+    }
+    
+    public static Document toDocument(SparseMatrix<Block> grid)
+    {
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
         grid.getBounds(lower, upper);
@@ -69,7 +75,7 @@ public class GridLogic
             if (b.getOrientation() != 0)
                 XMLEditUtils.addAttribute(block, "orientation", String.valueOf(b.getOrientation()));
         }
-        return XMLUtils.writeString(root);
+        return doc;
     }
     
     public static SparseMatrix<Block> fromString(String xml)

@@ -9,6 +9,7 @@ import java.awt.datatransfer.Transferable;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.GridLogic;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -67,14 +68,12 @@ public class SelectCopyPlugin implements IBlocksPlugin, ClipboardOwner
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
-        Point3i lower = sm.getSelectedLower();
-        Point3i upper = sm.getSelectedUpper();
-        if ((lower != null) && (upper != null))
-        {
-            SparseMatrix<Block> clip = GridLogic.extract(original, lower, upper);
-            String xml = GridLogic.toString(clip);
-            Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(xml), this);
-        }
+        Point3i lower = new Point3i();
+        Point3i upper = new Point3i();
+        PluginUtils.getEffectiveSelection(sm, original, lower, upper);
+        SparseMatrix<Block> clip = GridLogic.extract(original, lower, upper);
+        String xml = GridLogic.toString(clip);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(xml), this);
         return null;
     }
 

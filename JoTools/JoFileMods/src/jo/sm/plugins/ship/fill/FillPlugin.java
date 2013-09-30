@@ -107,8 +107,15 @@ public class FillPlugin implements IBlocksPlugin
         return modified;
     }
 
-    private void fill(SparseMatrix<Block> modified, List<Point3i> interior,
+    public static void fill(SparseMatrix<Block> modified, List<Point3i> interior,
             int numBlocks, short controllerID, short blockID, FillStrategy fillStrategy)
+    {
+        fill(modified, interior, numBlocks, controllerID, blockID, fillStrategy, null);
+    }
+    
+    public static void fill(SparseMatrix<Block> modified, List<Point3i> interior,
+            int numBlocks, short controllerID, short blockID, FillStrategy fillStrategy,
+            IPluginCallback cb)
     {
         if (numBlocks <= 0)
             return;
@@ -117,10 +124,14 @@ public class FillPlugin implements IBlocksPlugin
         if ((controllerID > 0) && (interior.size() > 0))
             place(modified, interior, controllerID);
         while ((numBlocks-- > 0) && (interior.size() > 0))
+        {
             place(modified, interior, blockID);
+            if (cb != null)
+                cb.workTask(1);
+        }
     }
     
-    private void place(SparseMatrix<Block> modified, List<Point3i> interior, short blockID)
+    private static void place(SparseMatrix<Block> modified, List<Point3i> interior, short blockID)
     {
         Block b = new Block();
         b.setBlockID(blockID);
@@ -129,7 +140,7 @@ public class FillPlugin implements IBlocksPlugin
         modified.set(p,  b);
     }
 
-    private void scopeInterior(SparseMatrix<Block> original,
+    public static void scopeInterior(SparseMatrix<Block> original,
             SparseMatrix<Block> modified, List<Point3i> interior,
             Set<Point3i> exterior, Point3i lower, Point3i upper, 
             IPluginCallback cb)

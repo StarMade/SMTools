@@ -31,6 +31,8 @@
 
 package jo.vecmath;
 
+import java.util.StringTokenizer;
+
 
 
 /**
@@ -97,6 +99,18 @@ package jo.vecmath;
             z = (int)(v.z - .5f);
         else
             z = (int)(v.z + .5f);
+    }
+
+
+    public Point3i(String txt)
+    {
+        StringTokenizer st = new StringTokenizer(txt, ",");
+        if (st.hasMoreTokens())
+            x = Integer.parseInt(st.nextToken());
+        if (st.hasMoreTokens())
+            y = Integer.parseInt(st.nextToken());
+        if (st.hasMoreTokens())
+            z = Integer.parseInt(st.nextToken());
     }
 
 }

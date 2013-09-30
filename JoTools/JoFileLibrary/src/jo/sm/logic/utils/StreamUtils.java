@@ -34,6 +34,13 @@ public class StreamUtils
         return baos.toByteArray();
     }
 
+    public static byte[] readStream(InputStream is, int limit) throws IOException
+    {
+        byte[] inbuf = new byte[limit];
+        is.read(inbuf);
+        return inbuf;
+    }
+
     public static String readStreamAsString(InputStream is) throws IOException
     {
         return new String(readStream(is));
