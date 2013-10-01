@@ -20,6 +20,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 import jo.sm.data.BlockTypes;
+import jo.sm.data.CubeIterator;
 import jo.sm.logic.IOLogic;
 import jo.sm.logic.utils.DebugLogic;
 import jo.sm.mods.IPluginCallback;
@@ -79,6 +80,11 @@ public class DataLogic
     public static Data readFile(InputStream is, boolean close, Point3i superChunkIndex) throws IOException
 	{
         //System.out.println("Reading...");
+        Point3i superChunkOrigin = ShipLogic.getSuperChunkOriginFromIndex(superChunkIndex);
+        Point3i superChunkLower = ShipLogic.getSuperChunkLowerFromOrigin(superChunkOrigin);
+        System.out.println("Super Chunk Index: "+superChunkIndex);
+        System.out.println("Super Chunk Origin: "+superChunkOrigin);
+        System.out.println("Super Chunk Lower: "+superChunkLower);
 		DataInputStream dis;
 		if (is instanceof DataInputStream)
 			dis = (DataInputStream)is;
@@ -88,19 +94,24 @@ public class DataLogic
 		data.setUnknown1(dis.readInt());
 		int[][][][] offsetSizeTable = new int[16][16][16][2];
 		IOLogic.readFully(dis, offsetSizeTable);
-		//data.setOffsetSizeTable(unknown2);
-//		if ((superChunkIndex != null) && (superChunkIndex.z < 0))
-//            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
-//            {
-//            	Point3i p = i.next();
-//            	if (offsetSizeTable[p.z][p.y][p.x][0] >= 0)
-//            		System.out.println("Offset "+p+" = "+offsetSizeTable[p.z][p.y][p.x][0]);
-//            }
+		// index offsets
+		Map<Integer,Point3i> chunkOffsets = new HashMap<Integer, Point3i>();
+		int maxOffset = -1;
+        for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
+        {
+            Point3i p = i.next();
+            int offset = offsetSizeTable[p.z][p.y][p.x][0];
+            if (offset >= 0)
+            {
+                chunkOffsets.put(offset, p);
+                maxOffset = Math.max(maxOffset, offset);
+            }
+        }		
         long[][][] timestampTable = new long[16][16][16];
         IOLogic.readFully(dis, timestampTable);
         //data.setTimestampTable(unknown3);
         List<Chunk> chunks = new ArrayList<Chunk>();
-        for (;;)
+        for (int offset = 0; offset <= maxOffset; offset++)
         {
             byte[] chunkData = new byte[5120];
             try
@@ -152,27 +163,76 @@ public class DataLogic
                     }
             //System.out.println("Block count="+blockCount);
             chunk.setBlocks(blocks);
-            chunks.add(chunk);
-            /*
+            if (chunkOffsets.containsKey(offset))
+            {
+                Point3i chunkIndex = chunkOffsets.get(offset);
+                Point3i expected = ShipLogic.getChunkPositionFromSuperchunkOriginAndChunkIndex(superChunkOrigin, chunkIndex);
+                if (!chunk.getPosition().equals(expected))
+                    System.out.println("Chunk #"+offset+"/"+chunkOffsets.get(offset)+" expected in position "+expected+", but actually in "+chunk.getPosition());
+                chunks.add(chunk);
+            }
+            else
+            {
+                System.out.println("Orphan chunk '"+chunk.getPosition()+"/"+offset);
+            }
             // backtrack offset table
-            if ((superChunkIndex != null) && (superChunkIndex.z < 0))
+            if ((superChunkIndex != null) && (superChunkIndex.z < 0) && (superChunkIndex.y == 0) && (superChunkIndex.x == 0))
             {
 	            int chunkNum = chunks.size() - 1;
+	            boolean found = false;
 	            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
 	            {
 	            	Point3i p = i.next();
 	            	if (offsetSizeTable[p.z][p.y][p.x][0] == chunkNum)
 	            	{
-	            		System.out.println("Chunk "+chunk.getPosition()+" at offset "+p);
+	            		if ((p.x == 8) && (p.y == 8))
+	            		    System.out.println("Chunk "+chunk.getPosition()+" at offset "+p);
+            		    found = true;
 	            		break;
 	            	}
 	            }
+	            if (!found)
+                    System.out.println("Chunk "+chunk.getPosition()+"/"+chunkNum+" not found in offset");
+	            if ((chunk.getPosition().x == 0) && (chunk.getPosition().y == 0))
+	            {
+    	            System.out.println("Chunk "+chunk.getPosition());
+    	            for (int z = 0; z < 16; z++)
+    	            {
+    	                System.out.print("|");	                
+    	                for (int x = 15; x >= 0; x--)
+    	                {
+    	                    boolean any = false;
+    	                    for (int y = 0; y < 16; y++)
+    	                        if (blocks[x][y][z] != null)
+    	                        {
+    	                            if (blocks[x][y][z].getBlockID() == BlockTypes.HULL_COLOR_BLACK_ID)
+    	                                System.out.print("#");
+    	                            else if (blocks[x][y][z].getBlockID() == BlockTypes.HULL_COLOR_WHITE_ID)
+    	                                System.out.print(".");
+    	                            else if (blocks[x][y][z].getBlockID() == BlockTypes.HULL_COLOR_YELLOW_ID)
+    	                                System.out.print(",");
+    	                            else
+    	                                System.out.print("?");
+    	                            any = true;
+    	                            break;
+    	                        }
+    	                    if (!any)
+    	                        System.out.print(" ");
+    	                }
+    	                System.out.println("|");
+    	            }
+	            }
             }
+            /*
             */
         }
         data.setChunks(chunks.toArray(new Chunk[0]));
         if (close)
             dis.close();
+        if (chunks.size() == 0)
+            System.out.println("NO CHUNKS!");
+        else if (chunkOffsets.size() == 0)
+            System.out.println("NO OFFSET TABLE!");
 		return data;
 	}
     

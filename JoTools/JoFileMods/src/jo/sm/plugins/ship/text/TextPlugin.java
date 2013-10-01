@@ -6,9 +6,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
-import jo.sm.logic.StarMadeLogic;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -74,10 +75,9 @@ public class TextPlugin implements IBlocksPlugin
             Object p, StarMade sm, IPluginCallback cb)
     {
         TextParameters params = (TextParameters)p;
-        Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
-        Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
-        if ((lower == null) || (upper == null))
-            return null;
+        Point3i lower = new Point3i();
+        Point3i upper = new Point3i();
+        PluginUtils.getEffectiveSelection(sm, original, lower, upper);;
         if (cb != null) cb.setStatus("Adding text");
         setupExtent(lower, upper);
         BufferedImage text = setupImage(params);
@@ -110,6 +110,7 @@ public class TextPlugin implements IBlocksPlugin
             if (cb != null) cb.workTask(1);
         }
         if (cb != null) cb.endTask();
+        modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
         return modified;
     }
 

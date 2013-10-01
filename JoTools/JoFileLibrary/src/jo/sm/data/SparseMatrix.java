@@ -54,21 +54,24 @@ public class SparseMatrix<T>
             mMatrix.remove(idx);
         else
             mMatrix.put(idx,  val);
-        if (mLower == null)
-            mLower = new Point3i(x, y, z);
-        else
+        if (val != null)
         {
-            mLower.x = Math.min(mLower.x, x);
-            mLower.y = Math.min(mLower.y, y);
-            mLower.z = Math.min(mLower.z, z);
-        }
-        if (mUpper == null)
-            mUpper = new Point3i(x, y, z);
-        else
-        {
-            mUpper.x = Math.max(mUpper.x, x);
-            mUpper.y = Math.max(mUpper.y, y);
-            mUpper.z = Math.max(mUpper.z, z);
+            if (mLower == null)
+                mLower = new Point3i(x, y, z);
+            else
+            {
+                mLower.x = Math.min(mLower.x, x);
+                mLower.y = Math.min(mLower.y, y);
+                mLower.z = Math.min(mLower.z, z);
+            }
+            if (mUpper == null)
+                mUpper = new Point3i(x, y, z);
+            else
+            {
+                mUpper.x = Math.max(mUpper.x, x);
+                mUpper.y = Math.max(mUpper.y, y);
+                mUpper.z = Math.max(mUpper.z, z);
+            }
         }
     }
     

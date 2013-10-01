@@ -266,4 +266,15 @@ public class ShipLogic
             superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256 - 16);
         return superChunkIndex;
     }
+
+    public static Point3i getChunkPositionFromSuperchunkOriginAndChunkIndex(
+            Point3i superChunkOrigin, Point3i chunkIndex)
+    {
+        Point3i position = new Point3i(chunkIndex);
+        position.scale(16);
+        position.x += superChunkOrigin.x - 128;
+        position.y += superChunkOrigin.y - 128;
+        position.z += superChunkOrigin.z - 128;
+        return position;
+    }
 }
