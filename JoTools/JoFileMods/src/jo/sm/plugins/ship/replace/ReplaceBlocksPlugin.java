@@ -72,7 +72,10 @@ public class ReplaceBlocksPlugin implements IBlocksPlugin
             Point3i xyz = i.next();
             Block b = original.get(xyz);
             if (b.getBlockID() == params.getColor1())
-                b = new Block(params.getColor2());
+                if (params.getColor2() == 0)
+                    b = null;
+                else
+                    b = new Block(params.getColor2());
             modified.set(xyz, b);
             cb.workTask(1);
         }

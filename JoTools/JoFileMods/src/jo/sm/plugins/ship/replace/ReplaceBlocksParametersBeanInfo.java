@@ -32,6 +32,8 @@ public class ReplaceBlocksParametersBeanInfo implements BeanInfo
                 {
                     props[i] = new BlockPropertyDescriptor(props[i].getName(), 
                             props[i].getReadMethod(), props[i].getWriteMethod());
+                    if (props[i].getName().endsWith("2"))
+                        ((BlockPropertyDescriptor)props[i]).setIncludeAir(true);
                 }
                 catch (IntrospectionException e)
                 {

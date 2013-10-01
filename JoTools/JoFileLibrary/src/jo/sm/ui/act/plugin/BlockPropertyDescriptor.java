@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 
 public class BlockPropertyDescriptor extends PropertyDescriptor
 {
+    private boolean mIncludeAir;
 
     public BlockPropertyDescriptor(String propertyName, Class<?> beanClass,
             String readMethodName, String writeMethodName)
@@ -39,6 +40,7 @@ public class BlockPropertyDescriptor extends PropertyDescriptor
     public PropertyEditor createPropertyEditor(final Object bean)
     {
         final PropertyEditor pe = new BlockPropertyEditor(bean);
+        ((BlockPropertyEditor)pe).setIncludeAir(mIncludeAir);
         try
         {
             pe.setValue(getReadMethod().invoke(bean));
@@ -62,6 +64,16 @@ public class BlockPropertyDescriptor extends PropertyDescriptor
             }
         });
         return pe;
+    }
+
+    public boolean isIncludeAir()
+    {
+        return mIncludeAir;
+    }
+
+    public void setIncludeAir(boolean includeAir)
+    {
+        mIncludeAir = includeAir;
     }
     
     
