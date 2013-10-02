@@ -122,6 +122,7 @@ public class ShipLogic
         	Point3i universePoint = i.next();
         	Point3i superChunkIndex = getSuperChunkIndexFromPoint(universePoint);
         	Point3i superChunkOrigin = getSuperChunkOriginFromIndex(superChunkIndex);
+            Point3i superChunkLower = getSuperChunkLowerFromOrigin(superChunkOrigin);
         	Map<Point3i, Chunk> assembly = assemblies.get(superChunkIndex);
         	if (assembly == null)
         	{
@@ -129,12 +130,9 @@ public class ShipLogic
         		assemblies.put(superChunkIndex, assembly);
         	}
         	Point3i chunkIndex = new Point3i(universePoint);
-        	chunkIndex.sub(superChunkOrigin);
+        	chunkIndex.sub(superChunkLower);
         	chunkIndex.scale(1, 16);
-        	chunkIndex.x += 8;
-        	chunkIndex.y += 8;
-        	chunkIndex.z += 8;
-        	Point3i chunkPosition = getChunkPositionFromSuperchunkOriginAndChunkIndex(superChunkOrigin, chunkIndex);
+        	Point3i chunkPosition = getChunkPositionFromSuperchunkLowerAndChunkIndex(superChunkLower, chunkIndex);
         	Chunk chunk = assembly.get(chunkIndex);
         	if (chunk == null)
         	{
@@ -145,8 +143,22 @@ public class ShipLogic
                 chunk.setType(1);
         		assembly.put(chunkIndex, chunk);
         	}
-        	chunk.getBlocks()[universePoint.z - chunkPosition.z][universePoint.y - chunkPosition.y][universePoint.x - chunkPosition.x]
-        			= blocks.get(universePoint);
+        	Point3i chunkOffset = new Point3i(universePoint.x - chunkPosition.x, universePoint.y - chunkPosition.y, universePoint.z - chunkPosition.z);
+        	try
+        	{
+        	chunk.getBlocks()[chunkOffset.x][chunkOffset.y][chunkOffset.z] = blocks.get(universePoint);
+        	}
+        	catch (ArrayIndexOutOfBoundsException e)
+        	{
+        	    System.out.println("Universe Point: "+universePoint);
+                System.out.println("Super Chunk Index: "+superChunkIndex);
+                System.out.println("Super Chunk Origin: "+superChunkOrigin);
+                System.out.println("Super Chunk Lower: "+superChunkLower);
+                System.out.println("Chunk Index: "+chunkIndex);
+                System.out.println("Chunk Position: "+chunkPosition);
+                System.out.println("Chunk Offset: "+chunkOffset);
+                e.printStackTrace();
+        	}
         }
         Map<Point3i, Data> data = new HashMap<Point3i, Data>();
         for (Point3i superChunkIndex : assemblies.keySet())
@@ -208,7 +220,6 @@ public class ShipLogic
         return data;
         */
     }
-    
     
     public static Point3i findCore(SparseMatrix<Block> grid)
     {
@@ -301,7 +312,7 @@ public class ShipLogic
     	if (axis >= -128)
     		return (axis + 128)/256;
     	if (axis < -368)
-    		return -(-368 - axis)/256;
+    		return -(143 - axis)/256;
     	return -1;
     }
 
@@ -321,6 +332,16 @@ public class ShipLogic
         	chunkPosition.z = superChunkOrigin.z + (chunkIndex.z - 8)*16;
         else
         	chunkPosition.z = superChunkOrigin.z + (7 - chunkIndex.z)*16;
+        return chunkPosition;
+    }
+
+    
+    private static Point3i getChunkPositionFromSuperchunkLowerAndChunkIndex(
+            Point3i superChunkLower, Point3i chunkIndex)
+    {
+        Point3i chunkPosition = new Point3i(chunkIndex);
+        chunkPosition.scale(16);
+        chunkPosition.add(superChunkLower);
         return chunkPosition;
     }
 
