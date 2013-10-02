@@ -13,7 +13,6 @@ import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;
 import jo.sm.ship.data.Data;
 import jo.vecmath.Point3i;
-import jo.vecmath.logic.MathUtils;
 
 public class ShipLogic
 {
@@ -117,6 +116,49 @@ public class ShipLogic
     public static Map<Point3i, Data> getData(SparseMatrix<Block> blocks)
     {
         long now = System.currentTimeMillis();
+        Map<Point3i, Map<Point3i, Chunk>> assemblies = new HashMap<Point3i, Map<Point3i,Chunk>>();
+        for (Iterator<Point3i> i = blocks.iteratorNonNull(); i.hasNext(); )
+        {
+        	Point3i universePoint = i.next();
+        	Point3i superChunkIndex = getSuperChunkIndexFromPoint(universePoint);
+        	Point3i superChunkOrigin = getSuperChunkOriginFromIndex(superChunkIndex);
+        	Map<Point3i, Chunk> assembly = assemblies.get(superChunkIndex);
+        	if (assembly == null)
+        	{
+        		assembly = new HashMap<Point3i, Chunk>();
+        		assemblies.put(superChunkIndex, assembly);
+        	}
+        	Point3i chunkIndex = new Point3i(universePoint);
+        	chunkIndex.sub(superChunkOrigin);
+        	chunkIndex.scale(1, 16);
+        	chunkIndex.x += 8;
+        	chunkIndex.y += 8;
+        	chunkIndex.z += 8;
+        	Point3i chunkPosition = getChunkPositionFromSuperchunkOriginAndChunkIndex(superChunkOrigin, chunkIndex);
+        	Chunk chunk = assembly.get(chunkIndex);
+        	if (chunk == null)
+        	{
+        		chunk = new Chunk();
+                chunk.setPosition(chunkPosition);
+                chunk.setBlocks(new Block[16][16][16]);
+                chunk.setTimestamp(now);
+                chunk.setType(1);
+        		assembly.put(chunkIndex, chunk);
+        	}
+        	chunk.getBlocks()[universePoint.z - chunkPosition.z][universePoint.y - chunkPosition.y][universePoint.x - chunkPosition.x]
+        			= blocks.get(universePoint);
+        }
+        Map<Point3i, Data> data = new HashMap<Point3i, Data>();
+        for (Point3i superChunkIndex : assemblies.keySet())
+        {
+        	Map<Point3i, Chunk> assembly = assemblies.get(superChunkIndex);
+        	Data datum = new Data();
+        	datum.setChunks(assembly.values().toArray(new Chunk[0]));
+        	data.put(superChunkIndex, datum);
+        }
+        return data;
+    	/*
+        long now = System.currentTimeMillis();
         Map<Point3i, Data> data = new HashMap<Point3i, Data>();
         Point3i lowerUniverse = new Point3i();
         Point3i upperUniverse = new Point3i();
@@ -164,6 +206,7 @@ public class ShipLogic
             data.put(superChunkIndex,  datum);
         }
         return data;
+        */
     }
     
     
@@ -213,15 +256,15 @@ public class ShipLogic
         if (superChunkIndex.x >= 0)
             superChunkOrigin.x = superChunkIndex.x*256;
         else
-            superChunkOrigin.x = superChunkIndex.x*(256 - 16);
+            superChunkOrigin.x = superChunkIndex.x*256 + 16;
         if (superChunkIndex.y >= 0)
             superChunkOrigin.y = superChunkIndex.y*256;
         else
-            superChunkOrigin.y = superChunkIndex.y*(256 - 16);
+            superChunkOrigin.y = superChunkIndex.y*256 + 16;
         if (superChunkIndex.z >= 0)
             superChunkOrigin.z = superChunkIndex.z*256;
         else
-            superChunkOrigin.z = superChunkIndex.z*(256 - 16);
+            superChunkOrigin.z = superChunkIndex.z*256 + 16;
         return superChunkOrigin;
     }
     
@@ -233,48 +276,70 @@ public class ShipLogic
     
     public static Point3i getSuperChunkUpperFromOrigin(Point3i superChunkOrigin)
     {
-        Point3i upperSuperChunk = new Point3i();
-        if (superChunkOrigin.x >= 0)
-            upperSuperChunk.x = superChunkOrigin.x + 127;
-        else
-            upperSuperChunk.x = superChunkOrigin.x + 127 - 16;
-        if (superChunkOrigin.y >= 0)
-            upperSuperChunk.y = superChunkOrigin.y + 127;
-        else
-            upperSuperChunk.y = superChunkOrigin.y + 127 - 16;
-        if (superChunkOrigin.z >= 0)
-            upperSuperChunk.z = superChunkOrigin.z + 127;
-        else
-            upperSuperChunk.z = superChunkOrigin.z + 127 - 16;
+        Point3i upperSuperChunk = new Point3i(superChunkOrigin.x + 127, superChunkOrigin.y + 127, superChunkOrigin.z + 127);
+        if (superChunkOrigin.x == -240)
+            upperSuperChunk.x = -129;
+        if (superChunkOrigin.y == -240)
+            upperSuperChunk.y = -129;
+        if (superChunkOrigin.z == -240)
+            upperSuperChunk.z = -129;
         return upperSuperChunk;
     }
     
     public static Point3i getSuperChunkIndexFromPoint(Point3i universePoint)
     {
-        Point3i superChunkIndex = new Point3i();
-        if (universePoint.x >= -128)
-            superChunkIndex.x = MathUtils.stride(universePoint.x + 128, 256);
-        else
-            superChunkIndex.x = MathUtils.stride(universePoint.x + 128, 256 - 16);
-        if (universePoint.y >= -128)
-            superChunkIndex.y = MathUtils.stride(universePoint.y + 128, 256);
-        else
-            superChunkIndex.y = MathUtils.stride(universePoint.y + 128, 256 - 16);
-        if (universePoint.z >= -128)
-            superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256);
-        else
-            superChunkIndex.z = MathUtils.stride(universePoint.z + 128, 256 - 16);
+        Point3i superChunkIndex = new Point3i(
+        		getIndexFromAxis(universePoint.x),
+        		getIndexFromAxis(universePoint.y),
+        		getIndexFromAxis(universePoint.z)
+        		);
         return superChunkIndex;
+    }
+    
+    private static int getIndexFromAxis(int axis)
+    {
+    	if (axis >= -128)
+    		return (axis + 128)/256;
+    	if (axis < -368)
+    		return -(-368 - axis)/256;
+    	return -1;
     }
 
     public static Point3i getChunkPositionFromSuperchunkOriginAndChunkIndex(
             Point3i superChunkOrigin, Point3i chunkIndex)
     {
-        Point3i position = new Point3i(chunkIndex);
-        position.scale(16);
-        position.x += superChunkOrigin.x - 128;
-        position.y += superChunkOrigin.y - 128;
-        position.z += superChunkOrigin.z - 128;
-        return position;
+        Point3i chunkPosition = new Point3i();
+        if (superChunkOrigin.x >= 0)
+        	chunkPosition.x = superChunkOrigin.x + (chunkIndex.x - 8)*16;
+        else
+        	chunkPosition.x = superChunkOrigin.x + (7 - chunkIndex.x)*16;
+        if (superChunkOrigin.y >= 0)
+        	chunkPosition.y = superChunkOrigin.y + (chunkIndex.y - 8)*16;
+        else
+        	chunkPosition.y = superChunkOrigin.y + (7 - chunkIndex.y)*16;
+        if (superChunkOrigin.z >= 0)
+        	chunkPosition.z = superChunkOrigin.z + (chunkIndex.z - 8)*16;
+        else
+        	chunkPosition.z = superChunkOrigin.z + (7 - chunkIndex.z)*16;
+        return chunkPosition;
+    }
+
+    public static Point3i getChunkIndexFromSuperchunkOriginAndChunkPosition(
+            Point3i superChunkOrigin, Point3i chunkPosition)
+    {
+        Point3i chunkIndex = new Point3i();
+        if (superChunkOrigin.x >= 0)
+        	chunkIndex.x = (chunkPosition.x - superChunkOrigin.x)/16 + 8;
+        else
+        	chunkIndex.x = (superChunkOrigin.x - chunkPosition.x)/16 + 7;
+        if (superChunkOrigin.y >= 0)
+        	chunkIndex.y = (chunkPosition.y - superChunkOrigin.y)/16 + 8;
+        else
+        	chunkIndex.y = (superChunkOrigin.y - chunkPosition.y)/16 + 7;
+        if (superChunkOrigin.z >= 0)
+        	chunkIndex.z = (chunkPosition.z - superChunkOrigin.z)/16 + 8;
+        else
+        	chunkIndex.z = (superChunkOrigin.z - chunkPosition.z)/16 + 7;
+        return chunkIndex;
     }
 }

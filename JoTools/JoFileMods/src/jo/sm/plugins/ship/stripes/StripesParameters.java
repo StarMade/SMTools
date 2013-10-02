@@ -10,13 +10,13 @@ public class StripesParameters
     private short   mColor1;
 	@Description(displayName="Second Color")
     private short   mColor2;
-	@Description(displayName="Left to Right")
+	@Description(displayName="Port to Starboard")
     private boolean mXAxis;
 	@Description(displayName="First", shortDescription="Width of first color stripe")
     private int     mXWidth1;
 	@Description(displayName="Second", shortDescription="Width of second color stripe")
     private int     mXWidth2;
-	@Description(displayName="Top to Bottom")
+	@Description(displayName="Dorsal to Ventral")
     private boolean mYAxis;
 	@Description(displayName="First", shortDescription="Width of first color stripe")
     private int     mYWidth1;

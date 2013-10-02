@@ -28,6 +28,7 @@ import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Chunk;
 import jo.sm.ship.data.Data;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.Point3iLogic;
 
 public class DataLogic 
 {
@@ -81,10 +82,12 @@ public class DataLogic
 	{
         //System.out.println("Reading...");
         Point3i superChunkOrigin = ShipLogic.getSuperChunkOriginFromIndex(superChunkIndex);
-        Point3i superChunkLower = ShipLogic.getSuperChunkLowerFromOrigin(superChunkOrigin);
         System.out.println("Super Chunk Index: "+superChunkIndex);
         System.out.println("Super Chunk Origin: "+superChunkOrigin);
-        System.out.println("Super Chunk Lower: "+superChunkLower);
+        System.out.println("Super Chunk Lower: "+ShipLogic.getSuperChunkLowerFromOrigin(superChunkOrigin));
+        System.out.println("Super Chunk Upper: "+ShipLogic.getSuperChunkUpperFromOrigin(superChunkOrigin));
+        Point3i min = null;
+        Point3i max = null;
 		DataInputStream dis;
 		if (is instanceof DataInputStream)
 			dis = (DataInputStream)is;
@@ -163,12 +166,17 @@ public class DataLogic
                     }
             //System.out.println("Block count="+blockCount);
             chunk.setBlocks(blocks);
+            min = Point3iLogic.min(min, chunk.getPosition());
+            max = Point3iLogic.max(max, chunk.getPosition());
             if (chunkOffsets.containsKey(offset))
             {
                 Point3i chunkIndex = chunkOffsets.get(offset);
                 Point3i expected = ShipLogic.getChunkPositionFromSuperchunkOriginAndChunkIndex(superChunkOrigin, chunkIndex);
                 if (!chunk.getPosition().equals(expected))
+                {
                     System.out.println("Chunk #"+offset+"/"+chunkOffsets.get(offset)+" expected in position "+expected+", but actually in "+chunk.getPosition());
+                    chunk.setPosition(expected);
+                }
                 chunks.add(chunk);
             }
             else
@@ -176,23 +184,9 @@ public class DataLogic
                 System.out.println("Orphan chunk '"+chunk.getPosition()+"/"+offset);
             }
             // backtrack offset table
+            /*
             if ((superChunkIndex != null) && (superChunkIndex.z < 0) && (superChunkIndex.y == 0) && (superChunkIndex.x == 0))
             {
-	            int chunkNum = chunks.size() - 1;
-	            boolean found = false;
-	            for (CubeIterator i = new CubeIterator(new Point3i(), new Point3i(15, 15, 15)); i.hasNext(); )
-	            {
-	            	Point3i p = i.next();
-	            	if (offsetSizeTable[p.z][p.y][p.x][0] == chunkNum)
-	            	{
-	            		if ((p.x == 8) && (p.y == 8))
-	            		    System.out.println("Chunk "+chunk.getPosition()+" at offset "+p);
-            		    found = true;
-	            		break;
-	            	}
-	            }
-	            if (!found)
-                    System.out.println("Chunk "+chunk.getPosition()+"/"+chunkNum+" not found in offset");
 	            if ((chunk.getPosition().x == 0) && (chunk.getPosition().y == 0))
 	            {
     	            System.out.println("Chunk "+chunk.getPosition());
@@ -223,7 +217,6 @@ public class DataLogic
     	            }
 	            }
             }
-            /*
             */
         }
         data.setChunks(chunks.toArray(new Chunk[0]));
@@ -233,15 +226,15 @@ public class DataLogic
             System.out.println("NO CHUNKS!");
         else if (chunkOffsets.size() == 0)
             System.out.println("NO OFFSET TABLE!");
+        System.out.println("Range: "+min+" -> "+max);
 		return data;
 	}
     
     public static void writeFile(Point3i superChunkIndex, Data data, OutputStream os, boolean close, IPluginCallback cb) throws IOException
     {
     	Point3i superChunkOrigin = ShipLogic.getSuperChunkOriginFromIndex(superChunkIndex);
-        Point3i superChunkLower = ShipLogic.getSuperChunkLowerFromOrigin(superChunkOrigin);
         if (cb != null)
-        	cb.setStatus("Writing "+superChunkLower);
+        	cb.setStatus("Writing "+superChunkIndex);
         DataOutputStream dos;
         if (os instanceof DataOutputStream)
             dos = (DataOutputStream)os;
@@ -295,16 +288,15 @@ public class DataLogic
             dos2.write(compressedData);
             for (int j = 25 + compressedData.length; j < 5120; j++)
                 dos2.writeByte(0);
-            Point3i index = getLocalIndex(superChunkIndex, superChunkLower,
-                    chunk.getPosition());
+            Point3i chunkIndex = ShipLogic.getChunkIndexFromSuperchunkOriginAndChunkPosition(superChunkOrigin, chunk.getPosition());
             try
             {
-            offsetSizeTable[index.z][index.y][index.x][1] = 25 + compressedData.length;
-            offsetSizeTable[index.z][index.y][index.x][0] = i;
-            timestampTable[index.z][index.y][index.x] = chunk.getTimestamp();
+            offsetSizeTable[chunkIndex.z][chunkIndex.y][chunkIndex.x][1] = 25 + compressedData.length;
+            offsetSizeTable[chunkIndex.z][chunkIndex.y][chunkIndex.x][0] = i;
+            timestampTable[chunkIndex.z][chunkIndex.y][chunkIndex.x] = chunk.getTimestamp();
             } catch (ArrayIndexOutOfBoundsException e) {
                 e.printStackTrace();
-                System.out.println("ChunkPosition: "+chunk.getPosition()+"SuperChunkIndex: "+superChunkIndex+", SuperChunkLower: "+superChunkLower+", index="+index);
+                System.out.println("ChunkPosition: "+chunk.getPosition()+"SuperChunkIndex: "+superChunkIndex+", index="+chunkIndex);
             }
         }
         dos2.flush();
