@@ -9,6 +9,7 @@ import java.util.Map;
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.BlueprintLogic;
 import jo.sm.logic.RunnableLogic;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
@@ -35,22 +36,24 @@ public class SaveAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        if (mFrame.getSpec() == null)
+        ShipSpec spec = StarMadeLogic.getInstance().getCurrentModel();
+        if (spec == null)
             return;
-        if (mFrame.getSpec().getType() == ShipSpec.FILE)
+        if (spec.getType() == ShipSpec.FILE)
             doSaveFile();
-        else if (mFrame.getSpec().getType() == ShipSpec.BLUEPRINT)
+        else if (spec.getType() == ShipSpec.BLUEPRINT)
             doSaveBlueprint(false);
-        else if (mFrame.getSpec().getType() == ShipSpec.DEFAULT_BLUEPRINT)
+        else if (spec.getType() == ShipSpec.DEFAULT_BLUEPRINT)
             doSaveBlueprint(true);
-        else if (mFrame.getSpec().getType() == ShipSpec.ENTITY)
+        else if (spec.getType() == ShipSpec.ENTITY)
             doSaveEntity();
     }
     
     private void doSaveFile()
     {
-        final File dataFile = mFrame.getSpec().getFile();
-        SparseMatrix<Block> grid = mFrame.getClient().getGrid();
+        final ShipSpec spec = StarMadeLogic.getInstance().getCurrentModel();
+        final File dataFile = spec.getFile();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
         final Point3i p = new Point3i();
         final Data d = data.get(p);
@@ -66,31 +69,33 @@ public class SaveAction extends GenericAction
 		        }
 		        catch (IOException e)
 		        {
-		            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
+		            throw new IllegalStateException("Cannot save to '"+spec.getFile()+"'", e);
 		        }
 			}
         };
-        RunnableLogic.run(mFrame, mFrame.getSpec().getName(), t);
+        RunnableLogic.run(mFrame, spec.getName(), t);
     }
     
     private void doSaveBlueprint(final boolean def)
     {
+        final ShipSpec spec = StarMadeLogic.getInstance().getCurrentModel();
         IRunnableWithProgress t = new IRunnableWithProgress() {
 			@Override
 			public void run(IPluginCallback cb)
 			{
-				BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), mFrame.getSpec(), def, cb);        
+				BlueprintLogic.saveBlueprint(StarMadeLogic.getModel(), spec, def, cb);        
 	        };
         };
-        RunnableLogic.run(mFrame, mFrame.getSpec().getName(), t);
+        RunnableLogic.run(mFrame, spec.getName(), t);
     }
     
     private void doSaveEntity()
     {
-        SparseMatrix<Block> grid = mFrame.getClient().getGrid();
+        ShipSpec spec = StarMadeLogic.getInstance().getCurrentModel();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         final Map<Point3i, Data> data = ShipLogic.getData(grid);
-        final File baseDir = new File(mFrame.getSpec().getEntity().getFile().getParentFile(), "DATA");
-        String fName = mFrame.getSpec().getEntity().getFile().getName();
+        final File baseDir = new File(spec.getEntity().getFile().getParentFile(), "DATA");
+        String fName = spec.getEntity().getFile().getName();
         final String baseName = fName.substring(0, fName.length() - 4); // remove .ent
         IRunnableWithProgress t = new IRunnableWithProgress() {
 			@Override

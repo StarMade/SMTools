@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Properties;
 
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.ship.data.Block;
+import jo.sm.ui.logic.ShipSpec;
 import jo.vecmath.Point3i;
 
 public class StarMade extends PCSBean
@@ -22,6 +24,8 @@ public class StarMade extends PCSBean
     private Point3i			mSelectedLower;
     private String			mStatusMessage;
     private IBlocksPlugin	mViewFilter;
+    private ShipSpec        mCurrentModel;
+    private SparseMatrix<Block> mModel;
     
     public StarMade()
     {
@@ -139,4 +143,28 @@ public class StarMade extends PCSBean
 	{
 		mViewFilter = viewFilter;
 	}
+
+    public ShipSpec getCurrentModel()
+    {
+        return mCurrentModel;
+    }
+
+    public void setCurrentModel(ShipSpec currentModel)
+    {
+        queuePropertyChange("currentModel", mCurrentModel, currentModel);
+        mCurrentModel = currentModel;
+        firePropertyChange();
+    }
+
+    public SparseMatrix<Block> getModel()
+    {
+        return mModel;
+    }
+
+    public void setModel(SparseMatrix<Block> model)
+    {
+        queuePropertyChange("model", mModel, model);
+        mModel = model;
+        firePropertyChange();
+    }
 }

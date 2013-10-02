@@ -41,9 +41,10 @@ public class SaveAsBlueprintAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        if (mFrame.getSpec() == null)
+        ShipSpec oriSpec = StarMadeLogic.getInstance().getCurrentModel();
+        if (oriSpec == null)
             return;
-        String name = JOptionPane.showInputDialog(mFrame, "What do you want to name it?", mFrame.getSpec().getName());
+        String name = JOptionPane.showInputDialog(mFrame, "What do you want to name it?", oriSpec.getName());
         if (StringUtils.isTrivial(name))
             return;
         File prints;
@@ -61,8 +62,8 @@ public class SaveAsBlueprintAction extends GenericAction
 			@Override
 			public void run(IPluginCallback cb)
 			{
-		        BlueprintLogic.saveBlueprint(mFrame.getClient().getGrid(), spec, mDef, cb);
-		        mFrame.setSpec(spec);
+		        BlueprintLogic.saveBlueprint(StarMadeLogic.getModel(), spec, mDef, cb);
+	           StarMadeLogic.getInstance().setCurrentModel(spec);
 			}
 		};
 		RunnableLogic.run(mFrame, name, t);

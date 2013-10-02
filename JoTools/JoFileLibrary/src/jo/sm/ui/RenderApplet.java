@@ -11,6 +11,7 @@ import javax.swing.JApplet;
 import javax.swing.UIManager;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.data.Data;
 import jo.sm.ship.logic.DataLogic;
@@ -61,7 +62,7 @@ public class RenderApplet extends JApplet
         	}
         }
         SparseMatrix<Block> grid = ShipLogic.getBlocks(mShip);
-        mClient.setGrid(grid);
+        StarMadeLogic.setModel(grid);
     }
 
     public static void setNativeLookAndFeel() {

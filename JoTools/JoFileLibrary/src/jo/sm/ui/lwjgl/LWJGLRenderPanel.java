@@ -2,6 +2,8 @@ package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import jo.sm.data.BlockTypes;
@@ -11,7 +13,6 @@ import jo.sm.data.UndoBuffer;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.RenderPanel;
-import jo.sm.ui.logic.ShipSpec;
 import jo.util.jgl.obj.JGLCamera;
 import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLScene;
@@ -34,12 +35,10 @@ public class LWJGLRenderPanel extends RenderPanel
     private JGLGroup			mSelection;
     private JGLGroup			mAxis;
     
-    private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private boolean             mPlainGraphics;
     private boolean             mDontDraw;
     private UndoBuffer          mUndoer;
-    private ShipSpec            mSpec;
 
     Vector3f            		mPOVTranslate;
 
@@ -68,6 +67,13 @@ public class LWJGLRenderPanel extends RenderPanel
 //        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
 //        		new LWJGLKeyEventDispatcher(this));
         mCanvas.addKeyListener(new LWJGLKeyEventDispatcher(this));
+        StarMadeLogic.getInstance().addPropertyChangeListener("model", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent ev)
+            {
+                setLookAt(new Point3f(0, 0, -1));
+            }
+        });
     }
 
     @Override
@@ -76,25 +82,12 @@ public class LWJGLRenderPanel extends RenderPanel
         // TODO Auto-generated method stub
 
     }
-
-    @Override
-    public SparseMatrix<Block> getGrid()
-    {
-        return mGrid;
-    }
-
-    @Override
-    public void setGrid(SparseMatrix<Block> grid)
-    {
-        mGrid = grid;
-        setLookAt(new Point3f(0, 0, -1));
-    }
     
     public void setLookAt(Point3f axis)
     {
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
-        mGrid.getBounds(lower, upper);
+        StarMadeLogic.getModel().getBounds(lower, upper);
         Point3f lookAtThis = new Point3f((upper.x + lower.x)/2, (upper.y + lower.y)/2, (upper.z + lower.z)/2);
         float maxModel = Math.max(Math.max(upper.x - lower.x, upper.y - lower.y), upper.z - lower.z) + 1;
         Point3f standHere = new Point3f(axis);
@@ -114,9 +107,9 @@ public class LWJGLRenderPanel extends RenderPanel
     	if (mDontDraw)
     		mFilteredGrid = new SparseMatrix<Block>();
     	else if (StarMadeLogic.getInstance().getViewFilter() == null)
-            mFilteredGrid = mGrid;
+            mFilteredGrid = StarMadeLogic.getModel();
         else
-            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
+            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(StarMadeLogic.getModel(), null, StarMadeLogic.getInstance(), null);
     	updateAxis();
         mBlocks.getChildren().clear();
         LWJGLRenderLogic.addBlocks(mBlocks, mFilteredGrid, mPlainGraphics);
@@ -171,7 +164,7 @@ public class LWJGLRenderPanel extends RenderPanel
         Point3i p = getPointAt(x, y);
         if (p == null)
             return null;
-        return mGrid.get(p);
+        return StarMadeLogic.getModel().get(p);
     }
 
     public Point3i getPointAt(double x, double y)
@@ -189,21 +182,9 @@ public class LWJGLRenderPanel extends RenderPanel
         rot.transform(model);
         Point3i p = new Point3i(model);
         System.out.println(" -> "+model+" -> "+p);
-        if (!mGrid.contains(p))
+        if (!StarMadeLogic.getModel().contains(p))
             return null;
         return p;
-    }
-
-    @Override
-    public ShipSpec getSpec()
-    {
-        return mSpec;
-    }
-
-    @Override
-    public void setSpec(ShipSpec spec)
-    {
-        mSpec = spec;
     }
 
     @Override
@@ -245,14 +226,14 @@ public class LWJGLRenderPanel extends RenderPanel
     {
         SparseMatrix<Block> grid = mUndoer.undo();
         if (grid != null)
-            setGrid(grid);
+            StarMadeLogic.setModel(grid);
     }
 
     public void redo()
     {
         SparseMatrix<Block> grid = mUndoer.redo();
         if (grid != null)
-            setGrid(grid);
+            StarMadeLogic.setModel(grid);
     }
 
     @Override

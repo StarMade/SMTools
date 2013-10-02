@@ -167,7 +167,7 @@ public class EditPanel extends JPanel
     
     private void doPlugin()
     {
-        int classification = mRenderer.getSpec().getClassification();
+        int classification = StarMadeLogic.getInstance().getCurrentModel().getClassification();
         List<IBlocksPlugin> plugins = StarMadeLogic.getBlocksPlugins(classification, IBlocksPlugin.SUBTYPE_PAINT);
         if (plugins.size() == 0)
             return;
@@ -201,7 +201,7 @@ public class EditPanel extends JPanel
     {
         if (StarMadeLogic.getInstance().getSelectedBlockType() < 0)
             return;
-        SparseMatrix<Block> grid = mRenderer.getGrid();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         Iterator<Point3i> i;
         if ((StarMadeLogic.getInstance().getSelectedLower() != null) && (StarMadeLogic.getInstance().getSelectedUpper() != null))
         	i = new CubeIterator(StarMadeLogic.getInstance().getSelectedLower(), StarMadeLogic.getInstance().getSelectedUpper());
@@ -264,7 +264,7 @@ public class EditPanel extends JPanel
         RenderPoly b = mRenderer.getTileAt(x, y);
         if (b == null)
             return;
-        SparseMatrix<Block> grid = mRenderer.getGrid();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         Point3i p = b.getPosition();
         if (p == null)
             return;

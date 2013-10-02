@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.GridLogic;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
@@ -160,12 +161,12 @@ public class LWJGLKeyEventDispatcher implements KeyEventDispatcher, KeyListener
 
 	private void doNudgeSelection(int keyCode, Point3i lower, Point3i upper)
 	{
-		mPanel.getUndoer().checkpoint(mPanel.getGrid());
-        SparseMatrix<Block> clip = GridLogic.extract(mPanel.getGrid(), lower, upper);
-        GridLogic.delete(mPanel.getGrid(), lower, upper);
+		mPanel.getUndoer().checkpoint(StarMadeLogic.getModel());
+        SparseMatrix<Block> clip = GridLogic.extract(StarMadeLogic.getModel(), lower, upper);
+        GridLogic.delete(StarMadeLogic.getModel(), lower, upper);
 		keyToDelta(keyCode, lower);		
 		keyToDelta(keyCode, upper);		
-        GridLogic.insert(mPanel.getGrid(), clip, lower);
+        GridLogic.insert(StarMadeLogic.getModel(), clip, lower);
 	}
 
 	private Point3i keyToDelta(int keyCode, Point3i delta)

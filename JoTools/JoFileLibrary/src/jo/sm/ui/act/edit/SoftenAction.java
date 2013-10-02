@@ -3,6 +3,7 @@ package jo.sm.ui.act.edit;
 import java.awt.event.ActionEvent;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.HullLogic;
 import jo.sm.ui.RenderFrame;
@@ -23,12 +24,12 @@ public class SoftenAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        SparseMatrix<Block> grid = mFrame.getClient().getGrid();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         if (grid == null)
             return;
         mFrame.getClient().getUndoer().checkpoint(grid);
         HullLogic.unpower(grid);
-        mFrame.getClient().setGrid(grid);
+        StarMadeLogic.setModel(grid);
     }
 
 }

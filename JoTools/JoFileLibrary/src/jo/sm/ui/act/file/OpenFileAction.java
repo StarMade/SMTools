@@ -127,8 +127,8 @@ public class OpenFileAction extends GenericAction
            spec.setType(ShipSpec.FILE);
            spec.setClassification(IBlocksPlugin.TYPE_SHIP); // TODO: autodetect
            spec.setFile(smb2);
-           mFrame.setSpec(spec);
-           mFrame.getClient().setGrid(grid);
+           StarMadeLogic.getInstance().setCurrentModel(spec);
+           StarMadeLogic.setModel(grid);
            mFrame.getClient().getUndoer().clear();
            if (DebugLogic.DEBUG)
            {

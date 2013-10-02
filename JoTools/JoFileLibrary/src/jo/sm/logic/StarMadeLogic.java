@@ -13,11 +13,13 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.jar.Manifest;
 
+import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.utils.BooleanUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IStarMadePlugin;
 import jo.sm.mods.IStarMadePluginFactory;
+import jo.sm.ship.data.Block;
 
 public class StarMadeLogic
 {
@@ -288,4 +290,14 @@ public class StarMadeLogic
 	{
 		return ((class1 == IBlocksPlugin.TYPE_ALL) || (class1 == class2));
 	}
+
+    public static SparseMatrix<Block> getModel()
+    {
+        return getInstance().getModel();
+    }
+
+    public static void setModel(SparseMatrix<Block> model)
+    {
+        getInstance().setModel(model);
+    }
 }

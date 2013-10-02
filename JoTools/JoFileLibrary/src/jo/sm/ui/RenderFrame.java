@@ -43,7 +43,6 @@ import jo.sm.ui.lwjgl.LWJGLRenderPanel;
 public class RenderFrame extends JFrame implements WindowListener
 {
     private String[]    mArgs;
-    private ShipSpec    mSpec;
     private RenderPanel mClient;
 
     public RenderFrame(String[] args)
@@ -155,9 +154,10 @@ public class RenderFrame extends JFrame implements WindowListener
     private void updatePopup(JMenu menu, int... subTypes)
     {
         MenuLogic.clearPluginMenus(menu);
-        if (mSpec == null)
+        ShipSpec spec = StarMadeLogic.getInstance().getCurrentModel();
+        if (spec == null)
             return;
-        int type = mSpec.getClassification();
+        int type = spec.getClassification();
         int lastModIndex = menu.getItemCount();
         int lastCount = 0;
         for (int subType : subTypes)
@@ -208,8 +208,8 @@ public class RenderFrame extends JFrame implements WindowListener
     				@Override
     				public void run(IPluginCallback cb)
     				{
-    		        	f.setSpec(spec);
-    		        	f.getClient().setGrid(ShipTreeLogic.loadShip(spec, cb));
+    				    StarMadeLogic.getInstance().setCurrentModel(spec);
+    		        	StarMadeLogic.setModel(ShipTreeLogic.loadShip(spec, cb));
     				}
     			};
     			RunnableLogic.run(f, "Loading...", t);
@@ -219,17 +219,6 @@ public class RenderFrame extends JFrame implements WindowListener
         {
             e.printStackTrace();
         }
-    }
-
-    public ShipSpec getSpec()
-    {
-        return mSpec;
-    }
-
-    public void setSpec(ShipSpec spec)
-    {
-        mSpec = spec;
-        mClient.setSpec(mSpec);
     }
 
     public RenderPanel getClient()

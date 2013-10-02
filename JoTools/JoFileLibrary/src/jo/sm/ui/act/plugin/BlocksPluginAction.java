@@ -44,6 +44,7 @@ public class BlocksPluginAction extends GenericAction
     {
         final Object params = mPlugin.newParameterBean();
         loadProps(params);
+        mPlugin.initParameterBean(StarMadeLogic.getModel(), params, StarMadeLogic.getInstance(), null);
         if (!getParams(params))
             return;
         saveProps(params);
@@ -51,14 +52,14 @@ public class BlocksPluginAction extends GenericAction
 			@Override
 			public void run(IPluginCallback cb)
 			{
-	            SparseMatrix<Block> original = mPanel.getGrid();
+	            SparseMatrix<Block> original = StarMadeLogic.getModel();
 	            mPanel.getUndoer().checkpoint(original);
 	            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), cb);
 	            if (!cb.isPleaseCancel())
 	            {
 	                if (modified != null)
 	                {
-	                    mPanel.setGrid(modified);
+	                    StarMadeLogic.setModel(modified);
 	                }
 	                else
 	                    mPanel.updateTiles();

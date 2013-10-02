@@ -9,9 +9,14 @@ import jo.sm.data.ShapeLibraryEntry;
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.utils.FileUtils;
 import jo.sm.logic.utils.StringUtils;
+import jo.sm.logic.utils.XMLEditUtils;
+import jo.sm.logic.utils.XMLUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class ShapeLibraryLogic
 {
@@ -148,7 +153,43 @@ public class ShapeLibraryLogic
     
     public static void addEntry(SparseMatrix<Block> grid, String name, String author, int type)
     {
-        
+        Document doc = GridLogic.toDocument(grid);
+        Node root = doc.getFirstChild();
+        if (!StringUtils.isTrivial(name))
+            XMLEditUtils.addAttribute(root, "name", name);
+        if (!StringUtils.isTrivial(author))
+            XMLEditUtils.addAttribute(root, "author", author);
+        switch (type)
+        {
+            case IBlocksPlugin.TYPE_ALL:
+                XMLEditUtils.addAttribute(root, "classifications", "all");
+                break;
+            case IBlocksPlugin.TYPE_FLOATINGROCK:
+                XMLEditUtils.addAttribute(root, "classifications", "floatingrock");
+                break;
+            case IBlocksPlugin.TYPE_SHIP:
+                XMLEditUtils.addAttribute(root, "classifications", "ship");
+                break;
+            case IBlocksPlugin.TYPE_SHOP:
+                XMLEditUtils.addAttribute(root, "classifications", "shop");
+                break;
+            case IBlocksPlugin.TYPE_STATION:
+                XMLEditUtils.addAttribute(root, "classifications", "station");
+                break;
+            case IBlocksPlugin.TYPE_PLANET:
+                XMLEditUtils.addAttribute(root, "classifications", "planet");
+                break;
+            default:
+                XMLEditUtils.addAttribute(root, "classifications", "all");
+                break;
+        }
+        File jo_plugins = new File(StarMadeLogic.getInstance().getBaseDir(), "jo_plugins");
+        File shapeLibDir = new File(jo_plugins, "shapeLibrary");
+        if (!shapeLibDir.exists())
+            shapeLibDir.mkdirs();
+        File shapeFile = new File(shapeLibDir, name+".xml");
+        XMLUtils.writeFile(root, shapeFile);
+        mLastRead = 0;
     }
     
     private static boolean isType(ShapeLibraryEntry entry, int type)

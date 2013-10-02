@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.logic.RunnableLogic;
+import jo.sm.logic.StarMadeLogic;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
@@ -40,8 +41,8 @@ public class OpenExistingAction extends GenericAction
 		        SparseMatrix<Block> grid = ShipTreeLogic.loadShip(spec, cb);
 		        if (grid != null)
 		        {
-		            mFrame.setSpec(spec);
-		            mFrame.getClient().setGrid(grid);
+		            StarMadeLogic.getInstance().setCurrentModel(spec);
+		            StarMadeLogic.setModel(grid);
 		            mFrame.getClient().getUndoer().clear();
 		        }
 			}

@@ -10,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Path2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.RenderPoly;
@@ -19,7 +21,6 @@ import jo.sm.data.UndoBuffer;
 import jo.sm.logic.RenderPolyLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.ship.data.Block;
-import jo.sm.ui.logic.ShipSpec;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
@@ -43,8 +44,6 @@ public class AWTRenderPanel extends RenderPanel
     private boolean				mDontDraw;
     private UndoBuffer          mUndoer;
     
-    private ShipSpec            mSpec;
-    private SparseMatrix<Block> mGrid;
     private SparseMatrix<Block> mFilteredGrid;
     private RenderSet			mTiles;
     private Matrix4f            mTransform;
@@ -93,6 +92,13 @@ public class AWTRenderPanel extends RenderPanel
         addMouseListener(ma);
         addMouseMotionListener(ma);
         addMouseWheelListener(ma);
+        StarMadeLogic.getInstance().addPropertyChangeListener("model", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt)
+            {
+                doNewGrid();
+            }
+        });
     }
     
     public synchronized void updateTransform()
@@ -227,17 +233,11 @@ public class AWTRenderPanel extends RenderPanel
         RenderPolyLogic.draw(g2, mTiles, !mPlainGraphics);
     }
 
-    public SparseMatrix<Block> getGrid()
+    private void doNewGrid()
     {
-        return mGrid;
-    }
-
-    public void setGrid(SparseMatrix<Block> grid)
-    {
-        mGrid = grid;
         Point3i lower = new Point3i();
         Point3i upper = new Point3i();
-        mGrid.getBounds(lower, upper);
+        StarMadeLogic.getModel().getBounds(lower, upper);
         mPreTranslate.x = -(lower.x + upper.x)/2;
         mPreTranslate.y = -(lower.y + upper.y)/2;
         mPreTranslate.z = -(lower.z + upper.z)/2;
@@ -259,9 +259,9 @@ public class AWTRenderPanel extends RenderPanel
     	else
     	{
 	        if (StarMadeLogic.getInstance().getViewFilter() == null)
-	            mFilteredGrid = mGrid;
+	            mFilteredGrid = StarMadeLogic.getModel();
 	        else
-	            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(mGrid, null, StarMadeLogic.getInstance(), null);
+	            mFilteredGrid = StarMadeLogic.getInstance().getViewFilter().modify(StarMadeLogic.getModel(), null, StarMadeLogic.getInstance(), null);
     	}
         RenderPolyLogic.fillPolys(mFilteredGrid, mTiles);
         Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
@@ -381,16 +381,6 @@ public class AWTRenderPanel extends RenderPanel
         return null;
     }
 
-    public ShipSpec getSpec()
-    {
-        return mSpec;
-    }
-
-    public void setSpec(ShipSpec spec)
-    {
-        mSpec = spec;
-    }
-
 	public boolean isPlainGraphics()
 	{
 		return mPlainGraphics;
@@ -427,14 +417,14 @@ public class AWTRenderPanel extends RenderPanel
 	{
 		SparseMatrix<Block> grid = mUndoer.undo();
 		if (grid != null)
-			setGrid(grid);
+			StarMadeLogic.setModel(grid);
 	}
 
 	public void redo()
 	{
 		SparseMatrix<Block> grid = mUndoer.redo();
 		if (grid != null)
-			setGrid(grid);
+		    StarMadeLogic.setModel(grid);
 	}
 
     @Override

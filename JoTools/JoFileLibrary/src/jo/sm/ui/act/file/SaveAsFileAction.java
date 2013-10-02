@@ -38,7 +38,7 @@ public class SaveAsFileAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        if (mFrame.getSpec() == null)
+        if (StarMadeLogic.getInstance().getCurrentModel() == null)
             return;
         File dir;
         if (StarMadeLogic.getProps().contains("open.file.dir"))
@@ -64,7 +64,7 @@ public class SaveAsFileAction extends GenericAction
         spec.setType(ShipSpec.FILE);
         spec.setName(name);
         spec.setFile(smb2);
-        SparseMatrix<Block> grid = mFrame.getClient().getGrid();
+        SparseMatrix<Block> grid = StarMadeLogic.getModel();
         Map<Point3i, Data> data = ShipLogic.getData(grid);
         final Point3i p = new Point3i();
         final Data d = data.get(p);
@@ -80,10 +80,9 @@ public class SaveAsFileAction extends GenericAction
 		        }
 		        catch (IOException e)
 		        {
-		            throw new IllegalStateException("Cannot save to '"+mFrame.getSpec().getFile()+"'", e);
+		            throw new IllegalStateException("Cannot save to '"+spec.getFile()+"'", e);
 		        }
-		        mFrame.setSpec(spec);
-		        mFrame.getClient().setSpec(spec);
+		        StarMadeLogic.getInstance().setCurrentModel(spec);
 			}
         };
         RunnableLogic.run(mFrame, name, t);
