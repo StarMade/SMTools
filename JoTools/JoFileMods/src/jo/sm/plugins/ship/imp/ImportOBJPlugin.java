@@ -21,6 +21,7 @@ import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.ext.Hull3f;
 import jo.vecmath.ext.Triangle3f;
+import jo.vecmath.logic.Point3fLogic;
 import jo.vecmath.logic.Point3iLogic;
 import jo.vecmath.logic.ext.Hull3fLogic;
 import jo.vecmath.logic.ext.Triangle3fLogic;
@@ -185,35 +186,26 @@ public class ImportOBJPlugin implements IBlocksPlugin
         //System.out.println();
     }
     
+//    private void drawLine(SparseMatrix<Block> grid, Point3i a, Point3i b)
+//    {
+//        List<Point3i> plot = new ArrayList<Point3i>();
+//        plotLine(a, b, plot);
+//        for (Point3i p : plot)
+//            grid.set(p, new Block(BlockTypes.HULL_COLOR_GREY_ID));
+//    }
+    
     private void plotLine(Point3i a, Point3i b, Collection<Point3i> plot)
     {
-        Point3i[] candidates = new Point3i[7];
-        plot.add(new Point3i(a));
-        while (!a.equals(b))
+        Point3f vector = new Point3f(b);
+        Point3f p = new Point3f(a);
+        vector.sub(p);
+        float mag = Point3fLogic.mag(vector);
+        int steps = (int)mag;
+        vector.scale(1/mag);
+        for (int i = 0; i < steps; i++)
         {
-            int dx = (int)Math.signum(b.x - a.x);
-            int dy = (int)Math.signum(b.y - a.y);
-            int dz = (int)Math.signum(b.z - a.z);
-            candidates[0] = new Point3i(a.x + dx, a.y, a.z);
-            candidates[1] = new Point3i(a.x, a.y + dy, a.z);
-            candidates[2] = new Point3i(a.x, a.y, a.z + dz);
-            candidates[3] = new Point3i(a.x + dx, a.y + dy, a.z);
-            candidates[4] = new Point3i(a.x, a.y + dy, a.z + dz);
-            candidates[5] = new Point3i(a.x + dx, a.y, a.z + dz);
-            candidates[6] = new Point3i(a.x + dx, a.y + dy, a.z + dz);
-            Point3i best = candidates[0];
-            int bestv = dist2(best, b);
-            for (int i = 1; i < candidates.length; i++)
-            {
-                int v = dist2(candidates[i], b);
-                if (v < bestv)
-                {
-                    best.set(candidates[i]);
-                    bestv = v;
-                }
-            }
-            a.set(best);
-            plot.add(new Point3i(a));
+            plot.add(new Point3i(p));
+            p.add(vector);
         }
     }
 
