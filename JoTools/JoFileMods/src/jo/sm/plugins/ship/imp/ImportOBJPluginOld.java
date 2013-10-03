@@ -5,10 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import jo.sm.data.BlockTypes;
@@ -20,12 +19,12 @@ import jo.sm.ship.data.Block;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.ext.Hull3f;
+import jo.vecmath.ext.Line3f;
 import jo.vecmath.ext.Triangle3f;
-import jo.vecmath.logic.Point3iLogic;
 import jo.vecmath.logic.ext.Hull3fLogic;
 import jo.vecmath.logic.ext.Triangle3fLogic;
 
-public class ImportOBJPlugin implements IBlocksPlugin
+public class ImportOBJPluginOld implements IBlocksPlugin
 {
     public static final String NAME = "Import/OBJ";
     public static final String DESC = "Import OBJ file";
@@ -81,8 +80,7 @@ public class ImportOBJPlugin implements IBlocksPlugin
             System.out.println("Read "+hull.getTriangles().size()+" triangles");
             Point3i lowerGrid = new Point3i();
             Point3i upperGrid = new Point3i();
-            Point3i offset = new Point3i();
-            float scale = getScale(hull, params, lowerGrid, upperGrid, offset);
+            float scale = getScale(hull, params, lowerGrid, upperGrid);
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
             mapHull(modified, hull, scale, lowerGrid, upperGrid, params.isForceConvex(), cb);
             return modified;
@@ -97,135 +95,81 @@ public class ImportOBJPlugin implements IBlocksPlugin
     private void mapHull(SparseMatrix<Block> modified, Hull3f hull,
             float scale, Point3i lowerGrid, Point3i upperGrid, boolean forceConvex, IPluginCallback cb)
     {
-        Point3i center = Point3iLogic.interpolate(lowerGrid, upperGrid, .5f);
-        cb.startTask(hull.getTriangles().size());
-        for (Triangle3f t : hull.getTriangles())
+        Point3i center = new Point3i();
+        center.x = (lowerGrid.x + upperGrid.x)/2;
+        center.y = (lowerGrid.x + upperGrid.x)/2;
+        center.z = (lowerGrid.x + upperGrid.x)/2;
+        cb.startTask((upperGrid.x - lowerGrid.x + 1)*(upperGrid.y - lowerGrid.y + 1));
+        for (int x = lowerGrid.x; x <= upperGrid.x; x++)
         {
-            Point3i iA = mapPoint(t.getA(), scale, center);
-            Point3i iB = mapPoint(t.getB(), scale, center);
-            Point3i iC = mapPoint(t.getC(), scale, center);
-            drawTriangle(modified, iA, iB, iC);
-            cb.workTask(1);
+            for (int y = lowerGrid.y; y <= upperGrid.y; y++)
+            {
+                Point3f o = new Point3f(x/scale, y/scale, 0);
+                Line3f line = new Line3f(o, new Point3f(0, 0, 1));
+                List<Point3f> hits = Hull3fLogic.intersections(hull, line);
+                if (hits.size() == 0)
+                	continue;
+                if (forceConvex)
+                {
+                	float lowZ = hits.get(0).z;
+                	float highZ = lowZ;
+                	for (int i = 1; i < hits.size(); i++)
+                	{
+                		float z = hits.get(i).z;
+                		lowZ = Math.min(lowZ, z);
+                		highZ = Math.max(highZ, z);
+                	}
+                	int lowHull = (int)(lowZ*scale);
+                	int highHull = (int)(highZ*scale);
+                	System.out.println("    x="+x+", y="+y+", z="+lowZ+" -- "+highZ+" out of "+hits.size());
+                	for (int z = lowHull; z <= highHull; z++)
+    		        {
+    		            Block b = new Block();
+    		            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
+    		            modified.set(x - center.x + 8, y - center.y + 8, z - center.z + 8, b);
+    		        }
+                }
+                else
+                	concaveHull(modified, scale, lowerGrid, center, x, y, hits);
+                if (cb.isPleaseCancel())
+                    break;
+                cb.workTask(1);
+            }
         }
         modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
         cb.endTask();
     }
-    
-    private Point3i mapPoint(Point3f f, float scale, Point3i center)
-    {
-        Point3f fA = new Point3f(f);
-        fA.scale(scale);
-        Point3i iA = new Point3i(fA);
-        iA.sub(center);
-        iA.x += 8;
-        iA.y += 8;
-        iA.z += 8;
-        return iA;
-    }
-    
-    private void drawTriangle(SparseMatrix<Block> grid, Point3i a, Point3i b, Point3i c)
-    {
-        //System.out.println("Drawing "+a+" "+b+" "+c);
-        // find shortest line
-        Point3i fulcrum;
-        Point3i target1;
-        Point3i target2;
-        int abDist = dist2(a, b);
-        int bcDist = dist2(b, c);
-        int caDist = dist2(c, a);
-        //System.out.println("  abDist="+abDist);
-        //System.out.println("  bcDist="+bcDist);
-        //System.out.println("  caDist="+caDist);
-        if (abDist < bcDist)
-            if (abDist < caDist)
-            {
-                fulcrum = c;
-                target1 = a;
-                target2 = b;
-            }
-            else
-            {
-                fulcrum = b;
-                target1 = c;
-                target2 = a;
-            }
-        else
-            if (bcDist < caDist)
-            {
-                fulcrum = a;
-                target1 = b;
-                target2 = c;
-            }
-            else
-            {
-                fulcrum = b;
-                target1 = c;
-                target2 = a;
-            }
-        //System.out.println("  fulcrum="+fulcrum);
-        //System.out.println("  target1="+target1);
-        //System.out.println("  target2="+target2);
-        List<Point3i> iterpolate = new ArrayList<Point3i>();
-        plotLine(target1, target2, iterpolate);
-        Set<Point3i> area = new HashSet<Point3i>();
-        //System.out.print("  interpolate over");
-        for (Point3i i : iterpolate)
-        {
-            //System.out.print(" "+i);
-            plotLine(i, fulcrum, area);
-        }
-        //System.out.println();
-        //System.out.println("  area="+area.size());
-        //System.out.print("  ");
-        for (Point3i p : area)
-        {
-            grid.set(p, new Block(BlockTypes.HULL_COLOR_GREY_ID));
-            //System.out.print(p+" ");
-        }
-        //System.out.println();
-    }
-    
-    private void plotLine(Point3i a, Point3i b, Collection<Point3i> plot)
-    {
-        Point3i[] candidates = new Point3i[7];
-        plot.add(new Point3i(a));
-        while (!a.equals(b))
-        {
-            int dx = (int)Math.signum(b.x - a.x);
-            int dy = (int)Math.signum(b.y - a.y);
-            int dz = (int)Math.signum(b.z - a.z);
-            candidates[0] = new Point3i(a.x + dx, a.y, a.z);
-            candidates[1] = new Point3i(a.x, a.y + dy, a.z);
-            candidates[2] = new Point3i(a.x, a.y, a.z + dz);
-            candidates[3] = new Point3i(a.x + dx, a.y + dy, a.z);
-            candidates[4] = new Point3i(a.x, a.y + dy, a.z + dz);
-            candidates[5] = new Point3i(a.x + dx, a.y, a.z + dz);
-            candidates[6] = new Point3i(a.x + dx, a.y + dy, a.z + dz);
-            Point3i best = candidates[0];
-            int bestv = dist2(best, b);
-            for (int i = 1; i < candidates.length; i++)
-            {
-                int v = dist2(candidates[i], b);
-                if (v < bestv)
-                {
-                    best.set(candidates[i]);
-                    bestv = v;
-                }
-            }
-            a.set(best);
-            plot.add(new Point3i(a));
-        }
-    }
 
-    private int dist2(Point3i p1, Point3i p2)
-    {
-        int dx = p1.x - p2.x;
-        int dy = p1.y - p2.y;
-        int dz = p1.z - p2.z;
-        return dx*dx + dy*dy + dz*dz;
-    }
+	private void concaveHull(SparseMatrix<Block> modified, float scale,
+			Point3i lowerGrid, Point3i center, int x, int y, List<Point3f> hits)
+	{
+		Collections.sort(hits, new Comparator<Point3f>() {
+		    @Override
+		    public int compare(Point3f p1, Point3f p2)
+		    {
+		        return (int)Math.signum(p1.z - p2.z);
+		    }
+		});
+		boolean inside = false;
+		int z = lowerGrid.z;
+		for (Point3f hit : hits)
+		{
+		    int hitz = (int)(hit.z*scale);
+		    while (z < hitz)
+		    {
+		        if (!inside)
+		        {
+		            Block b = new Block();
+		            b.setBlockID(BlockTypes.HULL_COLOR_GREY_ID);
+		            modified.set(x - center.x + 8, y - center.y + 8, z - center.z + 8, b);
+		        }
+		        z++;
+		    }
+		    inside = !inside;
+		}
+	}
 
-    private float getScale(Hull3f hull, ImportOBJParameters params, Point3i lowerGrid, Point3i upperGrid, Point3i offset)
+    private float getScale(Hull3f hull, ImportOBJParameters params, Point3i lowerGrid, Point3i upperGrid)
     {
         Point3f lowerModel = new Point3f();
         Point3f upperModel = new Point3f();
