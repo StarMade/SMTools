@@ -20,6 +20,7 @@ import jo.vecmath.Matrix3f;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.Point3iLogic;
 
 public class RenderPolyLogic
 {
@@ -659,12 +660,8 @@ public class RenderPolyLogic
 		upper.set(tile.getModelPoints()[0]);
 		for (int i = 1; i < tile.getModelPoints().length; i++)
 		{
-			lower.x = Math.min(lower.x, tile.getModelPoints()[i].x);
-			lower.y = Math.min(lower.y, tile.getModelPoints()[i].y);
-			lower.z = Math.min(lower.z, tile.getModelPoints()[i].z);
-			upper.x = Math.max(upper.x, tile.getModelPoints()[i].x);
-			upper.y = Math.max(upper.y, tile.getModelPoints()[i].y);
-			upper.z = Math.max(upper.z, tile.getModelPoints()[i].z);
+			Point3iLogic.min(lower, lower, tile.getModelPoints()[i]);
+			Point3iLogic.max(upper, upper, tile.getModelPoints()[i]);
 		}
 	}
 

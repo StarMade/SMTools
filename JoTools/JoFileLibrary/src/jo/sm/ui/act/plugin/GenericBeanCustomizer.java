@@ -133,7 +133,9 @@ public class GenericBeanCustomizer extends JPanel implements Customizer
                         editor.setAsText(txt);
                     }
                 });
-                combo.setSelectedItem(mEditors[i].getAsText());
+                String txt = mEditors[i].getAsText();
+                if (txt != null)
+                	combo.setSelectedItem(txt);
                 mControls[i] = combo;
             }
             else

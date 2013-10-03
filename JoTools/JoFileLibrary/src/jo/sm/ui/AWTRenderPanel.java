@@ -26,6 +26,7 @@ import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
 import jo.vecmath.logic.Matrix4fLogic;
+import jo.vecmath.logic.Point3iLogic;
 
 @SuppressWarnings("serial")
 public class AWTRenderPanel extends RenderPanel
@@ -195,30 +196,18 @@ public class AWTRenderPanel extends RenderPanel
     	Point3i lowest = new Point3i();
     	Point3i highest = new Point3i();
     	RenderPolyLogic.getBounds(tile, lowest, highest);
+    	if (highest.x > lowest.x)
+    		highest.x--;
+    	if (highest.y > lowest.y)
+    		highest.y--;
+    	if (highest.z > lowest.z)
+    		highest.z--;
     	Point3i lower = StarMadeLogic.getInstance().getSelectedLower();
-    	if (lower == null)
-    	{
-    		lower = lowest;
-    		StarMadeLogic.getInstance().setSelectedLower(lower);
-    	}
-    	else
-    	{
-    		lower.x = Math.min(lower.x, lowest.x);
-    		lower.y = Math.min(lower.y, lowest.y);
-    		lower.z = Math.min(lower.z, lowest.z);
-    	}
+    	lower = Point3iLogic.min(lower, lowest);
+		StarMadeLogic.getInstance().setSelectedLower(lower);
     	Point3i upper = StarMadeLogic.getInstance().getSelectedUpper();
-    	if (upper == null)
-    	{
-    		upper = highest;
-    		StarMadeLogic.getInstance().setSelectedUpper(upper);
-    	}
-    	else
-    	{
-    		upper.x = Math.min(upper.x, highest.x);
-    		upper.y = Math.min(upper.y, highest.y);
-    		upper.z = Math.min(upper.z, highest.z);
-    	}
+    	upper = Point3iLogic.max(upper, highest);
+		StarMadeLogic.getInstance().setSelectedUpper(upper);
     	updateTiles();
     }
     

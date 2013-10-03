@@ -3,7 +3,9 @@ package jo.sm.logic;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jo.sm.data.ShapeLibraryEntry;
 import jo.sm.data.SparseMatrix;
@@ -151,6 +153,14 @@ public class ShapeLibraryLogic
         return entries;
     }
     
+    public static ShapeLibraryEntry getEntry(int unid)
+    {
+    	for (ShapeLibraryEntry entry : mEntries)
+    		if (entry.getUNID() == unid)
+    			return entry;
+    	return null;
+    }
+    
     public static void addEntry(SparseMatrix<Block> grid, String name, String author, int type)
     {
         Document doc = GridLogic.toDocument(grid);
@@ -201,5 +211,16 @@ public class ShapeLibraryLogic
         if (entry.getClassifications().contains(IBlocksPlugin.TYPE_ALL))
             return true;
         return entry.getClassifications().contains(type);
+    }
+    
+    public static Map<String,Object> getEntryMap()
+    {
+    	Map<String,Object> shapeMap = new HashMap<String, Object>();
+    	int type = StarMadeLogic.getInstance().getCurrentModel().getType();
+    	for (ShapeLibraryEntry entry : ShapeLibraryLogic.getEntries(type))
+    		shapeMap.put(entry.getName(), entry.getUNID());
+    	if (shapeMap.size() == 0)
+    		shapeMap.put("No shapes recorded", -1);
+    	return shapeMap;
     }
 }

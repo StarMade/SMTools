@@ -8,6 +8,9 @@ import jo.vecmath.Point3i;
 
 public class ShapeLibraryEntry
 {
+	private static int mNextUNID = 1;
+	
+	private int		mUNID;
     private File    mShape;
     private long    mLastRead;
     private String  mName;
@@ -19,6 +22,7 @@ public class ShapeLibraryEntry
     public ShapeLibraryEntry()
     {
         mClassifications = new HashSet<Integer>();
+        mUNID = mNextUNID++;
     }
     
     public File getShape()
@@ -77,4 +81,14 @@ public class ShapeLibraryEntry
     {
         mClassifications = classifications;
     }
+
+	public int getUNID()
+	{
+		return mUNID;
+	}
+
+	public void setUNID(int uNID)
+	{
+		mUNID = uNID;
+	}
 }
