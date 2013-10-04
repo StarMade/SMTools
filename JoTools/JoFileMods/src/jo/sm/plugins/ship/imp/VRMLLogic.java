@@ -29,26 +29,16 @@ public class VRMLLogic
             return null;
         if (c == '}')
             return new VRMLNode("}");
-        if (!Character.isJavaIdentifierStart((char)c))
-            throw new IllegalArgumentException("Unexpected character '"+(char)c+"' while searching for tag");
-        StringBuffer name = new StringBuffer();
-        name.append((char)c);
-        for (;;)
+        rdr.unread(c);
+        String name = readValue(rdr, true);
+        if (name.equals("DEF"))
         {
-            c = rdr.read();
-            if (c == -1)
-                return null;
-            if (Character.isJavaIdentifierPart((char)c))
-                name.append((char)c);
-            else
-                break;
+        	name = readValue(rdr, true);
+        	readValue(rdr, true);
         }
-        if (Character.isWhitespace(c))
-        {
-            c = skipWhitespace(rdr);
-            if (c == -1)
-                return null;
-        }
+        c = skipWhitespace(rdr);
+        if (c == -1)
+            return null;
         //System.out.println("Reading "+name);
         if (c == '{')
         {   // map node
@@ -80,6 +70,7 @@ public class VRMLLogic
         }
         else
         {   // singleton
+        	rdr.unread(c);
             List<String> value = new ArrayList<String>();
             for (;;)
             {
@@ -114,6 +105,11 @@ public class VRMLLogic
             c = rdr.read();
             if (c == -1)
                 return null;
+            if (c == '\n')
+            {
+            	rdr.unread(c);
+            	break;
+            }
             if (inQuote)
             {
                 if (c == '"')
@@ -121,7 +117,7 @@ public class VRMLLogic
             }
             else
             {
-                if (Character.isWhitespace(c))
+                if (isWhitespace(c))
                     break;
                 if (c == ']')
                 {
@@ -160,10 +156,20 @@ public class VRMLLogic
             {
                 if (c == '#')
                     skipComment = true;
+                else if (c == '\n')
+                {
+                	if (!includingEOLN)
+                		return c;
+                }
                 else
-                    if (!Character.isWhitespace(c))
+                    if (!isWhitespace(c))
                         return c;
             }
         }
+    }
+    
+    private static boolean isWhitespace(int ch)
+    {
+    	return ((ch == ',') || Character.isWhitespace(ch));
     }
 }

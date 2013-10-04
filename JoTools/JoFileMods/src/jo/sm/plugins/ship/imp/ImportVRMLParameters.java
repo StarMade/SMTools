@@ -2,15 +2,15 @@ package jo.sm.plugins.ship.imp;
 
 import jo.sm.ui.act.plugin.Description;
 
-@Description(displayName="Import OBJ Model", shortDescription="Import a model in Wavefront OBJ format from your disk")
-public class ImportOBJParameters
+@Description(displayName="Import VRML Model", shortDescription="Import a model in VRML format from your disk")
+public class ImportVRMLParameters
 {
-	@Description(displayName="File", shortDescription="Path to OBJ model")
+	@Description(displayName="File", shortDescription="Path to VRML model")
     private String  mFile;
 	@Description(displayName="Longest Dimension", shortDescription="Scale the model to this size")
     private int   mLongestDimension;
     
-    public ImportOBJParameters()
+    public ImportVRMLParameters()
     {
         mLongestDimension = 100;
     }

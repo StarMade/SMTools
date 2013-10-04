@@ -1,5 +1,6 @@
 package jo.vecmath.ext;
 
+import jo.vecmath.Color3f;
 import jo.vecmath.Point3f;
 
 public class Triangle3f 
@@ -7,6 +8,7 @@ public class Triangle3f
 	private Point3f	mA;
 	private Point3f mB;
 	private Point3f mC;
+	private Color3f	mColor;
 	
 	public Triangle3f()
 	{
@@ -62,4 +64,14 @@ public class Triangle3f
     {
         mC = c;
     }
+
+	public Color3f getColor()
+	{
+		return mColor;
+	}
+
+	public void setColor(Color3f color)
+	{
+		mColor = color;
+	}
 }

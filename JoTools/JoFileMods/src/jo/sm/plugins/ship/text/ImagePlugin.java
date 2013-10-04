@@ -7,12 +7,12 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
+import jo.sm.plugins.ship.imp.PlotLogic;
 import jo.sm.ship.data.Block;
 import jo.vecmath.Point3i;
 
@@ -97,7 +97,7 @@ public class ImagePlugin implements IBlocksPlugin
                 if ((rgb&0xFF000000) != 0)
                 {
                     System.out.print("X");
-                    short id = mapColor(rgb);
+                    short id = PlotLogic.mapColor(rgb);
                     Point3i depth = new Point3i(height);
                     for (int z = 0; z < mDepthLength; z++)
                     {
@@ -116,44 +116,6 @@ public class ImagePlugin implements IBlocksPlugin
         }
         if (cb != null) cb.endTask();
         return modified;
-    }
-    
-    private static short HULL_IDS[] = BlockTypes.HULL_COLOR_MAP[0];
-    private static int HULL_RGBS[] = {
-        0x808080, // HULL_COLOR_GREY_ID,
-        0xa020f0, // HULL_COLOR_PURPLE_ID,
-        0xa52a2a, // HULL_COLOR_BROWN_ID,
-        0x000000, // HULL_COLOR_BLACK_ID,
-        0xFF0000, // HULL_COLOR_RED_ID,
-        0x0000FF, // HULL_COLOR_BLUE_ID,
-        0x00FF00, // HULL_COLOR_GREEN_ID,
-        0xFFFF00, // HULL_COLOR_YELLOW_ID,
-        0xFFFFFF, // HULL_COLOR_WHITE_ID,
-    };
-    
-    private int distance(int rgb1, int rgb2)
-    {
-        int delta = 0;
-        delta += Math.abs(((rgb1>>0)&0xff) - ((rgb2>>0)&0xff));
-        delta += Math.abs(((rgb1>>8)&0xff) - ((rgb2>>8)&0xff));
-        delta += Math.abs(((rgb1>>16)&0xff) - ((rgb2>>16)&0xff));
-        return delta;
-    }
-
-    private short mapColor(int rgb)
-    {
-        int best = 0;
-        int value = distance(rgb, HULL_RGBS[best]);
-        for (int i = 1; i < HULL_RGBS.length; i++)
-        {
-            int v = distance(rgb, HULL_RGBS[i]);
-            if (v < value)
-            {
-                best = i;
-                value = v;
-            }
-        }
-        return HULL_IDS[best];
     }
 
     private BufferedImage setupImage(ImageParameters params, IPluginCallback cb)

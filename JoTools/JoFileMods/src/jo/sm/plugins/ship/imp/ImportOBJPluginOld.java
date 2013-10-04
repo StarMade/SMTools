@@ -82,7 +82,7 @@ public class ImportOBJPluginOld implements IBlocksPlugin
             Point3i upperGrid = new Point3i();
             float scale = getScale(hull, params, lowerGrid, upperGrid);
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            mapHull(modified, hull, scale, lowerGrid, upperGrid, params.isForceConvex(), cb);
+            mapHull(modified, hull, scale, lowerGrid, upperGrid, false/*params.isForceConvex()*/, cb);
             return modified;
         }
         catch (IOException e)
