@@ -56,46 +56,16 @@ public class PlotLogic
     
     public static void drawTriangle(SparseMatrix<Block> grid, Point3i a, Point3i b, Point3i c, short color)
     {
-        //System.out.println("Drawing "+a+" "+b+" "+c);
-        // find shortest line
-        Point3i fulcrum;
-        Point3i target1;
-        Point3i target2;
-        int abDist = dist2(a, b);
-        int bcDist = dist2(b, c);
-        int caDist = dist2(c, a);
-        //System.out.println("  abDist="+abDist);
-        //System.out.println("  bcDist="+bcDist);
-        //System.out.println("  caDist="+caDist);
-        if (abDist < bcDist)
-            if (abDist < caDist)
-            {
-                fulcrum = c;
-                target1 = a;
-                target2 = b;
-            }
-            else
-            {
-                fulcrum = b;
-                target1 = c;
-                target2 = a;
-            }
-        else
-            if (bcDist < caDist)
-            {
-                fulcrum = a;
-                target1 = b;
-                target2 = c;
-            }
-            else
-            {
-                fulcrum = b;
-                target1 = c;
-                target2 = a;
-            }
-        //System.out.println("  fulcrum="+fulcrum);
-        //System.out.println("  target1="+target1);
-        //System.out.println("  target2="+target2);
+        // Brute force and ignorance method
+        // Anything smarter seems to leave holes
+        doDrawTriangle(grid, a, b, c, color);
+        doDrawTriangle(grid, b, c, a, color);
+        doDrawTriangle(grid, c, a, b, color);
+    }
+
+    private static void doDrawTriangle(SparseMatrix<Block> grid,
+            Point3i fulcrum, Point3i target1, Point3i target2, short color)
+    {
         List<Point3i> iterpolate = new ArrayList<Point3i>();
         plotLine(target1, target2, iterpolate);
         Set<Point3i> area = new HashSet<Point3i>();
@@ -105,24 +75,24 @@ public class PlotLogic
             //System.out.print(" "+i);
             plotLine(i, fulcrum, area);
         }
-        //System.out.println();
-        //System.out.println("  area="+area.size());
-        //System.out.print("  ");
+        plotArea(grid, area, color);
+    }
+
+    private static void plotArea(SparseMatrix<Block> grid, Collection<Point3i> area,
+            short color)
+    {
         for (Point3i p : area)
         {
             grid.set(p, new Block(color));
-            //System.out.print(p+" ");
         }
-        //System.out.println();
     }
     
-//    private void drawLine(SparseMatrix<Block> grid, Point3i a, Point3i b)
-//    {
-//        List<Point3i> plot = new ArrayList<Point3i>();
-//        plotLine(a, b, plot);
-//        for (Point3i p : plot)
-//            grid.set(p, new Block(BlockTypes.HULL_COLOR_GREY_ID));
-//    }
+    public static void drawLine(SparseMatrix<Block> grid, Point3i a, Point3i b, short color)
+    {
+        List<Point3i> plot = new ArrayList<Point3i>();
+        plotLine(a, b, plot);
+        plotArea(grid, plot, color);
+    }
     
     private static void plotLine(Point3i a, Point3i b, Collection<Point3i> plot)
     {
@@ -132,19 +102,15 @@ public class PlotLogic
         float mag = Point3fLogic.mag(vector);
         int steps = (int)mag;
         vector.scale(1/mag);
+        Point3i last = null;
         for (int i = 0; i < steps; i++)
         {
-            plot.add(new Point3i(p));
+            last = new Point3i(p);
+            plot.add(last);
             p.add(vector);
         }
-    }
-
-    private static int dist2(Point3i p1, Point3i p2)
-    {
-        int dx = p1.x - p2.x;
-        int dy = p1.y - p2.y;
-        int dz = p1.z - p2.z;
-        return dx*dx + dy*dy + dz*dz;
+        if (!b.equals(last))
+            plot.add(new Point3i(b));
     }
 
     public static float getScale(Hull3f hull, int longestDimension, Point3i lowerGrid, Point3i upperGrid, Point3i offset)
