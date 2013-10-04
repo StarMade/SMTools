@@ -72,13 +72,20 @@ public class BlocksPluginAction extends GenericAction
         	            if ((((PluginProgressDlg)cb).getErrorTitle() != null)
         	                    || (((PluginProgressDlg)cb).getErrorDescription() != null)
         	                    || (((PluginProgressDlg)cb).getError() != null))
+        	            {
+        	                ((PluginProgressDlg)cb).setPleaseCancel(true); // stop display if not yet auto-displayed
+        	                StringBuffer description = new StringBuffer();
+        	                if (((PluginProgressDlg)cb).getErrorDescription() != null)
+        	                    description.append(((PluginProgressDlg)cb).getErrorDescription()+"<hr/>");
+        	                description.append(composeDescription(params));
                             DlgError.showError(getFrame(), ((PluginProgressDlg)cb).getErrorTitle(), 
-                                    ((PluginProgressDlg)cb).getErrorDescription(), ((PluginProgressDlg)cb).getError());
+                                    description.toString(), ((PluginProgressDlg)cb).getError());
+        	            }
     			    }
     			    catch (Throwable t)
     			    {
     		            DlgError.showError(getFrame(), "Error executing plugin", 
-    		                    "Plugin: "+mPlugin.getName(), t);
+    		                    composeDescription(params), t);
     			    }
     			}
     		};
@@ -87,8 +94,55 @@ public class BlocksPluginAction extends GenericAction
         catch (Throwable t)
         {
             DlgError.showError(getFrame(), "Error launching plugin", 
-                    "Plugin: "+mPlugin.getName(), t);
+                    composeDescription(null), t);
         }
+    }
+    
+    private String composeDescription(Object params)
+    {
+        StringBuffer html = new StringBuffer();
+        html.append("Plugin: <b>"+mPlugin.getName()+"</b><br/>");
+        if (params == null)
+            return html.toString();
+        html.append("Arguments:<br/>");
+        html.append("<ul>");
+        try
+        {
+            BeanInfo info = Introspector.getBeanInfo(params.getClass());
+            for (PropertyDescriptor pd : info.getPropertyDescriptors())
+            {
+                if ((pd.getReadMethod() == null) || (pd.getWriteMethod() == null))
+                    continue;
+                try
+                {
+                    Object val = pd.getReadMethod().invoke(params);
+                    if (val != null)
+                    {
+                        html.append("<li>");
+                        html.append(pd.getName());
+                        html.append(" := <i>");
+                        html.append(val.toString());
+                        html.append("</i></li>");
+                    }
+                    else
+                    {
+                        html.append("<li>");
+                        html.append(pd.getName());
+                        html.append(" := null</li>");
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch (IntrospectionException e)
+        {
+            e.printStackTrace();
+        }
+        html.append("</ul>");
+        return html.toString();
     }
 
     private void saveProps(Object params)

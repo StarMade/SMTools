@@ -23,7 +23,7 @@ public class RunnableLogic
         catch (InterruptedException e)
         {
         }
-        if (t.isAlive())
+        if (t.isAlive() && !progress.isPleaseCancel())
         {
             progress.setVisible(true);
             try
