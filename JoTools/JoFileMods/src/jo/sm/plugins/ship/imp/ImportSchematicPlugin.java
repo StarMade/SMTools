@@ -98,7 +98,7 @@ public class ImportSchematicPlugin implements IBlocksPlugin
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            cb.setError(e);
             return null;
         }
     }

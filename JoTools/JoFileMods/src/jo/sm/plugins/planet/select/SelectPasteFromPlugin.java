@@ -83,7 +83,7 @@ public class SelectPasteFromPlugin implements IBlocksPlugin
                 }
                 catch (Exception ex)
                 {
-                    ex.printStackTrace();
+                    cb.setError(ex);
                 }
             }
         }

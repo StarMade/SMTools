@@ -83,7 +83,7 @@ public class ImportOBJPlugin implements IBlocksPlugin
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            cb.setError(e);
             return null;
         }
     }

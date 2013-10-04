@@ -132,8 +132,7 @@ public class ImagePlugin implements IBlocksPlugin
         }
         catch (IOException e)
         {
-            cb.setStatus(e.getMessage());
-            e.printStackTrace();
+            cb.setError(e);
             return null;
         }
     }

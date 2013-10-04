@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import jo.sm.logic.utils.StringUtils;
 import jo.sm.mods.IPluginCallback;
 
 @SuppressWarnings("serial")
@@ -20,6 +21,10 @@ public class PluginProgressDlg extends JDialog implements IPluginCallback
     private JLabel          mMessage;
     private JProgressBar    mProgress;
     private JButton         mCancel;
+    
+    private String          mErrorTitle;
+    private String          mErrorDescription;
+    private Throwable       mError;
     
     private int             mTotalUnits;
     private int             mUnitsDone;
@@ -79,6 +84,8 @@ public class PluginProgressDlg extends JDialog implements IPluginCallback
     {
         mUnitsDone += amnt;
         updateProgress();
+        if (mPleaseCancel)
+            throw new IllegalStateException("Operation canceled at user request");
     }
 
     @Override
@@ -97,5 +104,37 @@ public class PluginProgressDlg extends JDialog implements IPluginCallback
     public void setPleaseCancel(boolean pleaseCancel)
     {
         mPleaseCancel = pleaseCancel;
+    }
+
+    public String getErrorTitle()
+    {
+        return mErrorTitle;
+    }
+
+    public void setErrorTitle(String errorTitle)
+    {
+        mErrorTitle = errorTitle;
+    }
+
+    public String getErrorDescription()
+    {
+        return mErrorDescription;
+    }
+
+    public void setErrorDescription(String errorDescription)
+    {
+        mErrorDescription = errorDescription;
+    }
+
+    public Throwable getError()
+    {
+        return mError;
+    }
+
+    public void setError(Throwable error)
+    {
+        mError = error;
+        if (StringUtils.isTrivial(mErrorTitle))
+            setTitle(mError.toString());
     }
 }

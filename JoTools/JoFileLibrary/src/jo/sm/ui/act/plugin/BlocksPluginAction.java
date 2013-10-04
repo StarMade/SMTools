@@ -18,6 +18,7 @@ import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IRunnableWithProgress;
 import jo.sm.ship.data.Block;
+import jo.sm.ui.DlgError;
 import jo.sm.ui.RenderPanel;
 import jo.sm.ui.act.GenericAction;
 
@@ -42,31 +43,52 @@ public class BlocksPluginAction extends GenericAction
     @Override
     public void actionPerformed(ActionEvent ev)
     {
-        final Object params = mPlugin.newParameterBean();
-        loadProps(params);
-        mPlugin.initParameterBean(StarMadeLogic.getModel(), params, StarMadeLogic.getInstance(), null);
-        if (!getParams(params))
-            return;
-        saveProps(params);
-        IRunnableWithProgress t = new IRunnableWithProgress() {			
-			@Override
-			public void run(IPluginCallback cb)
-			{
-	            SparseMatrix<Block> original = StarMadeLogic.getModel();
-	            mPanel.getUndoer().checkpoint(original);
-	            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), cb);
-	            if (!cb.isPleaseCancel())
-	            {
-	                if (modified != null)
-	                {
-	                    StarMadeLogic.setModel(modified);
-	                }
-	                else
-	                    mPanel.updateTiles();
-	            }
-			}
-		};
-		RunnableLogic.run(getFrame(), mPlugin.getName(), t);
+        try
+        {
+            final Object params = mPlugin.newParameterBean();
+            loadProps(params);
+            mPlugin.initParameterBean(StarMadeLogic.getModel(), params, StarMadeLogic.getInstance(), null);
+            if (!getParams(params))
+                return;
+            saveProps(params);
+            IRunnableWithProgress t = new IRunnableWithProgress() {			
+    			@Override
+    			public void run(IPluginCallback cb)
+    			{
+    			    try
+    			    {
+        	            SparseMatrix<Block> original = StarMadeLogic.getModel();
+        	            mPanel.getUndoer().checkpoint(original);
+        	            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), cb);
+        	            if (!cb.isPleaseCancel())
+        	            {
+        	                if (modified != null)
+        	                {
+        	                    StarMadeLogic.setModel(modified);
+        	                }
+        	                else
+        	                    mPanel.updateTiles();
+        	            }
+        	            if ((((PluginProgressDlg)cb).getErrorTitle() != null)
+        	                    || (((PluginProgressDlg)cb).getErrorDescription() != null)
+        	                    || (((PluginProgressDlg)cb).getError() != null))
+                            DlgError.showError(getFrame(), ((PluginProgressDlg)cb).getErrorTitle(), 
+                                    ((PluginProgressDlg)cb).getErrorDescription(), ((PluginProgressDlg)cb).getError());
+    			    }
+    			    catch (Throwable t)
+    			    {
+    		            DlgError.showError(getFrame(), "Error executing plugin", 
+    		                    "Plugin: "+mPlugin.getName(), t);
+    			    }
+    			}
+    		};
+    		RunnableLogic.run(getFrame(), mPlugin.getName(), t);
+        }
+        catch (Throwable t)
+        {
+            DlgError.showError(getFrame(), "Error launching plugin", 
+                    "Plugin: "+mPlugin.getName(), t);
+        }
     }
 
     private void saveProps(Object params)
