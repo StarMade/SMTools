@@ -1,5 +1,6 @@
 package jo.sm.plugins.ship.imp;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,10 +13,13 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Color3f;
+import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.ext.Hull3f;
 import jo.vecmath.ext.Triangle3f;
+import jo.vecmath.logic.MathUtils;
+import jo.vecmath.logic.Point2fLogic;
 import jo.vecmath.logic.Point3fLogic;
 import jo.vecmath.logic.Point3iLogic;
 import jo.vecmath.logic.ext.Hull3fLogic;
@@ -28,22 +32,39 @@ public class PlotLogic
     {
         Point3i center = Point3iLogic.interpolate(lowerGrid, upperGrid, .5f);
         cb.startTask(hull.getTriangles().size());
-        short color = BlockTypes.HULL_COLOR_GREY_ID;
         for (Triangle3f t : hull.getTriangles())
         {
             Point3i iA = mapPoint(t.getA(), scale, center);
             Point3i iB = mapPoint(t.getB(), scale, center);
             Point3i iC = mapPoint(t.getC(), scale, center);
-            if (t.getColor() != null)
-            	color = mapColor(t.getColor());
-            drawTriangle(modified, iA, iB, iC, color);
+            if ((t.getAUV() != null) && (t.getBUV() != null) && (t.getCUV() != null) && (t.getTexture() != null))
+            {
+            	drawTriangle(modified, iA, iB, iC, t.getAUV(), t.getBUV(), t.getCUV(), t.getTexture());
+            }
+            else if (t.getColor() != null)
+            {
+            	short color = mapColor(t.getColor());
+            	drawTriangle(modified, iA, iB, iC, color);
+            }
+            else
+            	drawTriangle(modified, iA, iB, iC, BlockTypes.HULL_COLOR_GREY_ID);
             cb.workTask(1);
         }
         ShipLogic.ensureCore(modified);
         cb.endTask();
     }
     
-    private static Point3i mapPoint(Point3f f, float scale, Point3i center)
+    private static short uvToColor(Point2f uv, BufferedImage img)
+    {
+    	uv.x -= Math.floor(uv.x);
+    	uv.y -= Math.floor(uv.y);
+    	int x = (int)MathUtils.interpolate(uv.x, 0, 1, 0, img.getWidth() - 1);
+    	int y = (int)MathUtils.interpolate(uv.y, 0, 1, 0, img.getHeight() - 1);
+    	int rgb = img.getRGB(x, y);
+    	return mapColor(rgb);
+    }
+
+	private static Point3i mapPoint(Point3f f, float scale, Point3i center)
     {
         Point3f fA = new Point3f(f);
         fA.scale(scale);
@@ -78,6 +99,30 @@ public class PlotLogic
         }
         plotArea(grid, area, color);
     }
+    
+    public static void drawTriangle(SparseMatrix<Block> grid, Point3i a, Point3i b, Point3i c, Point2f auv, Point2f buv, Point2f cuv, BufferedImage img)
+    {
+        // Brute force and ignorance method
+        // Anything smarter seems to leave holes
+        doDrawTriangle(grid, a, b, c, auv, buv, cuv, img);
+        doDrawTriangle(grid, b, c, a, buv, cuv, auv, img);
+        doDrawTriangle(grid, c, a, b, cuv, auv, buv, img);
+    }
+
+    private static void doDrawTriangle(SparseMatrix<Block> grid,
+            Point3i fulcrum, Point3i target1, Point3i target2, 
+            Point2f fulcrumUV, Point2f target1UV, Point2f target2UV,
+            BufferedImage img)
+    {
+        List<Point3i> iterpolate = new ArrayList<Point3i>();
+        plotLine(target1, target2, iterpolate);
+        for (int i = 0; i < iterpolate.size(); i++)
+        {
+        	Point3i p = iterpolate.get(i);
+        	Point2f puv = Point2fLogic.interpolate(target1UV, target2UV, i/(float)(iterpolate.size() - 1));
+            drawLine(grid, p, fulcrum, puv, fulcrumUV, img);
+        }
+    }
 
     private static void plotArea(SparseMatrix<Block> grid, Collection<Point3i> area,
             short color)
@@ -93,6 +138,19 @@ public class PlotLogic
         List<Point3i> plot = new ArrayList<Point3i>();
         plotLine(a, b, plot);
         plotArea(grid, plot, color);
+    }
+    
+    public static void drawLine(SparseMatrix<Block> grid, Point3i a, Point3i b, Point2f auv, Point2f buv, BufferedImage img)
+    {
+        List<Point3i> plot = new ArrayList<Point3i>();
+        plotLine(a, b, plot);
+        for (int i = 0; i < plot.size(); i++)
+        {
+        	Point3i p = plot.get(i);
+        	Point2f uv = Point2fLogic.interpolate(auv, buv, i/(float)(plot.size() - 1));
+        	short color = uvToColor(uv, img);
+            grid.set(p, new Block(color));
+        }
     }
     
     private static void plotLine(Point3i a, Point3i b, Collection<Point3i> plot)

@@ -1,5 +1,8 @@
 package jo.vecmath.logic;
 
+import java.util.StringTokenizer;
+
+import jo.sm.logic.utils.FloatUtils;
 import jo.vecmath.Matrix4f;
 import jo.vecmath.Point3f;
 
@@ -59,5 +62,17 @@ public class Point3fLogic extends Tuple3fLogic
 
 	public static boolean equals(Point3f a, Point3f b) {
 		return isZero(a.distance(b));
+	}
+
+	public static Point3f fromString(String txt)
+	{
+		StringTokenizer st = new StringTokenizer(txt, ", ");
+		if (st.countTokens() != 3)
+			throw new IllegalArgumentException("Expected three values: '"+txt+"', got "+st.countTokens());
+		Point3f p = new Point3f();
+		p.x = FloatUtils.parseFloat(st.nextToken());
+		p.y = FloatUtils.parseFloat(st.nextToken());
+		p.z = FloatUtils.parseFloat(st.nextToken());
+		return p;
 	}
 }

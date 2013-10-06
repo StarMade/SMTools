@@ -367,9 +367,10 @@ public class ShipLogic
 	public static void ensureCore(SparseMatrix<Block> grid)
 	{
 		Point3i core = findCore(grid);
-		if ((core.x == 8) && (core.y == 8) && (core.z == 8))
+		if ((core != null) && (core.x == 8) && (core.y == 8) && (core.z == 8))
 			return;
-		grid.set(core, null);
+		if (core != null)
+			grid.set(core, null);
 		List<Point3i> cores = findBlocks(grid, BlockTypes.CORE_ID);
 		for (Point3i p : cores)
 			grid.set(p, null);
