@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.utils.IntegerUtils;
@@ -19,6 +18,7 @@ import jo.sm.mods.IPluginCallback;
 import jo.sm.plugins.ship.imp.nbt.IO;
 import jo.sm.plugins.ship.imp.nbt.Tag;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.sm.ui.BlockTypeColors;
 import jo.vecmath.Point3i;
 
@@ -93,7 +93,7 @@ public class ImportSchematicPlugin implements IBlocksPlugin
         	}
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
             readFile(params.getFile(), modified, center, cb);
-            modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+            ShipLogic.ensureCore(modified);
             return modified;
         }
         catch (Exception e)

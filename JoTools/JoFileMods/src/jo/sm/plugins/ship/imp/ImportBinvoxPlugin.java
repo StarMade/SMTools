@@ -10,6 +10,7 @@ import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.plugins.ship.move.MovePlugin;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 
 public class ImportBinvoxPlugin implements IBlocksPlugin
@@ -85,7 +86,7 @@ public class ImportBinvoxPlugin implements IBlocksPlugin
             //System.out.println("Move "+dx+","+dy+","+dz);
             modified = MovePlugin.shift(modified, dx, dy, dz, cb);
             // setting core
-            modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+        	ShipLogic.ensureCore(modified);
             //modified.getBounds(lower, upper);
             //System.out.println("New bounds="+lower+" -- "+upper);
             //Point3i core = MovePlugin.findCore(modified);

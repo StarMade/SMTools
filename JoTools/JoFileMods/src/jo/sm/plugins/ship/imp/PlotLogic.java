@@ -10,6 +10,7 @@ import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Color3f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
@@ -38,7 +39,7 @@ public class PlotLogic
             drawTriangle(modified, iA, iB, iC, color);
             cb.workTask(1);
         }
-        modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+        ShipLogic.ensureCore(modified);
         cb.endTask();
     }
     

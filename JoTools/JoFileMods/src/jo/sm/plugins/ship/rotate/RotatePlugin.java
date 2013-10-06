@@ -10,6 +10,7 @@ import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.CornerLogic;
+import jo.sm.ship.logic.ShipLogic;
 import jo.sm.ship.logic.WedgeLogic;
 import jo.vecmath.Point3i;
 import jo.vecmath.Point4i;
@@ -85,6 +86,7 @@ public class RotatePlugin implements IBlocksPlugin
         	grid = rotateAround(grid, params, center);
         	GridLogic.insert(modified, grid, lower);
         }
+    	ShipLogic.ensureCore(modified);
         return modified;
     }
 

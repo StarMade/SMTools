@@ -84,6 +84,7 @@ public class ReflectPlugin implements IBlocksPlugin
         	grid = reflectAround(grid, params, center);
         	GridLogic.insert(modified, grid, lower);
         }
+    	ShipLogic.ensureCore(modified);
         return modified;
     }
 

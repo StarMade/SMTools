@@ -6,13 +6,13 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 
 public class TextPlugin implements IBlocksPlugin
@@ -110,7 +110,7 @@ public class TextPlugin implements IBlocksPlugin
             if (cb != null) cb.workTask(1);
         }
         if (cb != null) cb.endTask();
-        modified.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+        ShipLogic.ensureCore(modified);
         return modified;
     }
 

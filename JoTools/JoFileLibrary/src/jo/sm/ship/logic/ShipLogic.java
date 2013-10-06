@@ -363,4 +363,16 @@ public class ShipLogic
         	chunkIndex.z = (superChunkOrigin.z - chunkPosition.z)/16 + 7;
         return chunkIndex;
     }
+
+	public static void ensureCore(SparseMatrix<Block> grid)
+	{
+		Point3i core = findCore(grid);
+		if ((core.x == 8) && (core.y == 8) && (core.z == 8))
+			return;
+		grid.set(core, null);
+		List<Point3i> cores = findBlocks(grid, BlockTypes.CORE_ID);
+		for (Point3i p : cores)
+			grid.set(p, null);
+		grid.set(8, 8, 8, new Block(BlockTypes.CORE_ID));
+	}
 }
