@@ -1,6 +1,10 @@
 package jo.sm.plugins.ship.imp;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,9 +13,15 @@ import java.util.Set;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
+import jo.sm.logic.StarMadeLogic;
+import jo.sm.logic.utils.IntegerUtils;
+import jo.sm.logic.utils.ResourceUtils;
+import jo.sm.logic.utils.ShortUtils;
+import jo.sm.logic.utils.XMLUtils;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.ShipLogic;
+import jo.sm.ui.BlockTypeColors;
 import jo.vecmath.Color3f;
 import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
@@ -23,6 +33,9 @@ import jo.vecmath.logic.Point2fLogic;
 import jo.vecmath.logic.Point3fLogic;
 import jo.vecmath.logic.Point3iLogic;
 import jo.vecmath.logic.ext.Hull3fLogic;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 public class PlotLogic
 {
@@ -191,18 +204,9 @@ public class PlotLogic
         return scale;
     }
     
-    private static short HULL_IDS[] = BlockTypes.HULL_COLOR_MAP[0];
-    private static int HULL_RGBS[] = {
-        0x808080, // HULL_COLOR_GREY_ID,
-        0xa020f0, // HULL_COLOR_PURPLE_ID,
-        0xa52a2a, // HULL_COLOR_BROWN_ID,
-        0x000000, // HULL_COLOR_BLACK_ID,
-        0xFF0000, // HULL_COLOR_RED_ID,
-        0x0000FF, // HULL_COLOR_BLUE_ID,
-        0x00FF00, // HULL_COLOR_GREEN_ID,
-        0xFFFF00, // HULL_COLOR_YELLOW_ID,
-        0xFFFFFF, // HULL_COLOR_WHITE_ID,
-    };
+    private static short HULL_IDS[] = null;
+    private static int HULL_RGBS[] = null;
+    private static long mLastRead = 0;
     
     private static int distance(int rgb1, int rgb2)
     {
@@ -212,9 +216,55 @@ public class PlotLogic
         delta += Math.abs(((rgb1>>16)&0xff) - ((rgb2>>16)&0xff));
         return delta;
     }
+    
+    private static void loadColors()
+    {
+    	File jo_plugins = new File(StarMadeLogic.getInstance().getBaseDir(), "jo_plugins");
+    	File colorMap = new File(jo_plugins, "color_map.xml");
+    	if (colorMap.exists())
+    	{
+    		if (colorMap.lastModified() <= mLastRead)
+    			return;
+    		try
+			{
+				readColorFile(new FileInputStream(colorMap));
+	    		mLastRead = colorMap.lastModified();
+	    		return;
+			} catch (FileNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+    	}
+    	if (HULL_IDS == null)
+    		readColorFile(ResourceUtils.loadSystemResourceStream("color_map.xml", PlotLogic.class));
+    }
+    
+    private static void readColorFile(InputStream is)
+    {
+    	Document doc = XMLUtils.readStream(is);
+    	if (doc == null)
+    		return;
+    	List<Short> hullIDs = new ArrayList<Short>();
+    	List<Integer> hullRGBs = new ArrayList<Integer>();
+    	for (Node n : XMLUtils.findNodes(doc, "colors/color"))
+    	{
+    		int rgb = Integer.parseInt(XMLUtils.getAttribute(n, "rgb"), 16);
+    		short block;
+    		String smBlock = XMLUtils.getAttribute(n, "block");
+    		if (BlockTypeColors.mBlockTypes.containsKey(smBlock))
+    			block = ShortUtils.parseShort(BlockTypeColors.mBlockTypes.getProperty(smBlock));
+    		else
+    			block = ShortUtils.parseShort(smBlock);
+    		hullIDs.add(block);
+    		hullRGBs.add(rgb);
+    	}
+    	HULL_IDS = ShortUtils.toShortArray(hullIDs.toArray());
+    	HULL_RGBS = IntegerUtils.toArray(hullRGBs.toArray());
+    }
 
     public static short mapColor(int rgb)
     {
+    	loadColors();
         int best = 0;
         int value = distance(rgb, HULL_RGBS[best]);
         for (int i = 1; i < HULL_RGBS.length; i++)
@@ -234,7 +284,7 @@ public class PlotLogic
     	int r = (int)(c.x*255);
     	int g = (int)(c.y*255);
     	int b = (int)(c.z*255);
-    	int rgb = (r<<0)|(g<<8)|(b<<16);
+    	int rgb = (r<<16)|(g<<8)|(b<<0);
     	short color = mapColor(rgb);
     	//System.out.println(c+" -> "+r+","+g+","+b+" -> "+Integer.toHexString(rgb)+" -> "+color);
     	return color;
