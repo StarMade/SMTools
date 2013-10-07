@@ -2,7 +2,7 @@ package jo.sm.logic.macro;
 
 import javax.script.ScriptContext;
 
-class JavascriptWrapper
+public class JavascriptWrapper
 {
     private String          mName;
     

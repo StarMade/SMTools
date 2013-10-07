@@ -150,7 +150,7 @@ public class MacroFunctionOpLogic
     		Object value = find(prop, i + off, args);
     		if (value instanceof String)
     			info.setAsText(prop.getName(), (String)value);
-    		else
+    		else if (value != null)
     			info.setAsValue(prop.getName(), value);
     	}
     	return plugin.modify(grid, params, sm, cb);
@@ -158,10 +158,19 @@ public class MacroFunctionOpLogic
 
 	private static Object find(PropertyDescriptor prop, int i, Object[] args)
 	{
-		if ((i < args.length) && prop.getPropertyType().isInstance(args[i]))
+		Class<?> propType = prop.getPropertyType();
+		propType = promoteType(propType);
+		if ((i < args.length) && propType.isAssignableFrom(args[i].getClass()))
 			return args[i];
 		// TODO: search for javascript struct
 		return null;
+	}
+	
+	private static Class<?> promoteType(Class<?> type)
+	{
+		if (type == boolean.class)
+			return Boolean.class;
+		return type;
 	}
 
 	private static Object find(Class<?> theClass,
