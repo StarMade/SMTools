@@ -8,15 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.beans.BeanInfo;
 import java.beans.Customizer;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -30,101 +24,35 @@ import jo.sm.ui.utils.SpringUtilities;
 @SuppressWarnings("serial")
 public class GenericBeanCustomizer extends JPanel implements Customizer
 {
-    private Object mBean;
-    private Class<?> mBeanClass;
-    private BeanInfo mBeanInfo;
+	private DescribedBeanInfo mInfo;
     
-    private PropertyDescriptor[] mProps;
-    private PropertyEditor[]    mEditors;
     private Component[]         mControls;
 
     @Override
     public void setObject(Object bean)
     {
-        mBean = bean;
-        mBeanClass = mBean.getClass();
-        try
-        {
-            mBeanInfo = Introspector.getBeanInfo(mBeanClass);
-        }
-        catch (IntrospectionException e)
-        {
-            e.printStackTrace();
-            return;
-        }
-        List<PropertyDescriptor> props = new ArrayList<PropertyDescriptor>();
-        for (PropertyDescriptor prop : mBeanInfo.getPropertyDescriptors())
-            if (prop.getReadMethod() == null || prop.getWriteMethod() == null)
-                continue;
-            else
-            {
-                try
-                {
-                    Description d = findDescription(mBeanClass, prop);
-                    if (d != null)
-                    {
-                        if (StringUtils.nonTrivial(d.displayName()))
-                            prop.setDisplayName(d.displayName());
-                        if (StringUtils.nonTrivial(d.shortDescription()))
-                            prop.setShortDescription(d.shortDescription());
-                    }
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                props.add(prop);
-            }
-        mProps = props.toArray(new PropertyDescriptor[0]);
-        
+    	mInfo = new DescribedBeanInfo(bean);
         createUI();
-    }
-
-    private Description findDescription(Class<?> beanClass,
-            PropertyDescriptor prop)
-    {
-        String propName = prop.getName();
-        Field match= null;
-        for (Field f : beanClass.getDeclaredFields())
-        {
-            String fieldName = f.getName();
-            if (propName.equalsIgnoreCase(fieldName))
-            {
-                match = f;
-                break;
-            }
-            if (fieldName.startsWith("m") && propName.equalsIgnoreCase(fieldName.substring(1)))
-            {
-                match = f;
-                break;
-            }
-        }
-        if (match == null)
-            return null;
-        return match.getAnnotation(Description.class);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	private void createUI()
     {        
-        mEditors = new PropertyEditor[mProps.length];
-        mControls = new Component[mProps.length];
-        setLayout(new GridLayout(mProps.length, 2));
+        mControls = new Component[mInfo.getOrderedProps().size()];
+        setLayout(new GridLayout(mInfo.getOrderedProps().size(), 2));
         setLayout(new SpringLayout());
         int rows = 0;
-        for (int i = 0; i < mProps.length; i++)
+        for (int i = 0; i < mInfo.getOrderedProps().size(); i++)
         {
-            mEditors[i] = mProps[i].createPropertyEditor(mBean);
-            if (mEditors[i] == null)
-                mEditors[i] = new GenericPropertyEditor(mBean, mProps[i]);
-            String name = mProps[i].getDisplayName();
+        	PropertyDescriptor prop = mInfo.getOrderedProps().get(i);
+        	final PropertyEditor editor = mInfo.getEditors().get(prop.getName());
+            String name = prop.getDisplayName();
             JLabel label = new JLabel(name);
-            if (mEditors[i].isPaintable())
-                mControls[i] = mEditors[i].getCustomEditor();
-            else if (mEditors[i].getTags() != null)
+            if (editor.isPaintable())
+                mControls[i] = editor.getCustomEditor();
+            else if (editor.getTags() != null)
             {
-                final PropertyEditor editor = mEditors[i];
-                final JComboBox combo = new JComboBox(mEditors[i].getTags());
+                final JComboBox combo = new JComboBox(editor.getTags());
                 combo.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent ev)
@@ -133,15 +61,14 @@ public class GenericBeanCustomizer extends JPanel implements Customizer
                         editor.setAsText(txt);
                     }
                 });
-                String txt = mEditors[i].getAsText();
+                String txt = editor.getAsText();
                 if (txt != null)
                 	combo.setSelectedItem(txt);
                 mControls[i] = combo;
             }
             else
             {
-                final PropertyEditor editor = mEditors[i];
-                final JTextField field = new JTextField(mEditors[i].getAsText());
+                final JTextField field = new JTextField(editor.getAsText());
                 field.addFocusListener(new FocusAdapter() {
                     @Override
                     public void focusLost(FocusEvent e)
@@ -156,7 +83,7 @@ public class GenericBeanCustomizer extends JPanel implements Customizer
             add(label);
             add(mControls[i]);
             rows++;
-            String desc = mProps[i].getShortDescription();
+            String desc = prop.getShortDescription();
             if (StringUtils.nonTrivial(desc) && !name.equals(desc))
             {
                 JLabel spacer = new JLabel();

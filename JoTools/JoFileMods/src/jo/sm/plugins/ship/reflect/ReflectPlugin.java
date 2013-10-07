@@ -16,8 +16,8 @@ import jo.vecmath.Point3i;
 
 public class ReflectPlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Refelect";
-    public static final String DESC = "Refelect ship around the core.";
+    public static final String NAME = "Reflect";
+    public static final String DESC = "Reflect ship around the core.";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 
         {

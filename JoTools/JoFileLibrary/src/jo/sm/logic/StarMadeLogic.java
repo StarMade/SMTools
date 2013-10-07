@@ -17,6 +17,7 @@ import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.utils.BooleanUtils;
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IStarMadePlugin;
 import jo.sm.mods.IStarMadePluginFactory;
 import jo.sm.ship.data.Block;
@@ -202,7 +203,7 @@ public class StarMadeLogic
         try
         {   // lets be protective against badly written plugins
             for (int[] classification : plugin.getClassifications())
-                if ((type == -1) || (IBlocksPlugin.TYPE_ALL == classification[0]) || (type == classification[0]))
+                if ((type == IBlocksPlugin.TYPE_ALL) || (IBlocksPlugin.TYPE_ALL == classification[0]) || (type == classification[0]))
                     if ((subtype == -1) || (subtype == classification[1]))
                         return true;
         }

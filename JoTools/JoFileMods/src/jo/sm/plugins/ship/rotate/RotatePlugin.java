@@ -24,6 +24,7 @@ public class RotatePlugin implements IBlocksPlugin
     public static final int[][] CLASSIFICATIONS = 
         {
         { TYPE_SHIP, SUBTYPE_MODIFY },
+        { TYPE_STATION, SUBTYPE_MODIFY },
         };
 
     @Override

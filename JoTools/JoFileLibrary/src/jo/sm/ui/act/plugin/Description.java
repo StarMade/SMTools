@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface Description {
     String displayName() default "";
     String shortDescription() default "";
+    String documentation() default "";
+    int priority() default 50;
 }
