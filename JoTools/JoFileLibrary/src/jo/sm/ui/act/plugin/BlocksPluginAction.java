@@ -6,11 +6,14 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.swing.JFrame;
 
 import jo.sm.data.SparseMatrix;
+import jo.sm.data.StarMade;
 import jo.sm.logic.RunnableLogic;
 import jo.sm.logic.StarMadeLogic;
 import jo.sm.logic.utils.ConvertLogic;
@@ -59,7 +62,9 @@ public class BlocksPluginAction extends GenericAction
     			    {
         	            SparseMatrix<Block> original = StarMadeLogic.getModel();
         	            mPanel.getUndoer().checkpoint(original);
-        	            SparseMatrix<Block> modified = mPlugin.modify(original, params, StarMadeLogic.getInstance(), cb);
+        	            StarMade sm = StarMadeLogic.getInstance();
+        	            pluginInvoked(mPlugin, original, params, sm, cb);
+        	            SparseMatrix<Block> modified = mPlugin.modify(original, params, sm, cb);
         	            if (!cb.isPleaseCancel())
         	            {
         	                if (modified != null)
@@ -225,5 +230,23 @@ public class BlocksPluginAction extends GenericAction
             if (c instanceof JFrame)
                 return (JFrame)c;
         return null;
+    }
+    
+    private static final List<IPluginInvocationListener> mListeners = new ArrayList<IPluginInvocationListener>();
+    
+    public static void addPluginInvocationListener(IPluginInvocationListener listener)
+    {
+        mListeners.add(listener);
+    }
+    
+    public static void removePluginInvocationListener(IPluginInvocationListener listener)
+    {
+        mListeners.remove(listener);
+    }
+    
+    private void pluginInvoked(IBlocksPlugin plugin, SparseMatrix<Block> original, Object params, StarMade sm, IPluginCallback cb)
+    {
+        for (IPluginInvocationListener listener : mListeners.toArray(new IPluginInvocationListener[0]))
+            listener.pluginInvoked(plugin, original, params, sm, cb);
     }
 }

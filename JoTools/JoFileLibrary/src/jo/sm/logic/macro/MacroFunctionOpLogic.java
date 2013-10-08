@@ -31,26 +31,59 @@ public class MacroFunctionOpLogic
         if (FUNCTIONS != null)
             return;        
         FUNCTIONS = new HashMap<String, IStarMadePlugin>();
-        register("file", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_FILE));
-        register("edit", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_EDIT));
-        register("gen", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_GENERATE));
-        register("mod", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_MODIFY));
-        register("paint", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_PAINT));
-        register("view", StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, IBlocksPlugin.SUBTYPE_VIEW));
+        register(IBlocksPlugin.SUBTYPE_FILE);
+        register(IBlocksPlugin.SUBTYPE_EDIT);
+        register(IBlocksPlugin.SUBTYPE_GENERATE);
+        register(IBlocksPlugin.SUBTYPE_MODIFY);
+        register(IBlocksPlugin.SUBTYPE_PAINT);
+        register(IBlocksPlugin.SUBTYPE_VIEW);
+    }
+    
+    public static String getID(IStarMadePlugin plugin)
+    {
+        int[] classification = plugin.getClassifications()[0];
+        return getPrefix(classification[1]) + getBaseID(plugin);
+    }
+    
+    private static String getPrefix(int subtype)
+    {
+        switch (subtype)
+        {
+            case IBlocksPlugin.SUBTYPE_FILE:
+                return "file";
+            case IBlocksPlugin.SUBTYPE_EDIT:
+                return "edit";
+            case IBlocksPlugin.SUBTYPE_GENERATE:
+                return "gen";
+            case IBlocksPlugin.SUBTYPE_MODIFY:
+                return "mod";
+            case IBlocksPlugin.SUBTYPE_PAINT:
+                return "paint";
+            case IBlocksPlugin.SUBTYPE_VIEW:
+                return "view";
+        }
+        throw new IllegalStateException("Unknown subtype="+subtype);
     }
 
-	private static void register(String prefix,
-			List<IBlocksPlugin> plugins)
+	private static void register(int subtype)
 	{
+	    String prefix = getPrefix(subtype);
+        List<IBlocksPlugin> plugins = StarMadeLogic.getBlocksPlugins(IBlocksPlugin.TYPE_ALL, subtype);
 		for (IBlocksPlugin plugin : plugins)
 		{
-			String name = prefix + plugin.getName();
-			name = StringUtils.substitute(name, "/", "");
-			name = StringUtils.substitute(name, ".", "");
-			name = StringUtils.substitute(name, " ", "");
+			String name = prefix + getBaseID(plugin);
 			//System.out.println("Registering '"+name+"'");
 			FUNCTIONS.put(name.toLowerCase(), plugin);
 		}
+	}
+	
+	private static String getBaseID(IStarMadePlugin plugin)
+	{
+        String name = plugin.getName();
+        name = StringUtils.substitute(name, "/", "");
+        name = StringUtils.substitute(name, ".", "");
+        name = StringUtils.substitute(name, " ", "");
+	    return name;
 	}
 
 	public static String expandFunctions(String expr,
@@ -160,8 +193,28 @@ public class MacroFunctionOpLogic
 	{
 		Class<?> propType = prop.getPropertyType();
 		propType = promoteType(propType);
-		if ((i < args.length) && propType.isAssignableFrom(args[i].getClass()))
-			return args[i];
+		if (i < args.length) 
+		{
+		    Class<?> argType = args[i].getClass();
+		    if ((args[i] instanceof String) || propType.isAssignableFrom(argType))
+		        return args[i];
+		    else if (Number.class.isAssignableFrom(propType) && Number.class.isAssignableFrom(argType))
+		    {
+		        Number arg = (Number)args[i];
+		        if (propType == Double.class)
+		            return arg.doubleValue();
+		        else if (propType == Float.class)
+                    return arg.floatValue();
+                else if (propType == Long.class)
+                    return arg.longValue();
+                else if (propType == Integer.class)
+                    return arg.intValue();
+                else if (propType == Short.class)
+                    return arg.shortValue();
+                else if (propType == Byte.class)
+                    return arg.byteValue();
+		    }
+		}
 		// TODO: search for javascript struct
 		return null;
 	}
@@ -170,6 +223,20 @@ public class MacroFunctionOpLogic
 	{
 		if (type == boolean.class)
 			return Boolean.class;
+        if (type == int.class)
+            return Integer.class;
+        if (type == short.class)
+            return Short.class;
+        if (type == byte.class)
+            return Byte.class;
+        if (type == long.class)
+            return Long.class;
+        if (type == double.class)
+            return Double.class;
+        if (type == float.class)
+            return Float.class;
+        if (type == char.class)
+            return Character.class;
 		return type;
 	}
 

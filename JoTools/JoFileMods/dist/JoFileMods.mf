@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 BlocksPlugins: jo.sm.factories.ship.filter.SelectSelectionFilterPlugin,
  jo.sm.plugins.all.props.PropsPlugin,
  jo.sm.plugins.all.macro.MacroRunPlugin,
+ jo.sm.plugins.all.macro.MacroRecordPlugin,
  jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.planet.gen.DomePlugin,
  jo.sm.plugins.planet.gen.GiantsCausewayPlugin,
