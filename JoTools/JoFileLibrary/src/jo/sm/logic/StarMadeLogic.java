@@ -17,7 +17,6 @@ import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
 import jo.sm.logic.utils.BooleanUtils;
 import jo.sm.mods.IBlocksPlugin;
-import jo.sm.mods.IPluginCallback;
 import jo.sm.mods.IStarMadePlugin;
 import jo.sm.mods.IStarMadePluginFactory;
 import jo.sm.ship.data.Block;

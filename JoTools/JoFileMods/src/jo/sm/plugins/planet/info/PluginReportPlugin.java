@@ -1,6 +1,7 @@
 package jo.sm.plugins.planet.info;
 
 import java.awt.Desktop;
+import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -10,6 +11,7 @@ import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ui.act.plugin.DescribedBeanInfo;
 
 public class PluginReportPlugin implements IBlocksPlugin
 {
@@ -66,9 +68,13 @@ public class PluginReportPlugin implements IBlocksPlugin
     {
         try
         {
-            File repFile = File.createTempFile("smReport", ".txt");
+            File repFile = File.createTempFile("smReport", ".htm");
             PrintWriter wtr = new PrintWriter(repFile);
+            wtr.println("<html>");
+            wtr.println("<body>");
             reportBlockPlugins(wtr, sm);
+            wtr.println("</body>");
+            wtr.println("</html>");
             wtr.close();
             if (Desktop.isDesktopSupported())
                 Desktop.getDesktop().open(repFile);
@@ -82,17 +88,19 @@ public class PluginReportPlugin implements IBlocksPlugin
 
     private void reportBlockPlugins(PrintWriter wtr, StarMade sm)
     {
-        wtr.println("BLOCK PLUGINS");
-        wtr.println("~~~~~~~~~~~~~");
-        wtr.println();
+        wtr.println("<h1>BLOCK PLUGINS</h1>");
         for (IBlocksPlugin plugin : sm.getBlocksPlugins())
         {
-            wtr.println("Name: "+plugin.getName());
-            wtr.println("Author: "+plugin.getAuthor());
-            wtr.println(plugin.getDescription());
-            wtr.println("Classifications:");
+        	Object params = plugin.newParameterBean();
+            wtr.println("<h3>"+plugin.getName()+"</h3>");
+            wtr.println("Author: <b>"+plugin.getAuthor()+"</b><br/>");
+            wtr.println("<i>"+plugin.getDescription()+"</i><br/>");
+            wtr.println("Classifications:<br/>");
+            wtr.println("<table>");
             for (int[] classification : plugin.getClassifications())
             {
+                wtr.println("<tr>");
+                wtr.println("<td>");
                 switch (classification[0])
                 {
                     case TYPE_ALL:
@@ -117,6 +125,8 @@ public class PluginReportPlugin implements IBlocksPlugin
                         wtr.print(classification[0]+" ");
                         break;
                 }
+                wtr.println("</td>");
+                wtr.println("<td>");
                 switch (classification[1])
                 {
                     case SUBTYPE_EDIT:
@@ -141,11 +151,42 @@ public class PluginReportPlugin implements IBlocksPlugin
                         wtr.print("- "+classification[1]+" ");
                         break;
                 }
+                wtr.println("</td>");
+                wtr.println("<td>");
                 if (classification.length > 2)
                     wtr.print("("+classification[2]+")");
-                wtr.println();
+                wtr.println("</td>");
+                wtr.println("</tr>");
             }
-            wtr.println();
+            wtr.println("</table>");
+            if (params != null)
+            {
+            	DescribedBeanInfo info = new DescribedBeanInfo(plugin.newParameterBean());
+            	if (info.getOrderedProps().size() > 0)
+            	{
+	                wtr.println("Parameters:<br/>");
+	                wtr.println("<table>");
+	                for (PropertyDescriptor prop : info.getOrderedProps())
+	                {
+	                    wtr.println("<tr>");
+	                    wtr.println("<td>");
+	                    wtr.println(prop.getName());
+	                    wtr.println("</td>");
+	                    wtr.println("<td>");
+	                    wtr.println(prop.getDisplayName());
+	                    wtr.println("</td>");
+	                    wtr.println("<td>");
+	                    wtr.println(prop.getShortDescription());
+	                    wtr.println("</td>");
+	                    wtr.println("<td>");
+	                    wtr.println(prop.getPropertyType().getSimpleName());
+	                    wtr.println("</td>");
+	                    wtr.println("</tr>");
+	                }
+	                wtr.println("</table>");
+            	}
+            }
+            wtr.println("<hr/>");
         }
     }
 }
