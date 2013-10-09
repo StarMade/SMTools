@@ -2,15 +2,15 @@ package jo.sm.plugins.ship.scale;
 
 import jo.sm.ui.act.plugin.Description;
 
-@Description(displayName="Scale up object", shortDescription="Increase the size of the object by a even factor")
+@Description(displayName="Scale model", shortDescription="Cange the size of the object")
 public class ScaleParameters
 {
 	@Description(displayName="Width", shortDescription="Scale along X axis, port/starboard")
-    private int     mXScale;
+    private float     mXScale;
 	@Description(displayName="Height", shortDescription="Scale along Y axis, dorsal/ventral")
-    private int     mYScale;
+    private float     mYScale;
 	@Description(displayName="Length", shortDescription="Scale along Z axis, fore/aft")
-    private int     mZScale;
+    private float     mZScale;
     
     public ScaleParameters()
     {
@@ -19,32 +19,32 @@ public class ScaleParameters
         mZScale = 1;
     }
 
-    public int getXScale()
+    public float getXScale()
     {
         return mXScale;
     }
 
-    public void setXScale(int xScale)
+    public void setXScale(float xScale)
     {
         mXScale = xScale;
     }
 
-    public int getYScale()
+    public float getYScale()
     {
         return mYScale;
     }
 
-    public void setYScale(int yScale)
+    public void setYScale(float yScale)
     {
         mYScale = yScale;
     }
 
-    public int getZScale()
+    public float getZScale()
     {
         return mZScale;
     }
 
-    public void setZScale(int zScale)
+    public void setZScale(float zScale)
     {
         mZScale = zScale;
     }

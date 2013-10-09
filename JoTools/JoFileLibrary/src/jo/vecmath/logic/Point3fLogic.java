@@ -75,4 +75,22 @@ public class Point3fLogic extends Tuple3fLogic
 		p.z = FloatUtils.parseFloat(st.nextToken());
 		return p;
 	}
+
+	public static Point3f abs(Point3f p1)
+	{
+		Point3f p2 = new Point3f((float)Math.abs(p1.x), (float)Math.abs(p1.y), (float)Math.abs(p1.z));
+		return p2;
+	}
+
+	public static Point3f ceil(Point3f p1)
+	{
+		Point3f p2 = new Point3f((float)Math.ceil(p1.x), (float)Math.ceil(p1.y), (float)Math.ceil(p1.z));
+		return p2;
+	}
+
+	public static Point3f floor(Point3f p1)
+	{
+		Point3f p2 = new Point3f((float)Math.floor(p1.x), (float)Math.floor(p1.y), (float)Math.floor(p1.z));
+		return p2;
+	}
 }

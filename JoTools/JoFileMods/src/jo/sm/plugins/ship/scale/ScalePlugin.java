@@ -8,7 +8,10 @@ import jo.sm.data.StarMade;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
+import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
+import jo.vecmath.logic.Point3fLogic;
 
 public class ScalePlugin implements IBlocksPlugin
 {
@@ -65,49 +68,58 @@ public class ScalePlugin implements IBlocksPlugin
         //System.out.println("Params: X="+params.getXRotate()
         //        +", Y="+params.getYRotate()
         //        +", Z="+params.getZRotate());
-        if (params.getXScale() < 1)
-            params.setXScale(1);
-        if (params.getYScale() < 1)
-            params.setYScale(1);
-        if (params.getZScale() < 1)
-            params.setZScale(1);
         Point3i core = findCore(original);
         System.out.println("  Core at "+core);
         SparseMatrix<Block> modified = new SparseMatrix<Block>();
+        Point3f size = new Point3f(1, 1, 1);
+        size.x *= params.getXScale();
+        size.y *= params.getYScale();
+        size.z *= params.getZScale();
+        size = Point3fLogic.abs(size);
+        size = Point3fLogic.ceil(size);
+        //System.out.println("Block size="+size);
         for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
         {
             Point3i xyz = i.next();
             Block b = original.get(xyz);
-            Point3i iPoint = transform(xyz, core, params);
+            Point3f fPoint = transform(xyz, core, params);
             //System.out.println("  "+xyz+" -> "+fPoint);
-            modified.set(iPoint, b);
             if (b.getBlockID() != BlockTypes.CORE_ID)
             {
-                for (int x = 0; x < params.getXScale(); x++)
-                    for (int y = 0; y < params.getYScale(); y++)
-                        for (int z = 0; z < params.getZScale(); z++)
-                            if ((x != 0) || (y != 0) || (z != 0))
-                            {
-                                Block newB = new Block(b);
-                                if (BlockTypes.isController(newB.getBlockID()))
-                                    newB.setBlockID(BlockTypes.CONTROLLER_IDS.get(newB.getBlockID()));
-                                modified.set(iPoint.x + x, iPoint.y + y, iPoint.z + z, newB);
-                            }
+                for (int x = 0; x < size.x; x++)
+                    for (int y = 0; y < size.y; y++)
+                        for (int z = 0; z < size.z; z++)
+                        {
+                            Block newB = new Block(b);
+                            if (BlockTypes.isController(newB.getBlockID()))
+                                newB.setBlockID(BlockTypes.CONTROLLER_IDS.get(newB.getBlockID()));
+                            set(fPoint, x, y, z, modified, newB);
+                        }
             }
         }
+        ShipLogic.ensureCore(modified);
         return modified;
     }
     
-    private Point3i transform(Point3i ori, Point3i core, ScaleParameters params)
+    private void set(Point3f iPoint, int x, int y, int z,
+			SparseMatrix<Block> grid, Block b)
+	{
+		x = (int)(iPoint.x + x + .5);
+		y = (int)(iPoint.y + y + .5);
+		z = (int)(iPoint.z + z + .5);
+		grid.set(x, y, z, b);
+	}
+
+	private Point3f transform(Point3i ori, Point3i core, ScaleParameters params)
     {
-    	Point3i trans = new Point3i();
+    	Point3f trans = new Point3f();
     	trans.x = transform(ori.x, core.x, params.getXScale());
     	trans.y = transform(ori.y, core.y, params.getYScale());
     	trans.z = transform(ori.z, core.z, params.getZScale());
     	return trans;
     }
     
-    private int transform(int ori, int core, int scale)
+    private float transform(int ori, int core, float scale)
     {
     	ori -= core;
     	ori *= scale;
