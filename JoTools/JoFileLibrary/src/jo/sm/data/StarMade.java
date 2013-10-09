@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Properties;
 
 import jo.sm.mods.IBlocksPlugin;
+import jo.sm.mods.IStarMadePluginFactory;
 import jo.sm.ship.data.Block;
 import jo.sm.ui.logic.ShipSpec;
 import jo.vecmath.Point3i;
@@ -18,6 +19,7 @@ public class StarMade extends PCSBean
     private List<Entity>    mEntities;
     private ClassLoader     mModLoader;
     private List<IBlocksPlugin> mBlocksPlugins;
+    private List<IStarMadePluginFactory> mPluginFactories;
     private Properties      mProps;
     private short           mSelectedBlockType;
     private Point3i			mSelectedUpper;
@@ -30,6 +32,7 @@ public class StarMade extends PCSBean
     public StarMade()
     {
         mBlocksPlugins = new ArrayList<IBlocksPlugin>();
+        mPluginFactories = new ArrayList<IStarMadePluginFactory>();
         mSelectedBlockType = -1;
     }
     
@@ -167,4 +170,14 @@ public class StarMade extends PCSBean
         mModel = model;
         firePropertyChange();
     }
+
+	public List<IStarMadePluginFactory> getPluginFactories()
+	{
+		return mPluginFactories;
+	}
+
+	public void setPluginFactories(List<IStarMadePluginFactory> pluginFactories)
+	{
+		mPluginFactories = pluginFactories;
+	}
 }

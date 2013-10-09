@@ -1,4 +1,4 @@
-package jo.sm.ui.act.plugin;
+package jo.sm.plugins.all.macro;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyChangeEvent;
@@ -6,44 +6,38 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.Method;
-import java.util.Map;
 
-public class ComboPropertyDescriptor extends PropertyDescriptor
+public class MacroPropertyDescriptor extends PropertyDescriptor
 {
-    protected Map<String,Object>  mKeyToValue;
-    
-    public ComboPropertyDescriptor(String propertyName, Class<?> beanClass,
-            String readMethodName, String writeMethodName, Map<String,Object> keyToValue)
+    public MacroPropertyDescriptor(String propertyName, Class<?> beanClass,
+            String readMethodName, String writeMethodName)
             throws IntrospectionException
     {
         super(propertyName, beanClass, readMethodName, writeMethodName);
-        mKeyToValue = keyToValue;
     }
 
-    public ComboPropertyDescriptor(String propertyName, Class<?> beanClass, Map<String,Object> keyToValue)
+    public MacroPropertyDescriptor(String propertyName, Class<?> beanClass)
             throws IntrospectionException
     {
         super(propertyName, beanClass);
-        mKeyToValue = keyToValue;
     }
 
-    public ComboPropertyDescriptor(String propertyName, Method readMethod,
-            Method writeMethod, Map<String,Object> keyToValue) throws IntrospectionException
+    public MacroPropertyDescriptor(String propertyName, Method readMethod,
+            Method writeMethod) throws IntrospectionException
     {
         super(propertyName, readMethod, writeMethod);
-        mKeyToValue = keyToValue;
     }
 
     @Override
     public Class<?> getPropertyEditorClass()
     {
-        return ComboPropertyEditor.class;
+        return MacroPropertyEditor.class;
     }
     
     @Override
     public PropertyEditor createPropertyEditor(final Object bean)
     {
-        final PropertyEditor pe = new ComboPropertyEditor(bean, mKeyToValue);
+        final PropertyEditor pe = new MacroPropertyEditor(bean);
         try
         {
             pe.setValue(getReadMethod().invoke(bean));

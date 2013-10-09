@@ -56,13 +56,19 @@ public class MacroRunPlugin implements IBlocksPlugin
         return CLASSIFICATIONS;
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
     public SparseMatrix<Block> modify(SparseMatrix<Block> original,
             Object p, StarMade sm, IPluginCallback cb)
     {
     	MacroRunParameters params = (MacroRunParameters)p;        
-        try
+        return run(original, params, sm, cb);
+    }
+
+    @SuppressWarnings("unchecked")
+	public static SparseMatrix<Block> run(SparseMatrix<Block> original,
+			MacroRunParameters params, StarMade sm, IPluginCallback cb)
+	{
+		try
         {
         	Map<String,Object> props = new HashMap<String, Object>();
         	props.put("grid",  original);
@@ -78,5 +84,5 @@ public class MacroRunPlugin implements IBlocksPlugin
             cb.setError(e);
             return null;
         }
-    }
+	}
 }

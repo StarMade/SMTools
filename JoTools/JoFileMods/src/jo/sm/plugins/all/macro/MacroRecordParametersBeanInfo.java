@@ -8,28 +8,38 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.JFileChooser;
-
-import jo.sm.ui.act.plugin.FilePropertyDescriptor;
-import jo.sm.ui.act.plugin.FilePropertyInfo;
+import jo.sm.ui.act.plugin.ComboPropertyDescriptor;
 
 public class MacroRecordParametersBeanInfo implements BeanInfo
 {
+	private static final Map<String,Object> PLACEMENT_MAP = new HashMap<String, Object>();
+	static
+	{
+		PLACEMENT_MAP.put("File", "FILE");
+		PLACEMENT_MAP.put("Edit", "EDIT");
+		PLACEMENT_MAP.put("File", "VIEW");
+		PLACEMENT_MAP.put("Generate", "GENERATE");
+		PLACEMENT_MAP.put("Modify", "MODIFY");
+		PLACEMENT_MAP.put("Paint", "PAINT");
+	}
+	private static final Map<String,Object> ENABLEMENT_MAP = new HashMap<String, Object>();
+	static
+	{
+		ENABLEMENT_MAP.put("All", "ALL");
+		ENABLEMENT_MAP.put("Ship", "SHIP");
+		ENABLEMENT_MAP.put("Station", "STATION");
+		ENABLEMENT_MAP.put("Shop", "SHOP");
+		ENABLEMENT_MAP.put("Floating Rock", "FLOATINGROCK");
+		ENABLEMENT_MAP.put("Planet", "PLANET");
+	}
     private BeanInfo mRootBeanInfo;
-    private FilePropertyInfo	mInfo;
     
     public MacroRecordParametersBeanInfo() throws IntrospectionException
     {
         super();
-        mInfo = new FilePropertyInfo();
-        mInfo.setDialogTitle("Save Javascript macro");
-        mInfo.setFilters(new String[][]{
-        		{ "Javascript macro", "js" },
-        });
-        mInfo.setDialogType(JFileChooser.SAVE_DIALOG);
-        mInfo.setApproveButtonText("Save");
-        mInfo.setApproveButtonTooltipText("Select file to save");
         mRootBeanInfo = Introspector.getBeanInfo(MacroRecordParameters.class, Introspector.IGNORE_IMMEDIATE_BEANINFO);
     }
 
@@ -39,11 +49,21 @@ public class MacroRecordParametersBeanInfo implements BeanInfo
         PropertyDescriptor[] props = mRootBeanInfo.getPropertyDescriptors();
         for (int i = 0; i < props.length; i++)
         {
-            if (props[i].getName().endsWith("ile"))
+            if (props[i].getName().endsWith("acement"))
                 try
                 {
-                    props[i] = new FilePropertyDescriptor(props[i].getName(), 
-                            props[i].getReadMethod(), props[i].getWriteMethod(), mInfo);
+                    props[i] = new ComboPropertyDescriptor(props[i].getName(), 
+                            props[i].getReadMethod(), props[i].getWriteMethod(), PLACEMENT_MAP);
+                }
+                catch (IntrospectionException e)
+                {
+                    e.printStackTrace();
+                }
+            else if (props[i].getName().endsWith("nablement"))
+                try
+                {
+                    props[i] = new ComboPropertyDescriptor(props[i].getName(), 
+                            props[i].getReadMethod(), props[i].getWriteMethod(), ENABLEMENT_MAP);
                 }
                 catch (IntrospectionException e)
                 {

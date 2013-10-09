@@ -17,7 +17,7 @@ import jo.vecmath.logic.MathUtils;
 
 public class OmbrePlugin implements IBlocksPlugin
 {
-    public static final String NAME = "Ombré";
+    public static final String NAME = "Ombre";
     public static final String DESC = "Paint a pattern fading from one color to another.";
     public static final String AUTH = "Jo Jaquinta";
     public static final int[][] CLASSIFICATIONS = 

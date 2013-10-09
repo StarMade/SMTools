@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
 BlocksPlugins: jo.sm.factories.ship.filter.SelectSelectionFilterPlugin,
  jo.sm.plugins.all.props.PropsPlugin,
- jo.sm.plugins.all.macro.MacroRunPlugin,
+ jo.sm.plugins.all.macro.MacroDeletePlugin,
  jo.sm.plugins.all.macro.MacroRecordPlugin,
+ jo.sm.plugins.all.macro.MacroRunPlugin,
  jo.sm.plugins.planet.hollow.HollowPlugin,
  jo.sm.plugins.planet.gen.DomePlugin,
  jo.sm.plugins.planet.gen.GiantsCausewayPlugin,
@@ -44,6 +45,7 @@ BlocksPlugins: jo.sm.factories.ship.filter.SelectSelectionFilterPlugin,
  jo.sm.plugins.ship.stripes.OmbrePlugin,
  jo.sm.plugins.ship.text.TextPlugin,
  jo.sm.plugins.ship.text.ImagePlugin
-PluginFactories: jo.sm.factories.planet.comp.MaterialFactory,
+PluginFactories: jo.sm.factories.all.macro.MacroFactory,
+ jo.sm.factories.planet.comp.MaterialFactory,
  jo.sm.factories.planet.veg.VegetationFactory,
  jo.sm.factories.ship.filter.ViewFilterFactory

@@ -124,12 +124,7 @@ public class StarMadeLogic
             IStarMadePluginFactory factory = (IStarMadePluginFactory)pluginFactoryClass.newInstance();
             if (factory == null)
                 return false;
-            IStarMadePlugin[] plugins = factory.getPlugins();
-            if (plugins == null)
-            	return false;
-            for (IStarMadePlugin plugin : plugins)
-            	if (plugin instanceof IBlocksPlugin)
-            		addBlocksPlugin((IBlocksPlugin)plugin);
+            getInstance().getPluginFactories().add(factory);
             return true;
         }
         catch (Exception e)
@@ -188,10 +183,26 @@ public class StarMadeLogic
         getInstance().setModLoader(modLoader);
     }
     
+    public static List<IBlocksPlugin> getAllBlocksPlugins()
+    {
+    	List<IBlocksPlugin> plugins = new ArrayList<IBlocksPlugin>();
+    	plugins.addAll(getInstance().getBlocksPlugins());
+    	for (IStarMadePluginFactory factory : getInstance().getPluginFactories())
+    	{
+	    	IStarMadePlugin[] plugs = factory.getPlugins();
+	        if (plugins == null)
+	        	continue;
+	        for (IStarMadePlugin plugin : plugs)
+	        	if (plugin instanceof IBlocksPlugin)
+	        		plugins.add((IBlocksPlugin)plugin);
+    	}
+    	return plugins;
+    }
+    
     public static List<IBlocksPlugin> getBlocksPlugins(int type, int subtype)
     {
         List<IBlocksPlugin> plugins = new ArrayList<IBlocksPlugin>();
-        for (IBlocksPlugin plugin : getInstance().getBlocksPlugins())
+        for (IBlocksPlugin plugin : getAllBlocksPlugins())
             if (isPlugin(plugin, type, subtype))
                 plugins.add(plugin);
         return plugins;
