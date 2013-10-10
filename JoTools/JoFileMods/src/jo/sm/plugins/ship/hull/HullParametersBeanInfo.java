@@ -24,9 +24,10 @@ public class HullParametersBeanInfo implements BeanInfo
         COMBO_MAP.put("Cylinder", HullParameters.CYLINDER);
         COMBO_MAP.put("Box", HullParameters.BOX);
         COMBO_MAP.put("Sphere", HullParameters.SPHERE);
+        COMBO_MAP.put("Hemisphere", HullParameters.HEMISPHERE);
         COMBO_MAP.put("Disc", HullParameters.DISC);
         COMBO_MAP.put("Irregular", HullParameters.IRREGULAR);
-
+        COMBO_MAP.put("Torus", HullParameters.TORUS);
     }
     
     private BeanInfo mRootBeanInfo;

@@ -49,6 +49,15 @@ public class Point3fLogic extends Tuple3fLogic
 		return ret;
 	}
 
+	public static Point3f scale(Point3f v, Point3f s) 
+	{
+		Point3f ret = new Point3f(v);
+		ret.x *= s.x;
+		ret.y *= s.y;
+		ret.z *= s.z;
+		return ret;
+	}
+
 	public static Point3f cross(Point3f a, Point3f b) 
 	{
 		Point3f ret = new Point3f();

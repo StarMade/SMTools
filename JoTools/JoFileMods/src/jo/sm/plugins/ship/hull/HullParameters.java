@@ -13,6 +13,8 @@ public class HullParameters
 	public static final int SPHERE = 5;
 	public static final int DISC = 6;
 	public static final int IRREGULAR = 7;
+	public static final int HEMISPHERE = 8;
+	public static final int TORUS = 9;
 	
 	@Description(displayName="Hull Type",shortDescription="Overall shape of hull")
 	private int	mType;

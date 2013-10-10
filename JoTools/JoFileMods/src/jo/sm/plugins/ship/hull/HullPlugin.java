@@ -15,11 +15,14 @@ import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.plugins.planet.hollow.HollowPlugin;
+import jo.sm.plugins.ship.imp.PlotLogic;
 import jo.sm.plugins.ship.rotate.RotateParameters;
 import jo.sm.plugins.ship.rotate.RotatePlugin;
 import jo.sm.ship.data.Block;
 import jo.sm.ship.logic.ShipLogic;
+import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
+import jo.vecmath.ext.Hull3f;
 import jo.vecmath.logic.MathUtils;
 import jo.vecmath.logic.Point3iLogic;
 
@@ -112,13 +115,19 @@ public class HullPlugin implements IBlocksPlugin
         		generateBox(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.SPHERE:
-        		generateSphere(modified, center, lower, upper, cb);
+        		generateSphere(modified, center, lower, upper, cb, false);
+        		break;
+        	case HullParameters.HEMISPHERE:
+        		generateSphere(modified, center, lower, upper, cb, true);
         		break;
         	case HullParameters.DISC:
         		generateDisc(modified, center, lower, upper, cb);
         		break;
         	case HullParameters.IRREGULAR:
         		generateIrregular(modified, center, lower, upper, cb);
+        		break;
+        	case HullParameters.TORUS:
+        		generateTorus(modified, center, lower, upper, cb);
         		break;
         }
         HollowPlugin.doHollow(modified, cb);
@@ -139,49 +148,27 @@ public class HullPlugin implements IBlocksPlugin
     	}
     	cb.endTask();
     }
+
+    private void generateTorus(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
+    {
+        cb.setStatus("Filling torus");
+        Point3f radius = new Point3f(upper.x - lower.x, upper.y - lower.y, upper.z - lower.z);
+        radius.scale(.5f);
+        float maxDiam = Math.max(Math.max(radius.x, radius.y), radius.z);
+        float resolution = 2.5f/maxDiam;
+        Hull3f torus = PlotLogic.makeTorus(resolution);
+        PlotLogic.mapHull(grid, torus, radius, new Point3i(), new Point3i(), cb);
+    }
     
-    private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)
+    private void generateSphere(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb, boolean hemi)
     {
         cb.setStatus("Filling sphere");
-    	int xMidRad = center.x - lower.x;
-    	int yMidRad = center.y - lower.y;
-    	int zMidRad = center.z - lower.z;
-    	if ((xMidRad == yMidRad) && (yMidRad == zMidRad))
-    	{	// perfect sphere
-    		int r2 = xMidRad*xMidRad;
-            cb.startTask(xMidRad*2);
-    		for (int x = -xMidRad; x <= xMidRad; x++)
-    		{
-        		for (int y = -yMidRad; y <= yMidRad; y++)
-            		for (int z = -zMidRad; z <= zMidRad; z++)
-            			if (x*x + y*y + z*z <= r2)
-            				addHull(grid, center.x + x, center.y + y, center.z + z);
-        		cb.workTask(1);
-    		}
-    		cb.endTask();
-    	}
-    	else
-    	{
-            int xRad;
-        	int yRad;
-        	cb.startTask(upper.z - lower.z + 1);
-        	for (int z = lower.z; z <= upper.z; z++)
-        	{
-        	    cb.workTask(1);
-        		if (z < center.z)
-        		{
-        			xRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, xMidRad);
-        			yRad = (int)MathUtils.interpolateSin(z, lower.z, center.z, 0, yMidRad);
-        		}
-        		else
-        		{
-        			xRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, xMidRad);
-        			yRad = (int)MathUtils.interpolateSin(z, upper.z, center.z, 0, yMidRad);
-        		}
-        		drawElipse(grid, center.x, center.y, z, xRad, yRad);
-        	}
-        	cb.endTask();
-    	}
+        Point3f radius = new Point3f(upper.x - lower.x, upper.y - lower.y, upper.z - lower.z);
+        radius.scale(.5f);
+        float maxDiam = Math.max(Math.max(radius.x, radius.y), radius.z);
+        float resolution = 2.5f/maxDiam;
+        Hull3f sphere = PlotLogic.makeSphere(resolution, hemi);
+        PlotLogic.mapHull(grid, sphere, radius, new Point3i(), new Point3i(), cb);
     }
     
     private void generateCone(SparseMatrix<Block> grid, Point3i center, Point3i lower, Point3i upper, IPluginCallback cb)

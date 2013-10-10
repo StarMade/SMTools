@@ -83,7 +83,7 @@ public class ImportVRMLPlugin implements IBlocksPlugin
             Point3i offset = new Point3i();
             float scale = PlotLogic.getScale(hull, params.getLongestDimension(), lowerGrid, upperGrid, offset);
             SparseMatrix<Block> modified = new SparseMatrix<Block>();
-            PlotLogic.mapHull(modified, hull, scale, lowerGrid, upperGrid, cb);
+            PlotLogic.mapHull(modified, hull, new Point3f(scale, scale, scale), lowerGrid, upperGrid, cb);
             return modified;
         }
         catch (IOException e)

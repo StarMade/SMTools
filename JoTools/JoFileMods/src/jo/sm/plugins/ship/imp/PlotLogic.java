@@ -41,7 +41,7 @@ public class PlotLogic
 {
 
     public static void mapHull(SparseMatrix<Block> modified, Hull3f hull,
-            float scale, Point3i lowerGrid, Point3i upperGrid, IPluginCallback cb)
+            Point3f scale, Point3i lowerGrid, Point3i upperGrid, IPluginCallback cb)
     {
         Point3i center = Point3iLogic.interpolate(lowerGrid, upperGrid, .5f);
         cb.startTask(hull.getTriangles().size());
@@ -77,10 +77,10 @@ public class PlotLogic
     	return mapColor(rgb);
     }
 
-	private static Point3i mapPoint(Point3f f, float scale, Point3i center)
+	private static Point3i mapPoint(Point3f f, Point3f scale, Point3i center)
     {
         Point3f fA = new Point3f(f);
-        fA.scale(scale);
+        fA = Point3fLogic.scale(fA, scale);
         Point3i iA = new Point3i(fA);
         iA.sub(center);
         iA.x += 8;
@@ -289,4 +289,92 @@ public class PlotLogic
     	//System.out.println(c+" -> "+r+","+g+","+b+" -> "+Integer.toHexString(rgb)+" -> "+color);
     	return color;
     }
+    
+    public static Hull3f makeTorus(float resolution)
+    {
+        Hull3f torus = new Hull3f();
+    	int longSteps = (int)(2*Math.PI*1/resolution);
+    	float longIncrement = (float)(2*Math.PI/longSteps);
+    	int shortSteps = (int)(2*Math.PI*.25/resolution);
+    	float shortIncrement = (float)(2*Math.PI/shortSteps);
+    	for (int longSegment = 0; longSegment < longSteps; longSegment++)
+    	{
+    		Point3f longCenter1 = new Point3f(.75f, 0, 0);
+    		Point3fLogic.rotateBy(longCenter1, 0, longSegment*longIncrement, 0);
+    		Point3f longCenter2 = new Point3f(.75f, 0, 0);
+    		Point3fLogic.rotateBy(longCenter2, 0, (longSegment + 1)*longIncrement, 0);
+    		for (int shortSegment = 0; shortSegment < shortSteps; shortSegment++)
+    		{
+        		Point3f shortSpur11 = new Point3f(.25f, 0, 0);
+        		Point3fLogic.rotateBy(shortSpur11, 0, 0, shortSegment*shortIncrement);
+        		Point3fLogic.rotateBy(shortSpur11, 0, longSegment*longIncrement, 0);
+        		shortSpur11.add(longCenter1);
+        		Point3f shortSpur12 = new Point3f(.25f, 0, 0);
+        		Point3fLogic.rotateBy(shortSpur12, 0, 0, (shortSegment + 1)*shortIncrement);
+        		Point3fLogic.rotateBy(shortSpur12, 0, longSegment*longIncrement, 0);
+        		shortSpur12.add(longCenter1);
+        		Point3f shortSpur21 = new Point3f(.25f, 0, 0);
+        		Point3fLogic.rotateBy(shortSpur21, 0, 0, shortSegment*shortIncrement);
+        		Point3fLogic.rotateBy(shortSpur21, 0, longSegment*longIncrement, 0);
+        		shortSpur21.add(longCenter2);
+        		Point3f shortSpur22 = new Point3f(.25f, 0, 0);
+        		Point3fLogic.rotateBy(shortSpur22, 0, 0, (shortSegment + 1)*shortIncrement);
+        		Point3fLogic.rotateBy(shortSpur22, 0, longSegment*longIncrement, 0);
+        		shortSpur22.add(longCenter2);
+    	        addTriangle(torus, shortSpur11, shortSpur12, shortSpur22, resolution);
+    	        addTriangle(torus, shortSpur11, shortSpur21, shortSpur22, resolution);
+    		}
+    	}
+    	return torus;
+    }
+    
+    public static Hull3f makeSphere(float resolution, boolean half)
+    {
+        Hull3f sphere = new Hull3f();
+        Point3f fore = new Point3f(0, 0, 1);
+        Point3f aft = new Point3f(0, 0, -1);
+        Point3f dorsal = new Point3f(0, 1, 0);
+        Point3f ventral = new Point3f(0, -1, 0);
+        Point3f starboard = new Point3f(1, 0, 0);
+        Point3f port = new Point3f(-1, 0, 0);
+        if (!half)
+        {
+	        addTriangle(sphere, fore, port, dorsal, resolution);
+	        addTriangle(sphere, port, aft, dorsal, resolution);
+	        addTriangle(sphere, aft, starboard, dorsal, resolution);
+	        addTriangle(sphere, starboard, fore, dorsal, resolution);
+        }
+        addTriangle(sphere, fore, port, ventral, resolution);
+        addTriangle(sphere, port, aft, ventral, resolution);
+        addTriangle(sphere, aft, starboard, ventral, resolution);
+        addTriangle(sphere, starboard, fore, ventral, resolution);
+    	return sphere;
+    }
+
+	private static void addTriangle(Hull3f sphere, Point3f p1, Point3f p2,
+			Point3f p3, float resolution)
+	{
+		//System.out.println("Adding "+p1+", "+p2+", "+p3);
+		if ((p1.distance(p2) < resolution) || (p2.distance(p3) < resolution) || (p3.distance(p1) < resolution))
+		{
+			Triangle3f t = new Triangle3f(p1, p2, p3);
+			sphere.getTriangles().add(t);
+		}
+		else
+		{
+			Point3f p12 = new Point3f(p1);
+			p12.add(p2);
+			Point3fLogic.normalize(p12);
+			Point3f p23 = new Point3f(p2);
+			p23.add(p3);
+			Point3fLogic.normalize(p23);
+			Point3f p31 = new Point3f(p3);
+			p31.add(p1);
+			Point3fLogic.normalize(p31);
+			addTriangle(sphere, p1, p12, p31, resolution);
+			addTriangle(sphere, p2, p23, p12, resolution);
+			addTriangle(sphere, p3, p31, p23, resolution);
+			addTriangle(sphere, p12, p23, p31, resolution);
+		}
+	}
 }
