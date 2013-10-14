@@ -598,6 +598,8 @@ public class RenderPolyLogic
             float m02 = corners[pCenter].x;
             float m12 = corners[pCenter].y;
             AffineTransform t = new AffineTransform(m00, m10, m01, m11, m02, m12);
+            if ((icon.getIconWidth() != 64) || (icon.getIconHeight() != 64))
+            	t.scale(64.0/icon.getIconWidth(), 64.0/icon.getIconHeight());
             Graphics2D g3 = (Graphics2D)g2.create();
             g3.clip(p);
             g3.drawImage(icon.getImage(), t, null);
@@ -624,6 +626,8 @@ public class RenderPolyLogic
             float m02 = corners[0].x;
             float m12 = corners[0].y;
             AffineTransform t = new AffineTransform(m00, m10, m01, m11, m02, m12);
+            if ((icon.getIconWidth() != 64) || (icon.getIconHeight() != 64))
+            	t.scale(64.0/icon.getIconWidth(), 64.0/icon.getIconHeight());
             g2.drawImage(icon.getImage(), t, null);
         }
         else
