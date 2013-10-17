@@ -619,7 +619,7 @@ public class BlockTypeColors
 		int numTextures = 16*16*mTextureMaps.size();
 		mAllTexturesImagesPerSide = (int)Math.ceil(Math.sqrt(numTextures));
 		mAllTexturesPixelsPerImage = 1024/mAllTexturesImagesPerSide;
-		mAllTextures = new BufferedImage(1024, 1024, BufferedImage.TYPE_4BYTE_ABGR);
+		mAllTextures = new BufferedImage(1024, 1024, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = mAllTextures.getGraphics();
 		for (int i = 0; i < numTextures; i++)
 		{
@@ -676,7 +676,7 @@ public class BlockTypeColors
     			color = 0x80000080;
     			break;
     	}
-        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_4BYTE_ABGR);
+        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
         for (int x = 0; x < 64; x++)
             for (int y = 0; y < 64; y++)
                 img.setRGB(x, y, color);

@@ -6,16 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.Iterator;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.spi.IIORegistry;
-import javax.imageio.spi.ImageWriterSpi;
-import javax.imageio.spi.ServiceRegistry;
-import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.ImageIO;
 
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
@@ -101,8 +93,11 @@ public class ExportOBJPlugin implements IBlocksPlugin
     private void writeTexture(String objFile) throws IOException
     {
     	String jpgFile = objFile.substring(0, objFile.length() - 4) + ".jpg";
-    	//ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
+    	ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
+        String pngFile = objFile.substring(0, objFile.length() - 4) + ".png";
+        ImageIO.write(BlockTypeColors.mAllTextures, "PNG", new File(pngFile));
     	
+    	/*
     	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
     	jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
     	jpegParams.setCompressionQuality(0.15f);
@@ -145,6 +140,7 @@ public class ExportOBJPlugin implements IBlocksPlugin
     	// from your JPEGImageWriteParam instance
     	writer.write(null, new IIOImage(BlockTypeColors.mAllTextures, null, null), jpegParams);
     	os.close();
+    	*/
     }
     
     private void writeFile(String objFile, JGLGroup quads) throws IOException

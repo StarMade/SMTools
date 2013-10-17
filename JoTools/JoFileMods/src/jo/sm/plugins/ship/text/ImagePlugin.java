@@ -14,6 +14,7 @@ import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.plugins.ship.imp.PlotLogic;
 import jo.sm.ship.data.Block;
+import jo.sm.ship.logic.ShipLogic;
 import jo.vecmath.Point3i;
 
 public class ImagePlugin implements IBlocksPlugin
@@ -114,6 +115,7 @@ public class ImagePlugin implements IBlocksPlugin
             advance.add(mAdvanceVector);
             if (cb != null) cb.workTask(1);
         }
+        ShipLogic.ensureCore(modified);
         if (cb != null) cb.endTask();
         return modified;
     }
