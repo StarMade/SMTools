@@ -1,5 +1,7 @@
 package jo.sm.plugins.ship.exp;
 
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -95,8 +97,13 @@ public class ExportOBJPlugin implements IBlocksPlugin
     {
         String pngFile = objFile.substring(0, objFile.length() - 4) + ".png";
         ImageIO.write(BlockTypeColors.mAllTextures, "PNG", new File(pngFile));
+        BufferedImage noTrans = new BufferedImage(BlockTypeColors.mAllTextures.getWidth(), 
+        		BlockTypeColors.mAllTextures.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics g = noTrans.getGraphics();
+        g.drawImage(BlockTypeColors.mAllTextures, 0, 0, null);
+        g.dispose();
     	String jpgFile = objFile.substring(0, objFile.length() - 4) + ".jpg";
-    	ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
+    	ImageIO.write(noTrans, "JPG", new File(jpgFile));
     	
     	/*
     	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
