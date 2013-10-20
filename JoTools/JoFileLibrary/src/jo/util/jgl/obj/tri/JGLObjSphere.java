@@ -135,7 +135,7 @@ public class JGLObjSphere extends JGLObj
         if (mVertexBuffers != null)
             mVertexBuffer = null; // these are cached, don't recycle
         if (mIndexBuffers != null)
-            mIndexBuffer = null;
+            mIndexShortBuffer = null;
         if (mNormalBuffers != null)
             mNormalBuffer = null;
         super.recycle();
@@ -219,12 +219,12 @@ public class JGLObjSphere extends JGLObj
                 mNormalBuffers.put(depth, getNormalBuffer());
         }
         if ((mIndexBuffers != null) && mIndexBuffers.containsKey(depth))
-            setIndexBuffer(mIndexBuffers.get(depth));
+            setIndexShortBuffer(mIndexBuffers.get(depth));
         else
         {
             setIndices(index);
             if (mIndexBuffers != null)
-                mIndexBuffers.put(depth, getIndexBuffer());
+                mIndexBuffers.put(depth, getIndexShortBuffer());
         }
         setColors(color);
     }

@@ -135,7 +135,7 @@ public class LWJGLRenderPanel extends RenderPanel
         mAxis.getChildren().clear();
         MeshInfo info = new MeshInfo();
         info.verts = new ArrayList<Point3f>();
-        info.indexes = new ArrayList<Short>();
+        info.indexes = new ArrayList<Integer>();
         info.colors = new ArrayList<Color3f>();
         //info.uv = new ArrayList<Point2f>();
         LWJGLRenderLogic.addBox(info, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });

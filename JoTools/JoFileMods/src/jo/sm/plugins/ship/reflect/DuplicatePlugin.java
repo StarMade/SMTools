@@ -108,10 +108,10 @@ public class DuplicatePlugin implements IBlocksPlugin
                 int delta = xyz.x - lower.x;
                 xyz.x = lower.x - 1 - delta;
             }
+            short ori = b.getOrientation();
             b = new Block(b.getBlockID());
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
-                short ori = b.getOrientation();
                 ori = WedgeLogic.reflect(ori, true, false, false);
                 if (ori >= 0)
                     b.setOrientation(ori);
@@ -120,7 +120,6 @@ public class DuplicatePlugin implements IBlocksPlugin
             }
             if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_CORNER_ID))
             {
-                short ori = b.getOrientation();
                 ori = CornerLogic.reflect(ori, true, false, false);
                 if (ori >= 0)
                     b.setOrientation(ori);
@@ -179,10 +178,10 @@ public class DuplicatePlugin implements IBlocksPlugin
                 int delta = xyz.y - lower.y;
                 xyz.y = lower.y - 1 - delta;
             }
+            short ori = b.getOrientation();
             b = new Block(b.getBlockID());
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
-                short ori = b.getOrientation();
                 ori = WedgeLogic.reflect(ori, false, true, false);
                 if (ori >= 0)
                     b.setOrientation(ori);
@@ -191,7 +190,6 @@ public class DuplicatePlugin implements IBlocksPlugin
             }
             if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_CORNER_ID))
             {
-                short ori = b.getOrientation();
                 ori = CornerLogic.reflect(ori, false, true, false);
                 if (ori >= 0)
                     b.setOrientation(ori);
@@ -251,9 +249,9 @@ public class DuplicatePlugin implements IBlocksPlugin
                 xyz.z = lower.z - 1 - delta;
             }
             b = new Block(b.getBlockID());
+            short ori = b.getOrientation();
             if (BlockTypes.isWedge(b.getBlockID()) || BlockTypes.isPowerWedge(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_WEDGE_ID))
             {
-                short ori = b.getOrientation();
                 ori = WedgeLogic.reflect(ori, false, false, true);
                 if (ori >= 0)
                     b.setOrientation(ori);
@@ -262,7 +260,6 @@ public class DuplicatePlugin implements IBlocksPlugin
             }
             if (BlockTypes.isCorner(b.getBlockID()) || BlockTypes.isPowerCorner(b.getBlockID()) || (b.getBlockID() == BlockTypes.GLASS_CORNER_ID))
             {
-                short ori = b.getOrientation();
                 ori = CornerLogic.reflect(ori, false, false, true);
                 if (ori >= 0)
                     b.setOrientation(ori);

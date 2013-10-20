@@ -17,6 +17,7 @@
 package jo.util.jgl.obj.tri;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,9 +168,16 @@ public class JGLObjTorus extends JGLObj
     }
     
     @Override
-    public ShortBuffer getIndexBuffer()
+    public ShortBuffer getIndexShortBuffer()
     {
         clean();
-        return super.getIndexBuffer();
+        return super.getIndexShortBuffer();
+    }
+    
+    @Override
+    public IntBuffer getIndexIntBuffer()
+    {
+        clean();
+        return super.getIndexIntBuffer();
     }
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 import javax.imageio.ImageIO;
@@ -92,10 +93,10 @@ public class ExportOBJPlugin implements IBlocksPlugin
     
     private void writeTexture(String objFile) throws IOException
     {
-    	String jpgFile = objFile.substring(0, objFile.length() - 4) + ".jpg";
-    	ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
         String pngFile = objFile.substring(0, objFile.length() - 4) + ".png";
         ImageIO.write(BlockTypeColors.mAllTextures, "PNG", new File(pngFile));
+    	String jpgFile = objFile.substring(0, objFile.length() - 4) + ".jpg";
+    	ImageIO.write(BlockTypeColors.mAllTextures, "JPG", new File(jpgFile));
     	
     	/*
     	JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
@@ -204,19 +205,42 @@ public class ExportOBJPlugin implements IBlocksPlugin
 				}
         		int faceCount = obj.getIndices();
         		int facePoints = (obj.getMode() == JGLObj.TRIANGLES) ? 3 : 4;
-        		ShortBuffer indexes = obj.getIndexBuffer();
-        		indexes.rewind();
-        		for (int i = 0; i < faceCount; i++)
+        		ShortBuffer indexes = obj.getIndexShortBuffer();
+        		if (indexes != null)
         		{
-        			wtr.write("f");
-        			for (int j = 0; j < facePoints; j++)
-        			{
-        				short face = indexes.get();
-        				wtr.write(" "+(face + vertPosition));
-        				wtr.write("/"+(face + vertPosition));
-        				wtr.write("/"+(face + vertPosition));
-        			}
-        			wtr.newLine();
+	        		indexes.rewind();
+	        		for (int i = 0; i < faceCount; i++)
+	        		{
+	        			wtr.write("f");
+	        			for (int j = 0; j < facePoints; j++)
+	        			{
+	        				short face = indexes.get();
+	        				wtr.write(" "+(face + vertPosition));
+	        				wtr.write("/"+(face + vertPosition));
+	        				wtr.write("/"+(face + vertPosition));
+	        			}
+	        			wtr.newLine();
+	        		}
+        		}
+        		else
+        		{
+            		IntBuffer intIndexes = obj.getIndexIntBuffer();
+            		if (intIndexes != null)
+            		{
+            			intIndexes.rewind();
+    	        		for (int i = 0; i < faceCount; i++)
+    	        		{
+    	        			wtr.write("f");
+    	        			for (int j = 0; j < facePoints; j++)
+    	        			{
+    	        				int face = intIndexes.get();
+    	        				wtr.write(" "+(face + vertPosition));
+    	        				wtr.write("/"+(face + vertPosition));
+    	        				wtr.write("/"+(face + vertPosition));
+    	        			}
+    	        			wtr.newLine();
+    	        		}
+            		}
         		}
         		vertPosition += vertCount;
             }

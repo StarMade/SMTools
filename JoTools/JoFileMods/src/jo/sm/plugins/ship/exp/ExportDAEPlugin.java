@@ -3,7 +3,6 @@ package jo.sm.plugins.ship.exp;
 import java.io.File;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import javax.imageio.ImageIO;
 
@@ -162,8 +161,6 @@ public class ExportDAEPlugin implements IBlocksPlugin
     		}
 		}
 		int faceCount = obj.getIndices();
-		ShortBuffer indexes = obj.getIndexBuffer();
-		indexes.rewind();
 		StringBuffer polyListVCount = new StringBuffer();
 		for (int i = 0; i < faceCount; i++)
 		{

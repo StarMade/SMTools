@@ -54,7 +54,7 @@ public class JGLObjCylinder extends JGLObj
             setupVerticies();
         setupColors();
         if (mIndexBuffers.containsKey(mResolution))
-            setIndexBuffer(mIndexBuffers.get(mResolution));
+            setIndexShortBuffer(mIndexBuffers.get(mResolution));
         else
             setupIndicies();
     }
@@ -63,7 +63,7 @@ public class JGLObjCylinder extends JGLObj
     public void recycle()
     {
         mVertexBuffer = null; // these are cached, don't recycle
-        mIndexBuffer = null;
+        mIndexShortBuffer = null;
         super.recycle();
     }
     private void setupVerticies()
@@ -143,7 +143,7 @@ public class JGLObjCylinder extends JGLObj
             indices.add(botRight);
         }
         setIndices(indices);
-        mIndexBuffers.put(mResolution, mIndexBuffer);
+        mIndexBuffers.put(mResolution, mIndexShortBuffer);
     }
     public void setFadeColor(float r1, float g1, float b1, float a1, float r2, float g2, float b2, float a2)
     {

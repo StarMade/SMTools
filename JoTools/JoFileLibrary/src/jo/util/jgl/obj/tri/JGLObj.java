@@ -3,11 +3,13 @@ package jo.util.jgl.obj.tri;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
 import jo.sm.logic.utils.FloatUtils;
+import jo.sm.logic.utils.IntegerUtils;
 import jo.sm.logic.utils.ShortUtils;
 import jo.util.jgl.obj.JGLNode;
 import jo.vecmath.Color3f;
@@ -33,7 +35,8 @@ public class JGLObj extends JGLNode
     protected FloatBuffer   mNormalBuffer;
     protected FloatBuffer   mTexturesBuffer;
     protected FloatBuffer   mColorBuffer;
-    protected ShortBuffer   mIndexBuffer;
+    protected ShortBuffer   mIndexShortBuffer;
+    protected IntBuffer   	mIndexIntBuffer;
 
     protected int           mTextureID;
     protected int           mMode; // TRIANGLES, QUADS, ...
@@ -64,8 +67,10 @@ public class JGLObj extends JGLNode
                 mTexturesBuffer.clear();
             if (mColorBuffer != null)
                 mColorBuffer.clear();
-            if (mIndexBuffer != null)
-                mIndexBuffer.clear();
+            if (mIndexShortBuffer != null)
+                mIndexShortBuffer.clear();
+            if (mIndexIntBuffer != null)
+                mIndexIntBuffer.clear();
         }
     }
     
@@ -244,10 +249,26 @@ public class JGLObj extends JGLNode
         {
             ByteBuffer i2bb = ByteBuffer.allocateDirect(indices.length * 4);
             i2bb.order(ByteOrder.nativeOrder());
-            mIndexBuffer = i2bb.asShortBuffer();
+            mIndexShortBuffer = i2bb.asShortBuffer();
             for (int i = 0; i < indices.length; i++)
-                mIndexBuffer.put(indices[i]);
-            mIndexBuffer.position(0);
+                mIndexShortBuffer.put(indices[i]);
+            mIndexShortBuffer.position(0);
+            if (mMode == TRIANGLES)
+                mIndices = indices.length/3;
+            else
+                mIndices = indices.length/4;
+        }
+    }
+    public void setIndices(int[] indices)
+    {
+        synchronized (this)
+        {
+            ByteBuffer i2bb = ByteBuffer.allocateDirect(indices.length * 4);
+            i2bb.order(ByteOrder.nativeOrder());
+            mIndexIntBuffer = i2bb.asIntBuffer();
+            for (int i = 0; i < indices.length; i++)
+                mIndexIntBuffer.put(indices[i]);
+            mIndexIntBuffer.position(0);
             if (mMode == TRIANGLES)
                 mIndices = indices.length/3;
             else
@@ -256,7 +277,11 @@ public class JGLObj extends JGLNode
     }
     public void setIndices(Collection<?> normals)
     {
-        setIndices(ShortUtils.toShortArray(normals.toArray()));
+    	Object[] arr = normals.toArray();
+    	if (arr[0] instanceof Short)
+    		setIndices(ShortUtils.toShortArray(arr));
+    	else if (arr[0] instanceof Integer)
+    		setIndices(IntegerUtils.toArray(arr));
     }
     
     public void setSolidColor(Point3f c)
@@ -369,18 +394,32 @@ public class JGLObj extends JGLNode
         mColors = mColorBuffer.limit()/4;
     }
 
-    public ShortBuffer getIndexBuffer()
+    public ShortBuffer getIndexShortBuffer()
     {
-        return mIndexBuffer;
+        return mIndexShortBuffer;
     }
 
-    public void setIndexBuffer(ShortBuffer indexBuffer)
+    public void setIndexShortBuffer(ShortBuffer indexBuffer)
     {
-        mIndexBuffer = indexBuffer;
+        mIndexShortBuffer = indexBuffer;
         if (mMode == TRIANGLES)
-            mIndices = mIndexBuffer.limit()/3;
+            mIndices = mIndexShortBuffer.limit()/3;
         else
-            mIndices = mIndexBuffer.limit()/4;
+            mIndices = mIndexShortBuffer.limit()/4;
+    }
+
+    public IntBuffer getIndexIntBuffer()
+    {
+        return mIndexIntBuffer;
+    }
+
+    public void setIndexIntBuffer(IntBuffer indexBuffer)
+    {
+        mIndexIntBuffer = indexBuffer;
+        if (mMode == TRIANGLES)
+            mIndices = mIndexIntBuffer.limit()/3;
+        else
+            mIndices = mIndexIntBuffer.limit()/4;
     }
 
     public int getIndices()

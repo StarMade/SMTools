@@ -52,9 +52,19 @@ public class ObjDrawHandler extends NodeDrawHandler
             else if (obj.getColorBuffer() != null)
                 GL11.glColorPointer(4, 0, obj.getColorBuffer());
             if (obj.getMode() == JGLObj.TRIANGLES)
-                GL11.glDrawElements(GL11.GL_TRIANGLES, obj.getIndexBuffer());
+            {
+            	if (obj.getIndexShortBuffer() != null)
+            		GL11.glDrawElements(GL11.GL_TRIANGLES, obj.getIndexShortBuffer());
+            	else if (obj.getIndexIntBuffer() != null)
+            		GL11.glDrawElements(GL11.GL_TRIANGLES, obj.getIndexIntBuffer());
+            }
             else if (obj.getMode() == JGLObj.QUADS)
-                GL11.glDrawElements(GL11.GL_QUADS, obj.getIndexBuffer());
+            {
+            	if (obj.getIndexShortBuffer() != null)
+            		GL11.glDrawElements(GL11.GL_QUADS, obj.getIndexShortBuffer());
+            	else if (obj.getIndexIntBuffer() != null)
+            		GL11.glDrawElements(GL11.GL_QUADS, obj.getIndexIntBuffer());
+            }
             else
                 throw new IllegalArgumentException("Unknown mode: "+obj.getMode());
             GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);

@@ -33,7 +33,7 @@ public class LWJGLRenderLogic
     	}
         MeshInfo info = new MeshInfo();
         info.verts = new ArrayList<Point3f>();
-        info.indexes = new ArrayList<Short>();
+        info.indexes = new ArrayList<Integer>();
         if (plain)
         	info.colors = new ArrayList<Color3f>();
         else
@@ -170,10 +170,10 @@ public class LWJGLRenderLogic
         info.verts.add(top);
         info.verts.add(right);
         info.verts.add(bottom);
-        info.indexes.add((short)(info.verts.size() - 1));
-        info.indexes.add((short)(info.verts.size() - 2));
-        info.indexes.add((short)(info.verts.size() - 3));
-        info.indexes.add((short)(info.verts.size() - 4));
+        info.indexes.add(info.verts.size() - 1);
+        info.indexes.add(info.verts.size() - 2);
+        info.indexes.add(info.verts.size() - 3);
+        info.indexes.add(info.verts.size() - 4);
         if (info.colors != null)
         {
 	        Color c = BlockTypeColors.getFillColor(type);
@@ -198,7 +198,7 @@ public class LWJGLRenderLogic
 class MeshInfo
 {
     List<Point3f> verts;
-    List<Short> indexes;
+    List<Integer> indexes;
     List<Color3f> colors; 
     List<Point2f> uv; 
 }

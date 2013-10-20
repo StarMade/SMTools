@@ -75,7 +75,11 @@ public class ReplaceBlocksPlugin implements IBlocksPlugin
                 if (params.getColor2() == 0)
                     b = null;
                 else
+                {
+                	short oldOri = b.getOrientation();
                     b = new Block(params.getColor2());
+                    b.setOrientation(oldOri);
+                }
             modified.set(xyz, b);
             cb.workTask(1);
         }
