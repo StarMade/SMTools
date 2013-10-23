@@ -2,8 +2,10 @@ package jo.sm.plugins.ship.replace;
 
 import java.util.Iterator;
 
+import jo.sm.data.CubeIterator;
 import jo.sm.data.SparseMatrix;
 import jo.sm.data.StarMade;
+import jo.sm.logic.PluginUtils;
 import jo.sm.mods.IBlocksPlugin;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.data.Block;
@@ -63,14 +65,20 @@ public class ReplaceBlocksPlugin implements IBlocksPlugin
             Object p, StarMade sm, IPluginCallback cb)
     {
         ReplaceBlocksParameters params = (ReplaceBlocksParameters)p;
+        Point3i upper = new Point3i();
+        Point3i lower = new Point3i();
+        PluginUtils.getEffectiveSelection(sm, original, lower, upper);
         //System.out.println("Params: color1="+params.getColor1()+", color2="+params.getColor2());
         cb.setStatus("Replacing colors");
-        cb.startTask(original.size());
-        SparseMatrix<Block> modified = new SparseMatrix<Block>();
-        for (Iterator<Point3i> i = original.iteratorNonNull(); i.hasNext(); )
+        cb.startTask(PluginUtils.getVolume(lower, upper));
+        SparseMatrix<Block> modified = new SparseMatrix<Block>(original);
+        for (Iterator<Point3i> i = new CubeIterator(lower, upper); i.hasNext(); )
         {
+            cb.workTask(1);
             Point3i xyz = i.next();
             Block b = original.get(xyz);
+            if (b == null)
+                continue;
             if (b.getBlockID() == params.getColor1())
                 if (params.getColor2() == 0)
                     b = null;
@@ -81,7 +89,6 @@ public class ReplaceBlocksPlugin implements IBlocksPlugin
                     b.setOrientation(oldOri);
                 }
             modified.set(xyz, b);
-            cb.workTask(1);
         }
         cb.endTask();
         return modified;
