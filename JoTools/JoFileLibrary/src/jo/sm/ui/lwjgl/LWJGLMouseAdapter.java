@@ -116,7 +116,7 @@ public class LWJGLMouseAdapter extends MouseAdapter
             doMouseMove(p, modifiers);
             mMouseDownAt = null;
         }
-        else if (mMouseMode == MOUSE_MODE_PIVOT)
+        else if (mMouseMode == MOUSE_MODE_SELECT)
         {
             doMouseMove(p, modifiers);
         }

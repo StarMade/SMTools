@@ -2,6 +2,7 @@ package jo.sm.ui.lwjgl;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -20,7 +21,6 @@ import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.lwjgl.win.JGLCanvas;
 import jo.vecmath.Color3f;
 import jo.vecmath.Color4f;
-import jo.vecmath.Matrix3f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
@@ -154,8 +154,16 @@ public class LWJGLRenderPanel extends RenderPanel
     @Override
     public RenderPoly getTileAt(double x, double y)
     {
-        // TODO Auto-generated method stub
-        return null;
+        Point3i p = getPointAt(x, y);
+        if (p == null)
+            return null;
+        Block b = StarMadeLogic.getModel().get(p);
+        if (b == null)
+            return null;
+        RenderPoly tile = new RenderPoly();
+        tile.setBlock(b);
+        tile.setPosition(p);
+        return tile;
     }
 
     @Override
@@ -169,6 +177,28 @@ public class LWJGLRenderPanel extends RenderPanel
 
     public Point3i getPointAt(double x, double y)
     {
+        Point3f pointMap = new Point3f((float)x, (float)y, 0);
+        System.out.print(pointMap+" ->");
+        mBlocks.setData("pointMap", pointMap);
+        Point3f pointMapped = null;
+        for (;;)
+        {
+            pointMapped = (Point3f)mBlocks.getData("pointMapped");
+            if (pointMapped != null)
+                break;
+            try
+            {
+                Thread.sleep(1000/24);
+            }
+            catch (InterruptedException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        System.out.println(" "+pointMapped);
+        return null;
+        /*
         Matrix3f rot = new Matrix3f();
         mUniverse.getCamera().get(rot);
         Point3f trans = new Point3f(mUniverse.getCamera().getLocation());
@@ -185,6 +215,7 @@ public class LWJGLRenderPanel extends RenderPanel
         if (!StarMadeLogic.getModel().contains(p))
             return null;
         return p;
+        */
     }
 
     @Override
@@ -268,5 +299,17 @@ public class LWJGLRenderPanel extends RenderPanel
 	{
 		mDontDraw = dontDraw;
 		updateTiles();
+	}
+	
+	@Override
+	public synchronized void addMouseListener(MouseListener l)
+	{
+	    mCanvas.addMouseListener(l);
+	}
+	
+	@Override
+	public synchronized void removeMouseListener(MouseListener l)
+	{
+	    mCanvas.removeMouseListener(l);
 	}
 }
