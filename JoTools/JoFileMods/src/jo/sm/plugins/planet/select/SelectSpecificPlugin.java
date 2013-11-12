@@ -48,6 +48,18 @@ public class SelectSpecificPlugin implements IBlocksPlugin
 	public void initParameterBean(SparseMatrix<Block> original, Object params,
 			StarMade sm, IPluginCallback cb)
 	{
+	    if ((sm.getSelectedLower() != null) && (sm.getSelectedUpper() != null))
+	    {
+	        Point3i lower = sm.getSelectedLower();
+	        Point3i upper = sm.getSelectedUpper();
+	        SelectSpecificParameters p = (SelectSpecificParameters)params;
+	        p.setLowX(lower.x);
+            p.setLowY(lower.y);
+            p.setLowZ(lower.z);
+            p.setHighX(upper.x);
+            p.setHighY(upper.y);
+            p.setHighZ(upper.z);
+	    }
 	}
 
     @Override

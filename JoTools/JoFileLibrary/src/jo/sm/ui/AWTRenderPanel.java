@@ -261,12 +261,22 @@ public class AWTRenderPanel extends RenderPanel
         			BlockTypes.SPECIAL_SELECT_ZP, BlockTypes.SPECIAL_SELECT_ZM,});
         if (mAxis)
         {
-	        addBox(new Point3i(9,8,8), new Point3i(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
-	        addBox(new Point3i(8-256,8,8), new Point3i(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
-	        addBox(new Point3i(8,9,8), new Point3i(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
-	        addBox(new Point3i(8,8-256,8), new Point3i(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
-	        addBox(new Point3i(8,8,9), new Point3i(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
-	        addBox(new Point3i(8,8,8-256), new Point3i(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+            lower = new Point3i();
+            upper = new Point3i();
+            mFilteredGrid.getBounds(lower, upper);
+            int r = Math.max(256, Math.abs(lower.x));
+            r = Math.max(r, Math.abs(lower.y));
+            r = Math.max(r, Math.abs(lower.z));
+            r = Math.max(r, Math.abs(upper.x));
+            r = Math.max(r, Math.abs(upper.y));
+            r = Math.max(r, Math.abs(upper.z));
+            r += 16;
+	        addBox(new Point3i(9,8,8), new Point3i(r+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
+	        addBox(new Point3i(8-r,8,8), new Point3i(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
+	        addBox(new Point3i(8,9,8), new Point3i(8,r+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
+	        addBox(new Point3i(8,8-r,8), new Point3i(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
+	        addBox(new Point3i(8,8,9), new Point3i(8,8,r+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
+	        addBox(new Point3i(8,8,8-r), new Point3i(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
         }
         updateTransform();
     }
