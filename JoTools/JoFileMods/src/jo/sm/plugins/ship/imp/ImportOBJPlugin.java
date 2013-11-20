@@ -66,6 +66,8 @@ public class ImportOBJPlugin implements IBlocksPlugin
         {
             Hull3f hull = OBJLogic.readFile(params.getFile());
             System.out.println("Read "+hull.getTriangles().size()+" triangles");
+            if (hull.getTriangles().size() == 0)
+                throw new IllegalArgumentException("OBJ File "+params.getFile()+" has no triangles defined in it.");
             Point3i lowerGrid = new Point3i();
             Point3i upperGrid = new Point3i();
             Point3i offset = new Point3i();

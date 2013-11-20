@@ -1,6 +1,8 @@
 package jo.sm.plugins.ship.move;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import jo.sm.data.BlockTypes;
 import jo.sm.data.SparseMatrix;
@@ -83,12 +85,47 @@ public class MovePlugin implements IBlocksPlugin
             Point3i to = new Point3i(from.x - dx, from.y - dy, from.z - dz);
             Block b = original.get(from);
             if (b.getBlockID() == BlockTypes.CORE_ID)
-                continue;
+            {
+                short newID = getFiller(original, from);
+                if (newID == -1)
+                    continue;
+                b = new Block(newID);
+            }
             modified.set(to, b);
         }
         return modified;
     }
     
+    private static short getFiller(SparseMatrix<Block> grid, Point3i p)
+    {
+        Map<Short,Integer> votes = new HashMap<Short, Integer>();
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dz = -1; dz <= 1; dz++)
+                    if ((dx != 0) || (dy != 0) || (dz != 0))
+                    {
+                        Block b = grid.get(p.x + dx, p.y + dy, p.z + dz);
+                        if (b != null)
+                        {
+                            Integer v = votes.get(b.getBlockID());
+                            if (v == null)
+                                v = new Integer(1);
+                            else
+                                v = new Integer(v + 1);
+                            votes.put(b.getBlockID(), v);
+                        }
+                    }
+        short best = -1;
+        int bestv = 0;
+        for (Short test : votes.keySet())
+            if (votes.get(test) > bestv)
+            {
+                best = test;
+                bestv = votes.get(best);
+            }
+        return best;
+    }
+
     public static Point3i findCore(SparseMatrix<Block> grid)
     {
         for (Iterator<Point3i> i = grid.iteratorNonNull(); i.hasNext(); )
