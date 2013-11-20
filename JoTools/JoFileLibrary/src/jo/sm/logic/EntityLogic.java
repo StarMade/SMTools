@@ -10,6 +10,7 @@ import jo.sm.data.Entity;
 import jo.sm.data.StarMade;
 import jo.sm.ent.data.Tag;
 import jo.sm.ent.logic.TagLogic;
+import jo.sm.logic.utils.DebugLogic;
 import jo.sm.mods.IPluginCallback;
 import jo.sm.ship.logic.DataLogic;
 import jo.vecmath.Point3i;
@@ -26,8 +27,15 @@ public class EntityLogic
             for (File entFile : serverDatabase.listFiles())
                 if (entFile.getName().startsWith("ENTITY_"))
                 {
-                    Entity entity = readEntity(entFile);
-                    sm.getEntities().add(entity);
+                    try
+                    {
+                        Entity entity = readEntity(entFile);
+                        sm.getEntities().add(entity);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
         }
         return sm.getEntities();
@@ -35,6 +43,7 @@ public class EntityLogic
     
     public static Entity readEntity(File entFile) throws IOException
     {
+        DebugLogic.debug("Reading entity "+entFile);
         Entity entity = new Entity();
         entity.setFile(entFile);
         parseName(entFile, entity);

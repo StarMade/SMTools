@@ -171,7 +171,14 @@ public class TagLogic
                 do
                 {
                     byte nt = dis.readByte();
-                    nextType = TagType.values()[nt];
+                    try
+                    {
+                        nextType = TagType.values()[nt];
+                    }
+                    catch (ArrayIndexOutOfBoundsException e)
+                    {
+                        throw new IllegalStateException("Unknown tag type '"+nt+"'");
+                    }
                     String name = null;
                     String msg = "Reading member #"+(inbuf.size() + 1);
                     if (nextType != TagType.FINISH)

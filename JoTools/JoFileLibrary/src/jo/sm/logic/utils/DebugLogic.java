@@ -2,7 +2,7 @@ package jo.sm.logic.utils;
 
 public class DebugLogic
 {
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
     
     private static String mIndent = "";
 
