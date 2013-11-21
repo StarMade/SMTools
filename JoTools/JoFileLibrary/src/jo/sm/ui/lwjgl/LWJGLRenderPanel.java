@@ -19,8 +19,8 @@ import jo.util.jgl.obj.JGLGroup;
 import jo.util.jgl.obj.JGLScene;
 import jo.util.jgl.obj.tri.JGLObj;
 import jo.util.lwjgl.win.JGLCanvas;
-import jo.vecmath.Color3f;
 import jo.vecmath.Color4f;
+import jo.vecmath.Point2f;
 import jo.vecmath.Point3f;
 import jo.vecmath.Point3i;
 import jo.vecmath.Vector3f;
@@ -136,18 +136,25 @@ public class LWJGLRenderPanel extends RenderPanel
         MeshInfo info = new MeshInfo();
         info.verts = new ArrayList<Point3f>();
         info.indexes = new ArrayList<Integer>();
-        info.colors = new ArrayList<Color3f>();
-        //info.uv = new ArrayList<Point2f>();
-        LWJGLRenderLogic.addBox(info, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
-        LWJGLRenderLogic.addBox(info, new Point3f(8-256,8,8), new Point3f(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
-        LWJGLRenderLogic.addBox(info, new Point3f(8,9,8), new Point3f(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
-        LWJGLRenderLogic.addBox(info, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
-        LWJGLRenderLogic.addBox(info, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
-        LWJGLRenderLogic.addBox(info, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+        //info.colors = new ArrayList<Color3f>();
+        info.uv = new ArrayList<Point2f>();
+        System.out.println("Adding axis");
+//        LWJGLRenderLogic.addBox(info, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XP });
+//        LWJGLRenderLogic.addBox(info, new Point3f(8-256,8,8), new Point3f(7,8,8), new short[] { BlockTypes.SPECIAL_SELECT_XM });
+//        LWJGLRenderLogic.addBox(info, new Point3f(8,9,8), new Point3f(8,256+8,8), new short[] { BlockTypes.SPECIAL_SELECT_YP });
+//        LWJGLRenderLogic.addBox(info, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.SPECIAL_SELECT_YM });
+//        LWJGLRenderLogic.addBox(info, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.SPECIAL_SELECT_ZP });
+//        LWJGLRenderLogic.addBox(info, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.SPECIAL_SELECT_ZM });
+        LWJGLRenderLogic.addBox(info, new Point3f(9,8,8), new Point3f(256+8,8,8), new short[] { BlockTypes.LIGHT_RED });
+        LWJGLRenderLogic.addBox(info, new Point3f(8-256,8,8), new Point3f(7,8,8), new short[] { BlockTypes.LIGHT_RED });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,9,8), new Point3f(8,256+8,8), new short[] { BlockTypes.LIGHT_GREEN });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8-256,8), new Point3f(8,7,8), new short[] { BlockTypes.LIGHT_GREEN });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8,9), new Point3f(8,8,256+8), new short[] { BlockTypes.LIGHT_BLUE });
+        LWJGLRenderLogic.addBox(info, new Point3f(8,8,8-256), new Point3f(8,8,7), new short[] { BlockTypes.LIGHT_BLUE });
         JGLObj obj = LWJGLRenderLogic.infoToObj(info);
-        for (int i = 0; i < obj.getColorBuffer().limit(); i++)
-            System.out.print(" "+obj.getColorBuffer().get(i));
-        System.out.println();
+//        for (int i = 0; i < obj.getColorBuffer().limit(); i++)
+//            System.out.print(" "+obj.getColorBuffer().get(i));
+//        System.out.println();
         mAxis.add(obj);
     }
 

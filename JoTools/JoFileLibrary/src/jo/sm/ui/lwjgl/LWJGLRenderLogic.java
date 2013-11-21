@@ -98,7 +98,8 @@ public class LWJGLRenderLogic
     {
         if ((lower == null) || (upper == null))
             return;
-        upper = new Point3f(upper.x + 1, upper.y + 1, upper.z + 1); // only place where bounds are at +1
+        lower = new Point3f(lower.x - .5f, lower.y - .5f, lower.z - .5f);
+        upper = new Point3f(upper.x + .5f, upper.y + .5f, upper.z + .5f); // only place where bounds are at +1
         addSelectFace(group, upper.x, lower.y, lower.z, upper.x, upper.y, upper.z,
                 RenderPoly.XP, colors[0%colors.length]);
         addSelectFace(group, lower.x, lower.y, lower.z, lower.x, upper.y, upper.z,
@@ -178,7 +179,6 @@ public class LWJGLRenderLogic
         {
 	        Color c = BlockTypeColors.getFillColor(type);
 	        Color3f color = new Color3f(c.getRed()/255f, c.getGreen()/255f, c.getBlue()/255f);
-	        //System.out.println("Color: "+c+" -> "+color);
 	        info.colors.add(color);
 	        info.colors.add(color);
 	        info.colors.add(color);
