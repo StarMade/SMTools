@@ -34,7 +34,8 @@ public class EntityLogic
                     }
                     catch (Exception e)
                     {
-                        e.printStackTrace();
+                        System.out.println("Bad entity read: "+e);
+                        //e.printStackTrace();
                     }
                 }
         }

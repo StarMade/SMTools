@@ -8,6 +8,11 @@ public class DebugLogic
 
 	public static final boolean	HULL_ONLY = false;
 
+	public static void setIndent(String indent)
+	{
+	    mIndent = indent;
+	}
+	
     public static void indent()
     {
         mIndent += "  ";

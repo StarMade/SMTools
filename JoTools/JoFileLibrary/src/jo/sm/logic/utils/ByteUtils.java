@@ -242,10 +242,15 @@ public class ByteUtils
     
     public static String toStringDump(byte[] b)
     {
+        return toStringDump(b, 0, b.length);
+    }
+    
+    public static String toStringDump(byte[] b, int o, int l)
+    {
         StringBuffer sb = new StringBuffer();
         if (b != null)
         {
-            for (int i = 0; i < b.length; i += 16)
+            for (int i = 0; i < l; i += 16)
             {
                 sb.append(StringUtils.zeroPrefix(Integer.toHexString(i), 4));
                 for (int j = 0; j < 16; j++)
@@ -253,17 +258,17 @@ public class ByteUtils
                     if (j%4 == 0)
                         sb.append("  ");
                     sb.append(" ");
-                    if (i + j < b.length)
-                        sb.append(StringUtils.zeroPrefix(Integer.toHexString(b[i+j]&0xff), 2));
+                    if (o + i + j < b.length)
+                        sb.append(StringUtils.zeroPrefix(Integer.toHexString(b[o+i+j]&0xff), 2));
                     else
                         sb.append("  ");
                 }
                 sb.append("    ");
                 for (int j = 0; j < 16; j++)
                 {
-                    if (i + j < b.length)
+                    if (o + i + j < b.length)
                     {
-                        char ch = (char)(b[i+j]&0xff);
+                        char ch = (char)(b[o+i+j]&0xff);
                         if ((ch >= ' ') && (ch <= '~'))
                             sb.append(ch);
                         else

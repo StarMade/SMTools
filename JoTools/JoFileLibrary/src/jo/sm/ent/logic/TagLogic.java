@@ -16,6 +16,7 @@ import jo.sm.ent.data.ControlElementMap;
 import jo.sm.ent.data.ControlSubElement;
 import jo.sm.ent.data.Tag;
 import jo.sm.ent.data.TagType;
+import jo.sm.logic.utils.ByteUtils;
 import jo.sm.logic.utils.DebugLogic;
 import jo.vecmath.Point3b;
 import jo.vecmath.Point3i;
@@ -26,6 +27,7 @@ public class TagLogic
     public static Tag readFile(InputStream is, boolean closeStream)
             throws IOException
     {
+        DebugLogic.setIndent("");
         DebugLogic.debug("Reading file");
         DebugLogic.indent();
         if (!(is instanceof PushbackInputStream))
@@ -171,12 +173,26 @@ public class TagLogic
                 do
                 {
                     byte nt = dis.readByte();
+                    if ((nt&0xff) == 0xf3) // HACK
+                    {
+                        dis.skip(23);
+                        nt = dis.readByte();
+                    }
+                    else if ((nt&0xff) == 0xff) // HACK
+                    {
+                        dis.skip(2);
+                        nt = dis.readByte();
+                    }
                     try
                     {
                         nextType = TagType.values()[nt];
                     }
                     catch (ArrayIndexOutOfBoundsException e)
                     {
+                        byte[] buf = new byte[128];
+                        buf[0] = nt;
+                        dis.read(buf, 1, 127);
+                        System.out.println("Bad tag data:\n"+ByteUtils.toStringDump(buf));
                         throw new IllegalStateException("Unknown tag type '"+nt+"'");
                     }
                     String name = null;
