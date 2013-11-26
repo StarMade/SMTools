@@ -3,6 +3,8 @@ package jo.sm.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import jo.sm.ship.data.Block;
+
 public class BlockTypes
 {
 	public static final short SPECIAL = 8350;
@@ -520,5 +522,16 @@ public class BlockTypes
     public static boolean isAnyCorner(short id)
     {
         return isCorner(id) || isPowerCorner(id) || (id == GLASS_CORNER_ID);
+    }
+
+    public static Block colorize(Block oldBlock, short color)
+    {
+        if (!isAnyHull(oldBlock.getBlockID()))
+            return oldBlock;
+        color = getColor(color);
+        short newID = getColoredBlock(oldBlock.getBlockID(), color);
+        Block newBlock = new Block(newID);
+        newBlock.setOrientation(oldBlock.getOrientation());
+        return newBlock;
     }
 }
